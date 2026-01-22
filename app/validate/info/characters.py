@@ -1,6 +1,7 @@
 from app.validate.info.base import BaseInfoValid
 from app.enum_type.char import Gender
 from app.validate.info.items import ItemInfo
+from app.exeption.char import CharHastNameError
 
 class SavingInfo(BaseInfoValid):
     exist_id: int
@@ -42,7 +43,7 @@ class EXistanceInfo(BaseInfoValid):
         elif self.first_name:
             return self.first_name
         else:
-            raise ValueError(f"This character({self.id}) hasn't first name")
+            raise CharHastNameError(f"This character({self.id}) hasn't first name")
 
 class CharacterInfo(BaseInfoValid):
     user_id: int

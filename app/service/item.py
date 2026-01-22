@@ -9,8 +9,8 @@ class ItemService(BaseService):
             sketch = string
         elif document:
             tgfile = await bot.get_file(document.file_id)
-            await bot.download_file(tgfile.file_path, 'app\service\sketch.json')
-            with open('app\service\sketch.json', 'w', encoding='utf-8') as file:
+            await bot.download_file(tgfile.file_path, 'app/service/sketch.json')
+            with open('app/service/sketch.json', 'w', encoding='utf-8') as file:
                 sketch = file.read()
 
         item = await ItemLayer().create(sketch, type_sketch='str')

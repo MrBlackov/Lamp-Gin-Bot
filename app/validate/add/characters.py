@@ -2,7 +2,7 @@ from app.enum_type.char import Gender
 from app.db.models.char import SavingDB, ExistenceDB, AttributePointDB
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.validate.add.base import BaseAddValid
-
+from app.exeption.char import CharHastNameError
 
 class Saving_add(BaseAddValid):
     exist_id: int
@@ -77,7 +77,7 @@ class Existence_add(BaseAddValid):
         elif self.first_name:
             return self.first_name
         else:
-            raise ValueError(f"This character({self.id}) hasn't first name")
+            raise CharHastNameError(f"This character({self.id}) hasn't first name")
    
 class Npc_add(BaseAddValid):
     exist: ExistenceDB

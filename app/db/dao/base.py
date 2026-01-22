@@ -82,7 +82,11 @@ class BaseDAO(Generic[T]):
                 datas = await cls.find_one_or_none(session, filters=filters)
 
             else:
-                datas = await cls.add(values=data)
+                datas = cls.model(**data)
+                session.add(datas)
+
+            await session.flush()
+
             return datas
         except Exception as e:
             await session.rollback()

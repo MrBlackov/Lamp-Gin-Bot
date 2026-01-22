@@ -4,8 +4,9 @@ from app.validate.service.info import UserChars
 from app.enum_type.char import Gender
 from app.validate.api.characters import GetSketchsInfo
 from app.validate.api.query import CreateCharSkecth
-from app.db.metods.gets import get_user_for_id
+from app.db.metods.gets import get_user_for_tg_id
 from app.db.metods.updates import update_main_char
+from app.db.metods.adds import add_char
 from app.logic.char import CharService
 
 class CreateCharacter:
@@ -17,7 +18,7 @@ class CreateCharacter:
         return GetSketchsInfo(sketchs=sketchs, first_names=first_names, last_names=last_names)
 
     async def add_char(tg_id: int, sketch: CreateCharSkecth):
-        user_id = await get_user_for_id(tg_id)
+        user_id = await get_user_for_tg_id(tg_id)
         char = CreateExistence(
             gender=sketch.sketch.gender, 
             prs=person(sketch.sketch.gender)
@@ -25,6 +26,9 @@ class CreateCharacter:
                           user_id=user_id, 
                           descript=sketch.description
                           )
+        
+        await add_char(data=char)
+
         return char
     
 class InfoCharacter:

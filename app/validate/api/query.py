@@ -4,7 +4,7 @@ from app.validate.api.characters import CharSketchInfo
 from app.validate.info.characters import CharacterInfo
 from app.validate.sketchs.item_sketchs import ItemSketch
 from app.enum_type.char import Gender
-import ast
+from app.exeption.char import CharHastNameError
 
 class BaseAPIValidate(BaseModel):
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
@@ -21,7 +21,7 @@ class CreateCharSkecth(BaseAPIValidate):
         elif self.first_name:
             return self.first_name
         else:
-            raise ValueError(f"This character({self.id}) hasn't first name")
+            raise CharHastNameError(f"This character({self.id}) hasn't first name")
  
 class QueryBody(BaseAPIValidate):
     platform: Literal['tg']

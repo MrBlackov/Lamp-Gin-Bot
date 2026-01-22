@@ -17,3 +17,7 @@ class ValidToStrLenError(ValidToTypeError):
 
 class ValidToStrError(ValidToTypeError):
     msg = '❌ Отправьте только текст (401.5)'
+
+class ValidStrToJSONError(ValidToTypeError):
+    msg = "❌ Значение должно содержать знак ':' (401.5)"
+

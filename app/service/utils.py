@@ -1,6 +1,8 @@
+from app.exeption.service import ValidStrToJSONError
+
 def str_to_json(string: str):
     if ':' not in string:
-        raise
+        raise ValidStrToJSONError("String hasnt ':' ")
     if "'"  in string or "\"" in string:
         string = string.replace("'", '').replace("\"", '')
     if ', 'in string:

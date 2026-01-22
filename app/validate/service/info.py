@@ -6,5 +6,5 @@ class BaseServiceValidate(BaseModel):
 
 class UserChars(BaseServiceValidate):
     chars: list[CharacterInfo] | None = None
-    main_id: int | None
+    main_id: int | None = None
     no_chars: bool = False

@@ -11,7 +11,7 @@ class SavingDB(Base):
 class InventoryDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))
     size: Mapped[int] = mapped_column(default=50)
-    items: Mapped[list[ItemDB] | None] = relationship(ItemDB, uselist=True, lazy='joined')
+    items: Mapped[list[ItemDB]] = relationship(ItemDB, uselist=True, lazy='joined', cascade='all')
 
 #class LocationDB(Base):
 #    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))

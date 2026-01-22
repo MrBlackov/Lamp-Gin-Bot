@@ -4,6 +4,7 @@ from faker.providers.person.en_US import Provider as EnUsProvider
 from app.validate.add.characters import Points
 from collections import OrderedDict
 from app.enum_type.char import Gender
+from app.exeption.another import DiceError
 
 lokals = {
     'loen':'en_US'
@@ -15,7 +16,7 @@ providers = {
 class dice:
     def __init__(self, max: int = 6, min: int = 1, step: int = 1):
         if max < min:
-            raise ValueError(f'This max({max}) < min({min})')
+            raise DiceError(f'This max({max}) < min({min})')
 
         self.max = max
         self.min = min
