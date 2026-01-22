@@ -1,0 +1,12 @@
+alembic
+sqlalchemy
+pydantic
+pydantic-settings
+asyncpg
+python-decouple
+APScheduler
+aiogram
+loguru
+pytest
+flask
+
