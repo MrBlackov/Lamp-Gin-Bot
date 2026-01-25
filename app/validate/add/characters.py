@@ -1,5 +1,5 @@
 from app.enum_type.char import Gender
-from app.db.models.char import SavingDB, ExistenceDB, AttributePointDB
+from app.db.models.char import SavingDB, ExistenceDB, AttributePointDB, InventoryDB
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.validate.add.base import BaseAddValid
 from app.exeption.char import CharHastNameError
@@ -8,22 +8,19 @@ class Saving_add(BaseAddValid):
     exist_id: int
     penny: int = 0
 
-#class Inventory_add(BaseAddValid):
-#    exist_id: int
-#    items: list[ItemDB] | None = None
-#
+class Inventory_add(BaseAddValid):
+    exist_id: int
+    size: int = 30
+    items: list | None = None
+
 class AttributePoint_add(BaseAddValid):
     exist_id: int
     dexterity: int
     strength: int
     health: int
     intelligence: int
-    fp: int = 0
-    hp: int = 0
-    move: int = 0
-    per: int = 0
-    will: int = 0
-    speed: int = 0
+    speed_value: int = 0
+    spirituality: int = 0
 
 class Points(BaseAddValid):
     dexterity: int
@@ -65,7 +62,7 @@ class Existence_add(BaseAddValid):
     last_name: str | None = Field(max_length=50, default=None)
     gender: Gender
     saving: Saving_add | SavingDB | int | None = None
-#    inventory: Inventory_add | InventoryDB | None = None
+    inventory: Inventory_add | InventoryDB | None = None
     attibute_point: AttributePoint_add | AttributePointDB | Points | None = None
     age: int
     amount_life: int
@@ -84,6 +81,6 @@ class Npc_add(BaseAddValid):
 
 class Character_add(BaseAddValid):
     user_id: int
-    exist: Existence_add | ExistenceDB
+    exist: Existence_add | ExistenceDB 
     description: str | None = Field(max_length=200, default=None)
 

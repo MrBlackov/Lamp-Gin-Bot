@@ -4,10 +4,12 @@ from app.validate.service.info import UserChars
 from app.enum_type.char import Gender
 from app.validate.api.characters import GetSketchsInfo
 from app.validate.api.query import CreateCharSkecth
-from app.db.metods.gets import get_user_for_tg_id
-from app.db.metods.updates import update_main_char
-from app.db.metods.adds import add_char
+from app.db.metods.gets import get_user_for_tg_id, select_exist
+from app.db.metods.updates import update_main_char, update_char, update_exist
+from app.db.metods.adds import add_char, add_db_obj
 from app.logic.char import CharService
+from app.validate.add.characters import Character_add
+from app.db.models.char import CharacterDB, ExistenceDB, SavingDB, InventoryDB, AttributePointDB
 
 class CreateCharacter:
     def get_sketchs(gender: Gender = 'M', quantity: int = 5):
@@ -17,7 +19,7 @@ class CreateCharacter:
         last_names = prs.names[1]
         return GetSketchsInfo(sketchs=sketchs, first_names=first_names, last_names=last_names)
 
-    async def add_char(tg_id: int, sketch: CreateCharSkecth):
+    async def add_char(self, tg_id: int, sketch: CreateCharSkecth):
         user_id = await get_user_for_tg_id(tg_id)
         char = CreateExistence(
             gender=sketch.sketch.gender, 
@@ -26,11 +28,34 @@ class CreateCharacter:
                           user_id=user_id, 
                           descript=sketch.description
                           )
-        
-        await add_char(data=char)
 
-        return char
+        return await self.valid_to_db_model(user_id, char)
     
+    async def valid_to_db_model(self, user_id: int, char: Character_add):
+        exist = char.exist
+        char_db = CharacterDB(user_id=user_id, description=char.description)
+        exist_db = ExistenceDB(people_id=char_db.id, 
+                                 first_name=exist.first_name, 
+                                 last_name=exist.last_name, 
+                                 gender=exist.gender,
+                                 age=exist.age,
+                                 amount_life=exist.amount_life)
+        print('1')
+        await add_db_obj(data=[char_db, exist_db])
+        saving = exist.saving
+        inventory = exist.inventory
+        attibute_point = exist.attibute_point
+        saving_db = SavingDB(exist_id=exist_db.id, penny=saving)
+        inventory_db = InventoryDB(exist_id=exist_db.id)
+        attibute_point_db = AttributePointDB(exist_id=exist_db.id, **attibute_point.model_dump())        
+        await add_db_obj(data=[saving_db, inventory_db, attibute_point_db])
+        new_exist_db = await select_exist(filters={'id':exist_db.id})
+        await update_char(filters={'id':char_db.id}, new_data={'exist':new_exist_db})
+        return True
+
+
+
+
 class InfoCharacter:
     async def get_chars(self, tg_id: int) -> UserChars:
         service = CharService(tg_id)

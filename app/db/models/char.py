@@ -11,7 +11,7 @@ class SavingDB(Base):
 class InventoryDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))
     size: Mapped[int] = mapped_column(default=50)
-    items: Mapped[list[ItemDB]] = relationship(ItemDB, uselist=True, lazy='joined', cascade='all')
+    items: Mapped[list[ItemDB] | None] = relationship(ItemDB, uselist=True, lazy='select', cascade='all')
 
 #class LocationDB(Base):
 #    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))
@@ -31,7 +31,7 @@ class AttributePointDB(Base):
         return (self.dexterity + self.health)/4 + self.speed_value
 
 class ExistenceDB(Base): 
-    people_id: Mapped[int | None] = mapped_column(default=None)
+    people_id: Mapped[int | None] = mapped_column(ForeignKey('characterdb.id'), default=None)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50), default='')
     gender: Mapped[Gender] = mapped_column(default=Gender.M.value)

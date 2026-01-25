@@ -1,7 +1,7 @@
 from app.db.metods.base import add_or_update_obj, select_obj, select_objs
 from app.db.dao.main import UserDAO, UserDB
-from app.db.dao.chars import CharacterDAO, CharacterDB
-from app.validate.add.characters import Character_add
+from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
+from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 
 add_or_update_user = add_or_update_obj(UserDAO)
@@ -9,7 +9,7 @@ add_or_update_user = add_or_update_obj(UserDAO)
 select_user = select_obj(Users_add, UserDAO)
 select_char = select_obj(Character_add, CharacterDAO)
 select_chars = select_objs(Character_add, CharacterDAO)
-
+select_exist = select_obj(Existence_add, ExistenceDAO)
 
 async def get_user_for_tg_id(tg_id: int) -> int:
     user = await add_or_update_user(data={'tg_id':tg_id}, tg_id=tg_id)

@@ -49,16 +49,28 @@ class BaseDAO(Generic[T]):
     @classmethod
     async def add(cls, session: AsyncSession, values: BaseModel):
         # Добавить одну запись
-        values_dict = values.model_dump(exclude_unset=True)
-        new_instance = cls.model(**values_dict)
-        session.add(new_instance)
         try:
+            values_dict = values.model_dump(exclude_unset=True)
+            new_instance = cls.model(**values_dict)
+            session.add(new_instance)
             await session.flush()
         except SQLAlchemyError as e:
             await session.rollback()
             raise e
         return new_instance
 
+    @classmethod
+    async def add_dict(cls, session: AsyncSession, values: dict):
+        # Добавить одну запись
+        try:
+            new_instance = cls.model(**values)
+            session.add(new_instance)
+            await session.flush()
+        except SQLAlchemyError as e:
+            await session.rollback()
+            raise e
+        return new_instance
+    
     @classmethod
     async def add_many(cls, session: AsyncSession, instances: List[BaseModel]):
         # Добавить несколько записей
@@ -104,7 +116,7 @@ class BaseDAO(Generic[T]):
             log.error(sqle)
             raise   
         except Exception as e:
-            log.error(sqle)
+            log.error(e)
             raise   
  
     @classmethod

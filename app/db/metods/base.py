@@ -1,4 +1,4 @@
-from typing import Any
+from app.db.base import Base
 from app.db.connection import connection
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +17,40 @@ def add_obj(clsDAO: BaseDAO):
         new_data = await clsDAO.add(session, data)
         if logger: log.info(f"New data in {new_data.__tablename__}, id: {new_data.id}, data:{data.model_dump()}")
         else: log.trace(f"New data in {new_data.__tablename__}, id: {new_data.id}, data:{data.model_dump()}")
+        return new_data
+
+    return add_new_obj
+
+@connection()
+@log.decor()
+async def add_db_obj(
+                      session: AsyncSession,
+                      data: list[Base],
+                      logger: bool = True
+                     ):
+    try:
+        session.add_all(data)
+        await session.flush()
+        if logger: log.info(f"New data in {[d.__tablename__ for d in data]}, data:{[d.__dict__ for d in data]}")
+        else: log.trace(f"New data in {[d.__tablename__ for d in data]}, data: {[d.__dict__ for d in data]}")
+        return data
+    except SQLAlchemyError as e:
+        await session.rollback()
+        raise e
+
+
+
+def add_obj_dict(clsDAO: BaseDAO):
+    @connection()
+    @log.decor()
+    async def add_new_obj(
+                          session: AsyncSession,
+                          data: dict,
+                          logger: bool = True
+                         ):
+        new_data = await clsDAO.add_dict(session, data)
+        if logger: log.info(f"New data in {new_data.__tablename__}, id: {new_data.id}, data:{data}")
+        else: log.trace(f"New data in {new_data.__tablename__}, id: {new_data.id}, data:{data}")
         return new_data
 
     return add_new_obj
@@ -56,7 +90,7 @@ def select_obj(clsP: BaseModel, clsDAO: BaseDAO,):
     return _select_obj
 
 def select_objs(clsP: BaseModel, clsDAO: BaseDAO,):
-    @connection()
+    @connection(commit=False)
     @log.decor()
     async def _select_objs(                      
                           session: AsyncSession,

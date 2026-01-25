@@ -107,7 +107,7 @@ class AddCharacterService(BaseService):
  
     async def create(self, descript: str | None = None):
         char = await self.get_info(descript)
-        api_data = await CreateCharacter.add_char(self.tg_id, char.char)
+        api_data = await CreateCharacter().add_char(self.tg_id, char.char)
         await self.state.clear()
         return True
 
