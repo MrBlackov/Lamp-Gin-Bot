@@ -20,6 +20,7 @@ class AddCharacterService(BaseService):
     
     async def to_get_sketchs(self, gender: Gender, to_changes: bool = False):
         if to_changes == False:
+            print(gender)
             api_data = CreateCharacter.get_sketchs(gender)
             logs.debug(f'Class Character give GetSketchs({api_data})')
             await self.state.update_data(

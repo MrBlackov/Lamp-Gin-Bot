@@ -96,6 +96,7 @@ class rnd_list:
 class person:
     def __init__(self, gender: Gender, coins: int = 60, local: Literal['loen'] = 'loen'):
         self.fake = Faker(lokals[local])
+        print(gender)
         self.provider = providers[local]
         self.coins = coins
         self.gender = gender
@@ -103,7 +104,7 @@ class person:
     def get_names(self, local:  Literal['loen'] | None = None): 
         if local:
             self.provider = providers[local]
-        first_names = self.provider.first_names_male if self.gender == Gender.M else self.provider.first_names_female
+        first_names = self.provider.first_names_male if self.gender == Gender.M.value else self.provider.first_names_female
         return (first_names, self.provider.last_names) if type(first_names) != dict and type(first_names) != OrderedDict else (first_names.keys(), self.provider.last_names.keys())
 
     @property

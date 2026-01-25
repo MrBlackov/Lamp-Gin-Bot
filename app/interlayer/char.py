@@ -14,6 +14,7 @@ from app.db.models.char import CharacterDB, ExistenceDB, SavingDB, InventoryDB, 
 class CreateCharacter:
     def get_sketchs(gender: Gender = 'M', quantity: int = 5):
         prs = person(gender)
+        print(gender)
         sketchs = CreateExistence(gender, prs).create_char_skecths(quantity)
         first_names = prs.names[0]
         last_names = prs.names[1]
