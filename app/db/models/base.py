@@ -31,6 +31,6 @@ class UserDB(Base):
     name: Mapped[str | None] = mapped_column(default=None)
     bans: Mapped[bool] = mapped_column(default=False)
     donates: Mapped[DonateDB | None] = relationship(DonateDB, uselist=False, lazy='joined', primaryjoin="foreign(DonateDB.user_id) == UserDB.id")
-    main_char: Mapped[int | None] = mapped_column(ForeignKey("characterdb.id"), default=None)
+    main_char: Mapped[int | None] = mapped_column(ForeignKey("characterdb.id", ondelete='SET NULL'), default=None)
 
     

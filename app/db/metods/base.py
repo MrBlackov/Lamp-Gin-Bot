@@ -110,9 +110,8 @@ def update_obj(clsDAO: BaseDAO):
     @log.decor()
     async def update_(session: AsyncSession, filters: dict, new_data: dict):
         data_find = await clsDAO.find_one_or_none(session, filters=filters)
-        update = await clsDAO.update_one_by_id_no_valid(session, data_id=data_find.id, values_dict=new_data)
-        return True
-    
+        update = await clsDAO.update_one(session, record=data_find, values=new_data)
+        return update
     return update_
 
 def delete_obj(clsDAO: BaseDAO):

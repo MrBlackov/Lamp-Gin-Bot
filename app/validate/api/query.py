@@ -2,7 +2,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, ValidationError
 from app.validate.api.characters import CharSketchInfo
 from app.validate.info.characters import CharacterInfo
-from app.validate.sketchs.item_sketchs import ItemSketch
+from app.validate.sketchs.item_sketchs import ItemSketchValide
 from app.enum_type.char import Gender
 from app.exeption.char import CharHastNameError
 
@@ -56,7 +56,7 @@ class QueryItem(QueryCharID):
     item_id: int
 
 class QueryItemCreate(QueryCharID):
-    item :ItemSketch
+    item :ItemSketchValide
 
 class QueryItemSellorGift(QueryCharID):
     puplure_id: int

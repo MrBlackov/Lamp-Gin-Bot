@@ -8,3 +8,7 @@ class NotNameItemSketchError(ItemError):
 
 class NameNoValideError(ItemError):
     msg = '❌ В вашем имени эскиза больше 30 символов (401.7)'
+
+class EmodziNoValideError(ItemError):
+    msg = '❌ Эмозди должен быть один (401.8)'
+    

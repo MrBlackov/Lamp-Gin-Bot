@@ -10,8 +10,7 @@ class SavingDB(Base):
 
 class InventoryDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))
-    size: Mapped[int] = mapped_column(default=50)
-    items: Mapped[list[ItemDB] | None] = relationship(ItemDB, uselist=True, lazy='select', cascade='all')
+    items: Mapped[list[ItemDB] | None] = relationship(ItemDB, uselist=True, lazy='select', cascade='all, delete-orphan')
 
 #class LocationDB(Base):
 #    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))
@@ -37,9 +36,9 @@ class ExistenceDB(Base):
     gender: Mapped[Gender] = mapped_column(default=Gender.M.value)
     age: Mapped[int]
     amount_life: Mapped[int]
-    saving: Mapped[SavingDB] = relationship(SavingDB, uselist=False, lazy='joined', cascade='all')
-    inventory: Mapped[InventoryDB] = relationship(InventoryDB, uselist=False, lazy='joined', cascade='all')
-    attibute_point: Mapped[AttributePointDB] = relationship(AttributePointDB, uselist=False, lazy='joined', cascade='all')   
+    saving: Mapped[SavingDB] = relationship(SavingDB, uselist=False, lazy='joined', cascade='all, delete-orphan')
+    inventory: Mapped[InventoryDB] = relationship(InventoryDB, uselist=False, lazy='joined', cascade='all, delete-orphan')
+    attibute_point: Mapped[AttributePointDB] = relationship(AttributePointDB, uselist=False, lazy='joined', cascade='all, delete-orphan')   
 #    location: Mapped[LocationDB] = relationship(LocationDB, uselist=False, lazy='joined')  
     die: Mapped[bool] = mapped_column(default=False)
     @property
@@ -59,7 +58,7 @@ class CharacterDB(Base):
     exist: Mapped[ExistenceDB] = relationship(ExistenceDB, 
                                               uselist=False, 
                                               lazy='joined', 
-                                              cascade='all', primaryjoin="foreign(ExistenceDB.people_id) == CharacterDB.id")
+                                              cascade='all, delete-orphan', primaryjoin="foreign(ExistenceDB.people_id) == CharacterDB.id")
     description: Mapped[str | None] = mapped_column(String(1000), default=None)
 
 

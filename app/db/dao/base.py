@@ -118,20 +118,28 @@ class BaseDAO(Generic[T]):
         except Exception as e:
             log.error(e)
             raise   
- 
+
     @classmethod
-    async def update_one_by_id(cls, session: AsyncSession, data_id: int, values: BaseModel):
+    async def update_one_by_id(cls, session: AsyncSession, data_id: int, values: BaseModel) -> Base:
         values_dict = values.model_dump(exclude_unset=True)
         try:
             record = await session.get(cls.model, data_id)
-            for key, value in values_dict.items():
-                setattr(record, key, value)
-            await session.flush()
-            return True
+            return await cls.update_one(record=record, values=values_dict)
         except SQLAlchemyError as e:
             log.error(e)
-            raise    
-        
+            raise   
+  
+    @classmethod
+    async def update_one(cls, session: AsyncSession, record: Base, values: dict):
+        try:
+            for key, value in values.items():
+                setattr(record, key, value)
+            await session.flush()
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise          
+
     @classmethod
     async def update_many(cls, session: AsyncSession, filter_criteria: BaseModel, values: BaseModel):
         filter_dict = filter_criteria.model_dump(exclude_unset=True)

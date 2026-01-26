@@ -4,7 +4,7 @@ from app.validate.service.info import UserChars
 from app.enum_type.char import Gender
 from app.validate.api.characters import GetSketchsInfo
 from app.validate.api.query import CreateCharSkecth
-from app.db.metods.gets import get_user_for_tg_id, select_exist
+from app.db.metods.gets import get_user_for_tg_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory
 from app.db.metods.updates import update_main_char, update_char, update_exist
 from app.db.metods.adds import add_char, add_db_obj
 from app.logic.char import CharService
@@ -54,9 +54,6 @@ class CreateCharacter:
         await update_char(filters={'id':char_db.id}, new_data={'exist':new_exist_db})
         return True
 
-
-
-
 class InfoCharacter:
     async def get_chars(self, tg_id: int) -> UserChars:
         service = CharService(tg_id)
@@ -73,4 +70,26 @@ class InfoCharacter:
         update = await update_main_char(user_id, char_id)
         data = await self.get_chars(tg_id)
         return data
+
+class InventoryCharacter:
+    def __init__(self, tg_id: int):
+        self.tg_id = tg_id
+
+    async def get_char_info(self):
+        self.user_id = await get_user_for_tg_id(self.tg_id)
+        self.char_id = await get_main_char_for_user_id(self.user_id)
+        self.char = await get_char_for_id(self.char_id)
+        return self
+    
+    async def inventory(self):
+        self = await self.get_char_info()
+        inventory = self.char.exist.inventory
+        self.items = await get_items_for_inventory(inventory.id)
+        self.max_size = self.char.exist.attibute_point.strength
+        size = 0
+        for item in self.items:
+            size += item.sketch.size*item.quantity
+        self.size = size
+        return self
+
 

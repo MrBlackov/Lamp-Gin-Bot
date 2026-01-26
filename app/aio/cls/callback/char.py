@@ -46,3 +46,11 @@ class InfoCharChouse(CallbackData, prefix='info_char_chouse'):
     char_id: int | None = None
     back: bool = False
 
+
+class InventoryItems(CallbackData, prefix='inventory_items'):
+    item: int
+
+class InventoryItemsGo(CallbackData, prefix='inventory_items_go'):
+    where: str
+
+

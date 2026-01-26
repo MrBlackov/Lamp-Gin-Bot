@@ -1,6 +1,7 @@
 from app.validate.api.characters import CharSketchInfo
 from app.validate.info.characters import CharacterInfo
 from app.aio.msg.utils import TextHTML
+from app.db.models.item import ItemDB
 
 class SketchInfoText:
 
@@ -158,3 +159,12 @@ class CharInfoText:
 
         return ''.join(texts)
     
+class InventoryItemsText:
+    def inventory(size: int, max_sixe: int):
+        return f'Ваш инвентарь {size}/{max_sixe} грамм'
+    
+    def no_items():
+        return 'Ваш инвентарь пустой'
+    
+    def item(item: ItemDB):
+        return item.sketch.emodzi + ' ' + item.sketch.name.title() + TextHTML(f' ID: {item.id} \n ID Эскиза: {item.sketch.id} \n Кол-во: {item.quantity} \n Описание: {item.sketch.description if item.sketch.description else '❌'}').blockquote()

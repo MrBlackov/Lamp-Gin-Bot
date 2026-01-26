@@ -1,14 +1,15 @@
 from aiogram.fsm.context import FSMContext
-from app.aio.inline_buttons.char import AddCharIKB, InfoCharIKB
+from app.aio.inline_buttons.char import AddCharIKB, InfoCharIKB, InventoryIKB
 from app.enum_type.char import Gender
 from app.logged.botlog import logs
 from app.validate.api.characters import CharSketchInfo
 from app.validate.api.query import CreateCharSkecth
-from app.aio.msg.char import SketchInfoText, CharInfoText
+from app.aio.msg.char import SketchInfoText, CharInfoText, InventoryItemsText
 from app.aio.msg.utils import TextHTML
 import random
 from app.service.base import BaseService 
-from app.interlayer.char import CreateCharacter, InfoCharacter
+from app.interlayer.char import CreateCharacter, InfoCharacter, InventoryCharacter
+from app.aio.cls.fsm.char import InventoryState
 
 class AddCharacterService(BaseService):
     def __init__(self, tg_id, state = None):
@@ -145,6 +146,30 @@ class InfoCharacterService(BaseService):
         chars = {char.id:char.exist.full_name for char in data}
         return self.IKB.get_list(datas.main_id, chars), '🪪 Ваши персонажи'
 
+class InventoryService(BaseService):
+    def __init__(self, tg_id, state = None):
+        super().__init__(tg_id, state)
+        self.IKB = InventoryIKB()
+
+    async def inventory(self):
+        inventory = await InventoryCharacter(self.tg_id).inventory()
+        items = {}
+        if inventory.items:
+            for item in inventory.items:
+                items |= {item.id: item}
+            await self.state.set_state(InventoryState.items)
+            await self.state.update_data(items=items)
+            return InventoryItemsText.inventory(inventory.size, inventory.max_size*1000), self.IKB.items(items)
+        return InventoryItemsText.no_items(), None
+        
+
+    async def get_item_info(self, item_id: int):
+        items = await self.state.get_value('items')
+        if items:
+            return InventoryItemsText.item(items[item_id]), self.IKB.back('inventory')
+
+    def throw_away(self, quantity: int):
+        pass
 
 class Character:
     def __init__(self, tg_id: int, state: FSMContext | None = None):
@@ -152,4 +177,5 @@ class Character:
         self.state = state
         self.to_create = AddCharacterService(tg_id, state)
         self.info = InfoCharacterService(tg_id, state)
+        self.inventory = InventoryService(tg_id, state)
         

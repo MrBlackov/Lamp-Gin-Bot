@@ -1,8 +1,10 @@
 from app.db.metods.base import add_or_update_obj, select_obj, select_objs
 from app.db.dao.main import UserDAO, UserDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
+from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
+from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 
 add_or_update_user = add_or_update_obj(UserDAO)
 
@@ -29,3 +31,14 @@ async def get_char_for_id(char_id: int) -> CharacterDB:
 
 async def get_chars_for_user_id(user_id: int) -> list[CharacterDB]:
     return await select_chars(filters={"user_id":user_id})
+
+
+select_item = select_obj(ItemValide, ItemDAO)
+select_items = select_objs(ItemValide, ItemDAO)
+select_item_sketch = select_obj(ItemSketchValide, ItemSketchDAO)
+
+async def get_item(sketch_id: int, inventory_id: int) -> ItemDB:
+    return await select_item(filters={'sketch_id':sketch_id, 'inventory_id':inventory_id})
+
+async def get_items_for_inventory(inventory_id: int) -> list[ItemDB] | None:
+    return await select_items(filters={'inventory_id':inventory_id})

@@ -2,9 +2,12 @@ from app.validate.sketchs.base import SketchsBasevalidate
 from pydantic import Field, field_validator
 from app.exeption.item import NotNameItemSketchError, NameNoValideError
 
-class ItemSketch(SketchsBasevalidate):
+class ItemSketchValide(SketchsBasevalidate):
     name: str | None = None
+    emodzi: str | None = None
     descriprtion: str | None = None
+    size: int = 500
+    image_id: int | None = None
 
     @field_validator('name', mode='before')
     @classmethod
@@ -14,3 +17,17 @@ class ItemSketch(SketchsBasevalidate):
         if len(name) > 30:
             raise NameNoValideError('This user enter name and len(name) > 30')
         return name
+
+    @field_validator('emodzi', mode='before')
+    @classmethod
+    def name_valid(cls, emodzi: str | None = None):
+        if  emodzi != None:
+            if len(emodzi) != 1:
+                raise NameNoValideError('This user enter emodzi and len(emodzi) > 1')
+        return emodzi    
+    
+class ItemValide(SketchsBasevalidate):
+    inventory_id: int
+    sketch_id: int
+    quantity: int = 1
+

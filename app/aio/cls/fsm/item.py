@@ -1,10 +1,13 @@
 from aiogram.filters.state import State, StatesGroup
-from typing import Literal
-from app.validate.sketchs.item_sketchs import ItemSketch
+from aiogram.types import Message
 
 class AddItemState(StatesGroup):
     name: str = State()
-    emoji: str
     description: str = State()
-    quantity: int = State()
-    msg: list = None
+    image: int = State()
+
+class AddDataItemState(StatesGroup):
+    data: dict = State()
+    image: int = State()
+    msg: Message
+

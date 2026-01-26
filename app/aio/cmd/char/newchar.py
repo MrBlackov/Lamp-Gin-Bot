@@ -15,12 +15,14 @@ from app.aio.cls.callback.char import (
                                        )
 from app.service.char import Character
 from app.aio.msg.utils import TextHTML
+from app.exeption.decorator import exept
 
 add_char_router = Router()
 
 @add_char_router.message(Command('newchar'), F.chat.type == 'private')
 @add_char_router.callback_query(AddCharNameCall.filter(F.back == True))
 @log.decor(arg=True)
+@exept
 async def cmd_new_char(data: Message | CallbackQuery, callback_data: AddCharNameCall | None = None):
     message = data if type(data) == Message else data.message
     user_id = message.from_user.id
@@ -30,6 +32,7 @@ async def cmd_new_char(data: Message | CallbackQuery, callback_data: AddCharName
 
 @add_char_router.message(Command('newchar'), F.chat.type != 'private')
 @log.decor(arg=True)
+@exept
 async def cmd_new_char(message: Message):
     user_id = message.from_user.id
     await message.answer('Создание персонажа происходит в лс')
@@ -66,6 +69,7 @@ async def callback_add_char_name_query(callback: CallbackQuery, callback_data: A
 
 @add_char_router.message(CreateCharState.query_value)
 @log.decor(arg=True)
+@exept
 async def msg_query_for_names(message: Message, state: FSMContext):
     msg_text = message.text
     msg = await state.get_value('msg')
@@ -175,6 +179,7 @@ async def callback_add_char_last_name(callback: CallbackQuery, callback_data: Ad
 
 @add_char_router.message(CreateCharState.description)
 @log.decor(arg=True)
+@exept
 async def msg_query_for_names(message: Message, state: FSMContext):
     if len(message.text) > 1000:
         await message.answer(f'Макс. количесто симловов для описания - 1000, у вас {len(message.text)}')  

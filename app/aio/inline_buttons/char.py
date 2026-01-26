@@ -7,9 +7,11 @@ from app.aio.cls.callback.char import (
                                        AddCharDescript,
                                        AddCharFinish,
                                        InfoCharList,
-                                       InfoCharChouse
+                                       InfoCharChouse,
+                                       InventoryItems,
+                                       InventoryItemsGo
                                        )
-
+from app.db.models.item import ItemDB
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -94,3 +96,15 @@ class InfoCharIKB(BotIKB):
     @property
     def add_char(self):
         return AddCharIKB()
+
+class InventoryIKB(BotIKB):
+    def items(self, items: dict[int, ItemDB]):
+        for id, item in items.items():
+            self.builder.button(text=f'{item.sketch.emodzi} | {item.sketch.name} ({item.quantity})', callback_data=InventoryItems(item=id))
+        return self.builder.adjust(1).as_markup()
+    
+    def back(self, where: str):
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGo(where=where))
+        return self.builder.adjust(1).as_markup()
+
+    

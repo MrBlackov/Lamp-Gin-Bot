@@ -1,6 +1,7 @@
 from aiogram.filters.state import State, StatesGroup
 from typing import Literal
 from app.validate.api.characters import CharSketchInfo
+from app.db.models.item import ItemDB
 
 class CreateCharState(StatesGroup):
     gender: Literal['M', 'W'] = State()
@@ -21,3 +22,8 @@ class CreateCharState(StatesGroup):
 class InfoCharacter(StatesGroup):
     chars: dict[int, CharSketchInfo]
     main_id: int
+
+class InventoryState(StatesGroup):
+    items: dict[int, ItemDB] = State()
+
+
