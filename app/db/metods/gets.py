@@ -1,7 +1,7 @@
 from app.db.metods.base import add_or_update_obj, select_obj, select_objs
 from app.db.dao.main import UserDAO, UserDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
-from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB
+from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
@@ -39,6 +39,15 @@ select_item_sketch = select_obj(ItemSketchValide, ItemSketchDAO)
 
 async def get_item(sketch_id: int, inventory_id: int) -> ItemDB:
     return await select_item(filters={'sketch_id':sketch_id, 'inventory_id':inventory_id})
+
+async def get_item_sketch(sketch_id: int) -> ItemSketchDB:
+    return await select_item_sketch(filters={'id':sketch_id})
+
+async def get_item_for_id(item_id: int) -> ItemDB:
+    return await select_item(filters={'id':item_id})
+
+async def get_item_for_name(name: str) -> ItemDB:
+    return await select_item_sketch(filters={'name':name})
 
 async def get_items_for_inventory(inventory_id: int) -> list[ItemDB] | None:
     return await select_items(filters={'inventory_id':inventory_id})

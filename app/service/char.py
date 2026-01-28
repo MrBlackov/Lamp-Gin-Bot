@@ -157,19 +157,25 @@ class InventoryService(BaseService):
         if inventory.items:
             for item in inventory.items:
                 items |= {item.id: item}
-            await self.state.set_state(InventoryState.items)
             await self.state.update_data(items=items)
-            return InventoryItemsText.inventory(inventory.size, inventory.max_size*1000), self.IKB.items(items)
+            return InventoryItemsText.inventory(inventory.size/1000, inventory.max_size), self.IKB.items(items)
         return InventoryItemsText.no_items(), None
         
 
     async def get_item_info(self, item_id: int):
         items = await self.state.get_value('items')
+        await self.state.update_data(item=item_id)
         if items:
-            return InventoryItemsText.item(items[item_id]), self.IKB.back('inventory')
+            return InventoryItemsText.item(items[item_id]), self.IKB.throw('inventory')
 
-    def throw_away(self, quantity: int):
-        pass
+    async def to_throw(self):
+        await self.state.set_state(InventoryState.throw_quantity)
+        return InventoryItemsText.throw(), self.IKB.back('item')
+
+    async def throw_away(self, item_id: int, quantity: int):
+        throw = await InventoryCharacter(self.tg_id).throw_away(item_id, quantity)
+        if throw: return await self.inventory()
+        raise
 
 class Character:
     def __init__(self, tg_id: int, state: FSMContext | None = None):

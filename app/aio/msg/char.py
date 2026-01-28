@@ -161,10 +161,13 @@ class CharInfoText:
     
 class InventoryItemsText:
     def inventory(size: int, max_sixe: int):
-        return f'Ваш инвентарь {size}/{max_sixe} грамм'
+        return f'Ваш инвентарь [{size}/{max_sixe}кг]'
     
     def no_items():
         return 'Ваш инвентарь пустой'
     
+    def throw():
+        return 'Сколько выбросить?'
+
     def item(item: ItemDB):
         return item.sketch.emodzi + ' ' + item.sketch.name.title() + TextHTML(f' ID: {item.id} \n ID Эскиза: {item.sketch.id} \n Кол-во: {item.quantity} \n Описание: {item.sketch.description if item.sketch.description else '❌'}').blockquote()

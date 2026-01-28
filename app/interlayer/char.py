@@ -10,6 +10,7 @@ from app.db.metods.adds import add_char, add_db_obj
 from app.logic.char import CharService
 from app.validate.add.characters import Character_add
 from app.db.models.char import CharacterDB, ExistenceDB, SavingDB, InventoryDB, AttributePointDB
+from app.logic.item import ItemSketchsLogic, ItemsLogic
 
 class CreateCharacter:
     def get_sketchs(gender: Gender = 'M', quantity: int = 5):
@@ -92,4 +93,5 @@ class InventoryCharacter:
         self.size = size
         return self
 
-
+    async def throw_away(self, item_id: int, quantity: int = 1):
+        return await ItemsLogic().throw_away(item_id, quantity)

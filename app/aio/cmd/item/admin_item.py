@@ -24,3 +24,16 @@ async def cmd_add_item_name(message: Message, command: CommandObject):
     else:
         await message.answer('⁉️ Неизввестная ошибка')
 
+@add_item_router.message(Command('giveitem'))
+@log.decor(arg=True)
+@exept
+async def cmd_add_item_name(message: Message, command: CommandObject):
+    if command.args != None and message.from_user.id == owner:
+        msg = await ItemService(message.from_user.id).give(command.args)
+        await message.answer(msg)
+    elif message.from_user.id != owner:
+        await message.answer('❌ Нет доступа')
+    elif command.args == None:
+        await message.answer('⁉️ Где данные?')
+    else:
+        await message.answer('⁉️ Неизввестная ошибка')

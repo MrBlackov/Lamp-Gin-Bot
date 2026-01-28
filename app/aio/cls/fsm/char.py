@@ -24,6 +24,8 @@ class InfoCharacter(StatesGroup):
     main_id: int
 
 class InventoryState(StatesGroup):
-    items: dict[int, ItemDB] = State()
+    items: dict[int, ItemDB]
+    item: int
+    throw_quantity: int = State()
 
 

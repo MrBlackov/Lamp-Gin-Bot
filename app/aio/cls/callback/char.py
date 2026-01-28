@@ -53,4 +53,7 @@ class InventoryItems(CallbackData, prefix='inventory_items'):
 class InventoryItemsGo(CallbackData, prefix='inventory_items_go'):
     where: str
 
+class InventoryItemsThrow(CallbackData, prefix='inventory_items_throw'):
+    throw: bool = True
+
 

@@ -9,7 +9,8 @@ from app.aio.cls.callback.char import (
                                        InfoCharList,
                                        InfoCharChouse,
                                        InventoryItems,
-                                       InventoryItemsGo
+                                       InventoryItemsGo, 
+                                       InventoryItemsThrow
                                        )
 from app.db.models.item import ItemDB
 from app.aio.inline_buttons.base import BotIKB
@@ -105,6 +106,9 @@ class InventoryIKB(BotIKB):
     
     def back(self, where: str):
         self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGo(where=where))
-        return self.builder.adjust(1).as_markup()
+        return self.builder.adjust(2).as_markup()
 
-    
+    def throw(self, where: str):
+        self.builder.button(text='🚮 Выбросить', callback_data=InventoryItemsThrow(where=where))
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGo(where=where))
+        return self.builder.adjust(1).as_markup()
