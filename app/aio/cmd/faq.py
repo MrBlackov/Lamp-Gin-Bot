@@ -7,4 +7,34 @@ from app.aio.config import owner
 from app.service.item import ItemService
 from app.exeption.decorator import exept
 
-add_item_router = Router()
+faq_router = Router()
+
+@faq_router.message(Command('help'), F.text.contains('error'))
+@log.decor(arg=True)
+@exept
+async def cmd_help(message: Message, state: FSMContext):
+    await message.answer('Скоро')
+
+@faq_router.message(Command('help'), F.text.contains('char'))
+@log.decor(arg=True)
+@exept
+async def cmd_help(message: Message, state: FSMContext):
+    await message.answer('Скоро')
+
+@faq_router.message(Command('help'), F.text.contains('item'))
+@log.decor(arg=True)
+@exept
+async def cmd_help(message: Message, state: FSMContext):
+    await message.answer('Скоро')
+
+@faq_router.message(Command('help'), F.text.contains('cmd'))
+@log.decor(arg=True)
+@exept
+async def cmd_help(message: Message, state: FSMContext):
+    await message.answer('Скоро')
+
+@faq_router.message(Command('help'))
+@log.decor(arg=True)
+@exept
+async def cmd_help(message: Message, state: FSMContext):
+    await message.answer('Скоро')

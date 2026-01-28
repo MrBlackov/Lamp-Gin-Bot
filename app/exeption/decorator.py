@@ -13,10 +13,10 @@ def exept(func):
             return result
         except BotError as bote:
             log.warning(f'AioPartPath: {bote}')
-            await message.reply(bote.msg)
+            await message.reply(bote.to_msg)
         except Exception as e:
             log.warning(f'AioPartPath: {e}')
-            await message.reply('⚠️ Непредвиденная ошибка')            
+            await message.reply('⚠️ Непредвиденная ошибка (500.0)')            
             raise e
         finally:
             await dowload.delete()

@@ -1,7 +1,6 @@
 from app.exeption.base import BotError
 
 class ApiError(BotError):
-    msg = ''
-
+    pass
 class ValidationApiError(ApiError):
-    msg = ''
+    pass
