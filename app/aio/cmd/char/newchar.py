@@ -20,15 +20,21 @@ from app.exeption.decorator import exept
 add_char_router = Router()
 
 @add_char_router.message(Command('newchar'), F.chat.type == 'private')
+@log.decor(arg=True)
+@exept
+async def cmd_new_char(message: Message):
+    user_id = message.from_user.id
+    markup = Character(tg_id=user_id).to_create.chouse_gender()
+    await message.answer('Выберите пол', reply_markup=markup)
+    await message.delete()
+
 @add_char_router.callback_query(AddCharNameCall.filter(F.back == True))
 @log.decor(arg=True)
 @exept
-async def cmd_new_char(data: Message | CallbackQuery, callback_data: AddCharNameCall | None = None):
-    message = data if type(data) == Message else data.message
-    user_id = message.from_user.id
+async def cmd_new_char(callback: CallbackQuery, callback_data: AddCharNameCall | None = None):
+    user_id = callback.from_user.id
     markup = Character(tg_id=user_id).to_create.chouse_gender(callback_data.back if callback_data else False)
-    await message.answer('Выберите пол', reply_markup=markup)
-    await message.delete()
+    await callback.message.edit_text('Выберите пол', reply_markup=markup)
 
 @add_char_router.message(Command('newchar'), F.chat.type != 'private')
 @log.decor(arg=True)

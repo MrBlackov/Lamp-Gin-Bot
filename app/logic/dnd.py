@@ -129,12 +129,12 @@ class person:
     def to_age(self, args: list[dice] = [dice(80, 16), dice(21, 18), dice(21, 18)]) -> int:
         return int(dices(args).medium)
     
-    @property
-    def penny(self):
-        return self.to_penny()
-
-    def to_penny(self, args: list[dice] = [dice(10000, 0)]):
-        return int(dices(args+[dice(self.age*100)]).sum)
+    #@property
+    #def penny(self):
+    #    return self.to_penny()
+#
+    #def to_penny(self, args: list[dice] = [dice(10000, 0)]):
+    #    return int(dices(args+[dice(self.age*100)]).sum)
 
     @property
     def points(self):

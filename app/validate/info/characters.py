@@ -30,7 +30,6 @@ class EXistanceInfo(BaseInfoValid):
     gender: Gender
     age: int
     amount_life: int
-    saving: SavingInfo
 #    inventory: InventoryInfo
     attibute_point: AttributePointsInfo
     location: None = None

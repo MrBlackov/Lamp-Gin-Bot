@@ -4,12 +4,8 @@ from app.db.base import Base
 from app.enum_type.char import Gender
 from app.db.models.item import ItemDB
 
-class SavingDB(Base):
-    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))
-    penny: Mapped[int] = mapped_column(default=0)
-
 class InventoryDB(Base):
-    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))
+    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))
     items: Mapped[list[ItemDB] | None] = relationship(ItemDB, uselist=True, lazy='select', cascade='all, delete-orphan')
 
 #class LocationDB(Base):
@@ -17,7 +13,7 @@ class InventoryDB(Base):
     
 
 class AttributePointDB(Base):
-    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))
+    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))
     strength: Mapped[int]
     dexterity: Mapped[int]
     intelligence: Mapped[int]
@@ -30,13 +26,12 @@ class AttributePointDB(Base):
         return (self.dexterity + self.health)/4 + self.speed_value
 
 class ExistenceDB(Base): 
-    people_id: Mapped[int | None] = mapped_column(ForeignKey('characterdb.id'), default=None)
+    people_id: Mapped[int | None] = mapped_column(ForeignKey('characterdb.id', ondelete='CASCADE'), default=None)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50), default='')
     gender: Mapped[Gender] = mapped_column(default=Gender.M.value)
     age: Mapped[int]
     amount_life: Mapped[int]
-    saving: Mapped[SavingDB] = relationship(SavingDB, uselist=False, lazy='joined', cascade='all, delete-orphan')
     inventory: Mapped[InventoryDB] = relationship(InventoryDB, uselist=False, lazy='joined', cascade='all, delete-orphan')
     attibute_point: Mapped[AttributePointDB] = relationship(AttributePointDB, uselist=False, lazy='joined', cascade='all, delete-orphan')   
 #    location: Mapped[LocationDB] = relationship(LocationDB, uselist=False, lazy='joined')  

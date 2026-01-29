@@ -2,6 +2,7 @@ from app.validate.api.characters import CharSketchInfo
 from app.validate.info.characters import CharacterInfo
 from app.aio.msg.utils import TextHTML
 from app.db.models.item import ItemDB
+from app.aio.msg.item import ItemText
 
 class SketchInfoText:
 
@@ -45,7 +46,7 @@ class SketchInfoText:
                '🏃 Бонус к Скорости: {SPEED_BONUS} \n' \
                '🔮 Духовность: {SPIRITUALITY} \n' \
                '⌛ Возраст: {AGE} \n' \
-               '🪙 Пенни: {PENNY}(фунтов: {LBS})'
+               #'🪙 Пенни: {PENNY}(фунтов: {LBS})'
 
     @property
     def gender_template(self):
@@ -64,8 +65,8 @@ class SketchInfoText:
             'SPEED_BONUS':self.speed_bonus,
             'SPIRITUALITY':self.spirituality,
             'AGE':self.age,
-            'PENNY':self.sketch.penny,
-            'LBS':self.sketch.penny//400
+            #'PENNY':self.sketch.penny,
+            #'LBS':self.sketch.penny//400
             }
         
         if and_gender: 
@@ -131,7 +132,7 @@ class CharInfoText:
                '🏃 Бонус к Скорости: {SPEED_BONUS} \n' \
                '🔮 Духовность: {SPIRITUALITY} \n' \
                '⌛ Возраст: {AGE} \n' \
-               '🪙 Пенни: {PENNY}(фунтов: {LBS})'
+               #'🪙 Пенни: {PENNY}(фунтов: {LBS})'
 
     @property
     def template_full_name(self):
@@ -149,8 +150,8 @@ class CharInfoText:
             'SPEED_BONUS':self.speed_bonus,
             'SPIRITUALITY':self.spirituality,
             'AGE':self.age,
-            'PENNY':self.char.exist.saving.penny,
-            'LBS':self.char.exist.saving.penny//400
+            #'PENNY':self.char.exist.saving.penny,
+            #'LBS':self.char.exist.saving.penny//400
             })).blockquote()]
         
         if self.descript:
@@ -170,4 +171,4 @@ class InventoryItemsText:
         return 'Сколько выбросить?'
 
     def item(item: ItemDB):
-        return item.sketch.emodzi + ' ' + item.sketch.name.title() + TextHTML(f' ID: {item.id} \n ID Эскиза: {item.sketch.id} \n Кол-во: {item.quantity} \n Описание: {item.sketch.description if item.sketch.description else '❌'}').blockquote()
+        return ItemText(item).text

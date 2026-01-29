@@ -36,6 +36,7 @@ async def get_chars_for_user_id(user_id: int) -> list[CharacterDB]:
 select_item = select_obj(ItemValide, ItemDAO)
 select_items = select_objs(ItemValide, ItemDAO)
 select_item_sketch = select_obj(ItemSketchValide, ItemSketchDAO)
+select_item_sketchs = select_objs(ItemSketchValide, ItemSketchDAO)
 
 async def get_item(sketch_id: int, inventory_id: int) -> ItemDB:
     return await select_item(filters={'sketch_id':sketch_id, 'inventory_id':inventory_id})
@@ -51,3 +52,6 @@ async def get_item_for_name(name: str) -> ItemDB:
 
 async def get_items_for_inventory(inventory_id: int) -> list[ItemDB] | None:
     return await select_items(filters={'inventory_id':inventory_id})
+
+async def get_item_sketchs() -> list[ItemSketchDB]:
+    return await select_item_sketchs()

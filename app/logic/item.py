@@ -1,6 +1,6 @@
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.db.metods.adds import add_item, add_item_sketch, ItemDB, ItemSketchDB
-from app.db.metods.gets import get_item, get_item_for_id, get_char_for_id, get_items_for_inventory, get_item_sketch
+from app.db.metods.gets import get_item, get_item_for_id, get_char_for_id, get_items_for_inventory, get_item_sketch, get_item_sketchs
 from app.db.metods.updates import update_quantity_item
 from app.db.metods.deletes import delete_item_for_id
 from app.logged.botlog import log
@@ -11,6 +11,9 @@ class ItemSketchsLogic:
     async def create(self, item: ItemSketchValide) -> ItemSketchDB:
         log.info(f'Created new item_sketch: {item.model_dump()}')
         return await add_item_sketch(data=item)
+    
+    async def get_sketchs(self):
+        return await get_item_sketchs()
 
 class ItemsLogic:
     async def give(self, sketch_id: int, inventory_id: int, char_id: int, quantity: int = 1) -> ItemDB:

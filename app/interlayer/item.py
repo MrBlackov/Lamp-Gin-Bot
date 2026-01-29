@@ -35,4 +35,11 @@ class ItemLayer:
             raise ItemError('To give, but not enter sketcth_id or sketch_name')
         return item
    
+    async def get_item_sketchs(self):
+        return await self.sketch_logic.get_sketchs()
+    
+    async def sell(self, item_id: int, buyer_char_id: int, price: int | None = None, cost: int | None = None, quantity: int = 1):
+        pass
 
+    async def transfer(self, my_item_id: int, seller_char_id: int, get_char_id: int, my_quantity: int = 1, get_quantity: int = 1):
+        pass   

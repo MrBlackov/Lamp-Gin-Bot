@@ -9,7 +9,7 @@ from app.db.metods.updates import update_main_char, update_char, update_exist
 from app.db.metods.adds import add_char, add_db_obj
 from app.logic.char import CharService
 from app.validate.add.characters import Character_add
-from app.db.models.char import CharacterDB, ExistenceDB, SavingDB, InventoryDB, AttributePointDB
+from app.db.models.char import CharacterDB, ExistenceDB, InventoryDB, AttributePointDB
 from app.logic.item import ItemSketchsLogic, ItemsLogic
 
 class CreateCharacter:
@@ -44,13 +44,11 @@ class CreateCharacter:
                                  amount_life=exist.amount_life)
         print('1')
         await add_db_obj(data=[char_db, exist_db])
-        saving = exist.saving
         inventory = exist.inventory
         attibute_point = exist.attibute_point
-        saving_db = SavingDB(exist_id=exist_db.id, penny=saving)
         inventory_db = InventoryDB(exist_id=exist_db.id)
         attibute_point_db = AttributePointDB(exist_id=exist_db.id, **attibute_point.model_dump())        
-        await add_db_obj(data=[saving_db, inventory_db, attibute_point_db])
+        await add_db_obj(data=[inventory_db, attibute_point_db])
         new_exist_db = await select_exist(filters={'id':exist_db.id})
         await update_char(filters={'id':char_db.id}, new_data={'exist':new_exist_db})
         return True
@@ -71,6 +69,9 @@ class InfoCharacter:
         update = await update_main_char(user_id, char_id)
         data = await self.get_chars(tg_id)
         return data
+
+    async def locator(self):
+        pass
 
 class InventoryCharacter:
     def __init__(self, tg_id: int):

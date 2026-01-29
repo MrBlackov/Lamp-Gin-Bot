@@ -27,7 +27,6 @@ def msg_error(bot_error: BotError | list[BotError]) -> str | list[str]:
     else:
         raise AttributeError(f'Error to msg_error, bot error: {bot_error}')
     
-error_faq: dict[str, BotError] = {}
 
 def get_sub_exeptions(cls):
 
@@ -40,7 +39,11 @@ def get_sub_exeptions(cls):
     
     return all_subclasses
 
-def get_error_faq():
+def get_error_faq() -> dict[str, BotError]: 
+    error_faq: dict[str, BotError] = {}
     sub_exeptions: list[BotError] = get_sub_exeptions(BotError)
     for error in sub_exeptions:
         error_faq |= {error.code: error}
+    return error_faq
+
+error_faq: dict[str, BotError] = get_error_faq()

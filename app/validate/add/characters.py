@@ -1,12 +1,8 @@
 from app.enum_type.char import Gender
-from app.db.models.char import SavingDB, ExistenceDB, AttributePointDB, InventoryDB
+from app.db.models.char import ExistenceDB, AttributePointDB, InventoryDB
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.validate.add.base import BaseAddValid
 from app.exeption.char import CharHastNameError
-
-class Saving_add(BaseAddValid):
-    exist_id: int
-    penny: int = 0
 
 class Inventory_add(BaseAddValid):
     exist_id: int
@@ -39,7 +35,6 @@ class CharSketch(BaseAddValid):
     age: int
     amount_life: int
     gender: Gender
-    penny: int
 
 
     @field_validator('gender', mode='before')
@@ -61,7 +56,6 @@ class Existence_add(BaseAddValid):
     first_name: str = Field(max_length=50)
     last_name: str | None = Field(max_length=50, default=None)
     gender: Gender
-    saving: Saving_add | SavingDB | int | None = None
     inventory: Inventory_add | InventoryDB | None = None
     attibute_point: AttributePoint_add | AttributePointDB | Points | None = None
     age: int

@@ -22,7 +22,6 @@ class CharSketchInfo(BaseInfoValid):
     age: int
     amount_life: int
     gender: str
-    penny: int
 
     @field_validator('points', mode='before')
     @classmethod

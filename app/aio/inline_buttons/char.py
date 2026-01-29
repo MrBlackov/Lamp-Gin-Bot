@@ -82,8 +82,9 @@ class AddCharIKB(BotIKB):
     
 class InfoCharIKB(BotIKB):
     def get_list(self, main_char_id: int, char_dict: dict[int, str]):
-        main_char = char_dict.pop(main_char_id)
-        self.builder.button(text=f'👑 {main_char}', callback_data=InfoCharList(char_id=main_char_id, main=True))
+        if main_char_id in char_dict:
+            main_char = char_dict.pop(main_char_id)
+            self.builder.button(text=f'👑 {main_char}', callback_data=InfoCharList(char_id=main_char_id, main=True))
         for char_id, char_name in char_dict.items():
             self.builder.button(text=f'♟️ {char_name}', callback_data=InfoCharList(char_id=char_id))
         return self.builder.adjust(1).as_markup()

@@ -55,6 +55,11 @@ class ItemService(BaseService):
         if item:
             return f'Выдан предмет({item.sketch.name}) в количестве {quantity} шт'
         
+    async def get_item_sketchs(self):
+        sketchs = await self.layer.get_item_sketchs()
+        await self.state.update_data()
+        return 
+
 
 
 

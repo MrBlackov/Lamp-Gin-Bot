@@ -11,3 +11,10 @@ class AddDataItemState(StatesGroup):
     image: int = State()
     msg: Message
 
+class ListItemSketchs(StatesGroup):
+    sketchs: list
+    name: str = State()
+    page: int = 0
+
+
+

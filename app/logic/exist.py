@@ -11,7 +11,6 @@ class CreateExistence:
         return CharSketch(
             gender=self.gender,
             points=self.person.points,
-            penny=self.person.penny,
             age=self.person.age,
             amount_life=self.person.amount_age
         )
@@ -28,7 +27,6 @@ class CreateExistence:
                 first_name=names[0],
                 last_name=names[1] if len(names) > 1 else None,
                 gender=sketch.gender,
-                saving=sketch.penny,
                 attibute_point=sketch.points,
                 age=sketch.age,
                 amount_life=sketch.amount_life
@@ -44,7 +42,6 @@ class CreateExistence:
             last_name=names[1] if len(names) > 1 else None,
             gender=self.gender,
             attibute_point=self.person.points,
-            saving=self.person.penny,
             age=self.person.age,
             amount_life=self.person.amount_age
         )
