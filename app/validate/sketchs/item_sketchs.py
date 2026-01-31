@@ -1,6 +1,6 @@
 from app.validate.sketchs.base import SketchsBasevalidate
 from pydantic import Field, field_validator
-from app.exeption.item import NotNameItemSketchError, NameNoValideError
+from app.exeption.item import NotNameItemSketchError, NameNoValideError, EmodziNoValideError
 
 class ItemSketchValide(SketchsBasevalidate):
     name: str | None = None
@@ -8,6 +8,7 @@ class ItemSketchValide(SketchsBasevalidate):
     descriprtion: str | None = None
     size: int = 500
     image_id: int | None = None
+    creator_id :int
 
     @field_validator('name', mode='before')
     @classmethod
@@ -23,7 +24,7 @@ class ItemSketchValide(SketchsBasevalidate):
     def name_valid(cls, emodzi: str | None = None):
         if  emodzi != None:
             if len(emodzi) != 1:
-                raise NameNoValideError('This user enter emodzi and len(emodzi) > 1')
+                raise EmodziNoValideError('This user enter emodzi and len(emodzi) > 1')
         return emodzi    
     
 class ItemValide(SketchsBasevalidate):

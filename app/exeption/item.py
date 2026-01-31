@@ -35,6 +35,10 @@ class GiveItemQuantityLessOne(ItemError):
 class GiveItemNoEnterNameOrID(ItemError):
     msg = '❌ Вы не указали ни имя, ни айди нужного предмета'
     code = '402.5'
+
+class GiveItemNoEnterID(ItemError):
+    msg = '❌ Вы не указали айди нужного предмета'
+    code = '402.5'    
    
 class GiveItemNoInt(ItemError):
     msg = '❌ Вы отправили не число. Нужно число'

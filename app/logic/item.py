@@ -9,7 +9,7 @@ from app.exeption.char import InventaryOverFlowing
 
 class ItemSketchsLogic:
     async def create(self, item: ItemSketchValide) -> ItemSketchDB:
-        log.info(f'Created new item_sketch: {item.model_dump()}')
+        log.info(f' User({item.creator_id}) created new item_sketch: {item.model_dump()}')
         return await add_item_sketch(data=item)
     
     async def get_sketchs(self):

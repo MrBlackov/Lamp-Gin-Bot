@@ -102,7 +102,7 @@ class InfoCharIKB(BotIKB):
 class InventoryIKB(BotIKB):
     def items(self, items: dict[int, ItemDB]):
         for id, item in items.items():
-            self.builder.button(text=f'{item.sketch.emodzi} | {item.sketch.name} ({item.quantity})', callback_data=InventoryItems(item=id))
+            self.builder.button(text=f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity})', callback_data=InventoryItems(item=id))
         return self.builder.adjust(1).as_markup()
     
     def back(self, where: str):

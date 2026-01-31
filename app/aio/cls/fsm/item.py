@@ -11,8 +11,11 @@ class AddDataItemState(StatesGroup):
     image: int = State()
     msg: Message
 
-class ListItemSketchs(StatesGroup):
-    sketchs: list
+class ListItemSketchsState(StatesGroup):
+    sketch_ids: dict
+    msg: Message
+    sketches: list
+    searchs: list
     name: str = State()
     page: int = 0
 

@@ -43,13 +43,31 @@ class ItemSketchText:
             '📜 Описание: {DESCRIPT}',
         ])).blockquote()
  
-    @property    
-    def text(self):
+    @property
+    def temperate_admin(self):
+        return '{EMODZI} {NAME}' + TextHTML('\n'.join([
+            '👤 Создатель: {USER_ID}',
+            '♣️ Эскиз ID: {ID}',
+            '⏲️ Вес одного: {WEIGHT}кг',
+            '📜 Описание: {DESCRIPT}',
+        ])).blockquote()  
+    
+    def text(self, is_admin: bool = False):
+        if is_admin:
+            value = self.temperate_admin.format(
+            USER_ID=self.sketch.creator_id,
+            EMODZI=self.sketch.emodzi,
+            NAME=self.sketch.name,
+            DESCRIPT=self.sketch.description if self.sketch.description else '❌',
+            WEIGHT=self.sketch.size/1000,
+            ID=self.sketch.id
+        )
+            return value
         value = self.temperate.format(
             EMODZI=self.sketch.emodzi,
             NAME=self.sketch.name,
             DESCRIPT=self.sketch.description if self.sketch.description else '❌',
             WEIGHT=self.sketch.size/1000,
-            SKETCHID=self.sketch.id
+            ID=self.sketch.id
         )
         return value

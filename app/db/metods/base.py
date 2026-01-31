@@ -94,7 +94,7 @@ def select_objs(clsP: BaseModel, clsDAO: BaseDAO,):
     @log.decor()
     async def _select_objs(                      
                           session: AsyncSession,
-                          filters: dict,
+                          filters: dict | None = None,
                           logger: bool = True
                         ):
         data = await clsDAO.find_all(session, filters)

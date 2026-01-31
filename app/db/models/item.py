@@ -9,9 +9,10 @@ class ItemSketchDB(Base):
     size: Mapped[int] = mapped_column(default=100)
     items: Mapped[list['ItemDB']] = relationship('ItemDB', uselist=True, lazy='select', cascade='all', back_populates='sketch')
     image_id: Mapped[int | None] = mapped_column(default=None)
+    creator_id: Mapped[int] = mapped_column(ForeignKey('userdb.id'))
 
 class ItemDB(Base):
-    inventory_id: Mapped[int | None] = mapped_column(ForeignKey('inventorydb.id'), default=None)
+    inventory_id: Mapped[int] = mapped_column(ForeignKey('inventorydb.id'))
     #transfer_id: Mapped[int | None] = mapped_column(ForeignKey('transferdb.id'), default=None)
     sketch_id: Mapped[int] = mapped_column(ForeignKey('itemsketchdb.id'))
     quantity: Mapped[int] = mapped_column(default=1)
