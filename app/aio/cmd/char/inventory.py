@@ -15,6 +15,7 @@ inventory_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
+    await state.clear()
     msg, markup = await Character(message.from_user.id, state).inventory.inventory()
     await message.answer(msg, reply_markup=markup)
 

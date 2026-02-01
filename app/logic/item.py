@@ -29,13 +29,13 @@ class ItemSketchsLogic:
 class ItemsLogic:
     async def give(self, sketch_id: int, inventory_id: int, char_id: int, quantity: int = 1) -> ItemDB:
         item = await get_item(sketch_id, inventory_id)
-        sketch = await get_item_sketch(sketch_id)
+        sketch = item.sketch
         char = await get_char_for_id(char_id)
         items = await get_items_for_inventory(inventory_id)
         max_size = char.exist.attibute_point.strength*1000
         size = 0
-        for item in items:
-            size += item.sketch.size*item.quantity
+        for i in items:
+            size += i.sketch.size*i.quantity
 
         if size+sketch.size*quantity > max_size:
             raise InventaryOverFlowing(f'This char({char_id}) inventary is full')

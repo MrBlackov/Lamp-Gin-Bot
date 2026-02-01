@@ -22,6 +22,7 @@ item_router.include_router(change_item_router)
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
+    await state.clear()
     msg, markup = await ItemService(message.from_user.id, state).list.get_item_sketchs()
     await message.answer(msg, reply_markup=markup)
 

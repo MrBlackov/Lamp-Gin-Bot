@@ -22,7 +22,8 @@ add_char_router = Router()
 @add_char_router.message(Command('newchar'), F.chat.type == 'private')
 @log.decor(arg=True)
 @exept
-async def cmd_new_char(message: Message):
+async def cmd_new_char(message: Message, state: FSMContext):
+    await state.clear()
     user_id = message.from_user.id
     markup = Character(tg_id=user_id).to_create.chouse_gender()
     await message.answer('Выберите пол', reply_markup=markup)

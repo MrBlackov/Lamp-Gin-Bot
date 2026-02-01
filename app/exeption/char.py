@@ -8,6 +8,9 @@ class CharHastNameError(CharError):
     msg = '⁉️ Персонаж Безымянный, буквально...'    
     code = '500.1'
 
+class NoHaveMainChar(CharError):
+    msg = '❌ У вас не выбран действующий персонаж'    
+    code = '503.1'    
 
 class InventaryOverFlowing(CharError):
     msg = '❌ Инвентарь будет переполнен, предмет невозможно получить'

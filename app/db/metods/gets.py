@@ -5,6 +5,7 @@ from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
+from app.exeption.char import NoHaveMainChar
 
 add_or_update_user = add_or_update_obj(UserDAO)
 
@@ -23,8 +24,11 @@ async def get_user_for_id(user_id: int) -> UserDB:
 
 
 async def get_main_char_for_user_id(user_id: int) -> int | None:
-   user: UserDB = await get_user_for_id(user_id)
-   return user.main_char
+    user: UserDB = await get_user_for_id(user_id)
+    if user.main_char:
+        return user.main_char
+    else:
+        raise NoHaveMainChar(f'This user({user_id}) no have main char')
 
 async def get_char_for_id(char_id: int) -> CharacterDB:
     return await select_char(filters={'id':char_id})

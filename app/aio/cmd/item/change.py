@@ -21,6 +21,7 @@ change_item_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_add_item_name(message: Message, command: CommandObject, state: FSMContext):
+    await state.clear()
     if command.args != None and message.from_user.id == owner:
         msg, markup = await ItemService(message.from_user.id, state).change.start(command.args)
         await message.answer(msg, reply_markup=markup)

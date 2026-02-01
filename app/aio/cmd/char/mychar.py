@@ -23,6 +23,7 @@ char_router.include_router(inventory_router)
 @log.decor(arg=True)
 @exept
 async def cmd_new_char(message: Message, state: FSMContext):
+    await state.clear()
     markup, text = await Character(message.from_user.id, state).info.get_chars()
     await message.answer(text, reply_markup=markup)
     await message.delete()
