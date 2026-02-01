@@ -37,17 +37,4 @@ async def cmd_add_item_name(message: Message, command: CommandObject):
         await message.answer('⁉️ Где данные?')
     else:
         await message.answer('⁉️ Неизввестная ошибка')
-
-@add_item_router.message(Command('changeitem'))
-@log.decor(arg=True)
-@exept
-async def cmd_add_item_name(message: Message, command: CommandObject):
-    if command.args != None and message.from_user.id == owner:
-        msg, markup = await ItemService(message.from_user.id).change.change(command.args)
-        await message.answer(msg, reply_markup=markup)
-    elif message.from_user.id != owner:
-        await message.answer('❌ Нет доступа')
-    elif command.args == None:
-        await message.answer('⁉️ Где данные?')
-    else:
-        await message.answer('⁉️ Неизввестная ошибка')        
+     

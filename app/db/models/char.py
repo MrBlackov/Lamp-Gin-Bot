@@ -6,6 +6,7 @@ from app.db.models.item import ItemDB
 
 class InventoryDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))
+    exist: Mapped['ExistenceDB'] = relationship('ExistenceDB', uselist=False, lazy='select', cascade='all', back_populates='inventory')
     items: Mapped[list[ItemDB] | None] = relationship(ItemDB, uselist=True, lazy='select', cascade='all, delete-orphan')
 
 #class LocationDB(Base):
@@ -13,7 +14,8 @@ class InventoryDB(Base):
     
 
 class AttributePointDB(Base):
-    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))
+    exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))    
+    exist: Mapped['ExistenceDB'] = relationship('ExistenceDB', uselist=False, lazy='select', cascade='all', back_populates='attibute_point')
     strength: Mapped[int]
     dexterity: Mapped[int]
     intelligence: Mapped[int]
@@ -27,13 +29,14 @@ class AttributePointDB(Base):
 
 class ExistenceDB(Base): 
     people_id: Mapped[int | None] = mapped_column(ForeignKey('characterdb.id', ondelete='CASCADE'), default=None)
+    char: Mapped['CharacterDB'] = relationship('CharacterDB', uselist=False, lazy='select', cascade='all', back_populates='exist')
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50), default='')
     gender: Mapped[Gender] = mapped_column(default=Gender.M.value)
     age: Mapped[int]
     amount_life: Mapped[int]
-    inventory: Mapped[InventoryDB] = relationship(InventoryDB, uselist=False, lazy='joined', cascade='all, delete-orphan')
-    attibute_point: Mapped[AttributePointDB] = relationship(AttributePointDB, uselist=False, lazy='joined', cascade='all, delete-orphan')   
+    inventory: Mapped[InventoryDB] = relationship(InventoryDB, uselist=False, lazy='joined', cascade='all, delete-orphan', back_populates='exist')
+    attibute_point: Mapped[AttributePointDB] = relationship(AttributePointDB, uselist=False, lazy='joined', cascade='all, delete-orphan', back_populates='exist')   
 #    location: Mapped[LocationDB] = relationship(LocationDB, uselist=False, lazy='joined')  
     die: Mapped[bool] = mapped_column(default=False)
     @property

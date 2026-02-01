@@ -15,7 +15,7 @@ def exept(func):
             log.warning(f'AioPartPath: {bote}')
             await message.reply(bote.to_msg)
         except Exception as e:
-            log.warning(f'AioPartPath: {e}')
+            log.error(f'AioPartPath: {e}')
             await message.reply('⚠️ Непредвиденная ошибка (500.0)')            
             raise e
         finally:

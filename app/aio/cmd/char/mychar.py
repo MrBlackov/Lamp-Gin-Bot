@@ -5,7 +5,7 @@ from aiogram.types import Message, CallbackQuery
 from app.logged.botlog import log
 from app.service.char import Character
 from app.aio.cmd.char.newchar import add_char_router
-from app.aio.cmd.item.item import item_router
+from app.aio.cmd.item.items import item_router
 from app.aio.cmd.char.inventory import inventory_router
 from app.aio.cls.callback.char import (
                                        InfoCharChouse, 

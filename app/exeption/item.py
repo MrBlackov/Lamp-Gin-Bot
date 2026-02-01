@@ -16,6 +16,18 @@ class EmodziNoValideError(ItemError):
     msg = '❌ Эмозди должен быть один'
     code = '401.8'
     
+class SizeNotIntItemSketchError(ItemError):
+    msg = '❌ Вес должен быть челым числом'
+    code = '401.10'
+
+
+
+class NoFindItemSketchForID(ItemError):
+    msg = '❌ Эскиз предмета с таким ID не найден, попробуйте поискать в /items'
+    code = '401.10'
+
+
+
 class ThrowAwayQuantityLessOne(ItemError):
     msg = '❌ Вы отправили число меньше или равное нулю. Нужно целое число, которое больше нуля'
     code = '402.1'
@@ -28,6 +40,8 @@ class ThrowAwayQuantityNoInt(ItemError):
     msg = '❌ Вы отправили не число. Нужно число'
     code = '402.3'
     
+
+
 class GiveItemQuantityLessOne(ItemError):
     msg = '❌ Вы отправили число меньше или равное нулю. Нужно целое число, которое больше нуля'
     code = '402.4'

@@ -205,3 +205,4 @@ async def callback_add_char_last_name(callback: CallbackQuery, callback_data: Ad
         await callback.message.edit_text('Персонаж создан, просмотреть информацию /mychar')
     else:
         await callback.message.edit_text('Персонаж не создан, ошибка')
+    await state.clear()

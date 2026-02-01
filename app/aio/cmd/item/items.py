@@ -4,7 +4,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from app.logged.botlog import log
 from app.service.item import ItemService
-from app.aio.cmd.item.admin_item import add_item_router
+from app.aio.cmd.item.add_and_give import add_item_router
+from app.aio.cmd.item.change import change_item_router
 from app.exeption.decorator import exept
 from app.aio.cls.fsm.item import ListItemSketchsState
 from app.aio.cls.callback.item import (ListItemSketchBackCall, 
@@ -15,6 +16,7 @@ from app.aio.cls.callback.item import (ListItemSketchBackCall,
 
 item_router = Router()
 item_router.include_router(add_item_router)
+item_router.include_router(change_item_router)
 
 @item_router.message(Command('items'))
 @log.decor(arg=True)
@@ -59,6 +61,7 @@ async def cmd_inventory(message: Message, state: FSMContext):
     msg, markup = await ItemService(message.from_user.id, state).list.search(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
+    await state.set_state()
     await msg0.delete()
 
 @item_router.callback_query(ListItemSketchItemCall.filter())     

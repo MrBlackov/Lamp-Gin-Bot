@@ -23,7 +23,7 @@ async def cmd_inventory(message: Message, state: FSMContext):
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InventoryItems, state: FSMContext):
     await callback.answer()
     msg, markup = await Character(callback.from_user.id, state).inventory.inventory()
-    await callback.message.answer(msg, reply_markup=markup)
+    await callback.message.edit_text(msg, reply_markup=markup)
     
 @inventory_router.callback_query(InventoryItems.filter())     
 @log.decor(arg=True)
@@ -52,8 +52,10 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: Invent
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
     item_id = await state.get_value('item')
-    if message.text.isalnum() == False:
-        raise ThrowAwayQuantityNoInt(f'This user({message.fron_user.id}) enter no int')
+    if message.text.isdigit() == False:
+        raise ThrowAwayQuantityNoInt(f'This user(tg_id={message.from_user.id}) enter no int')
     msg, markup = await Character(message.from_user.id, state).inventory.throw_away(item_id, int(message.text))
     await message.answer(msg, reply_markup=markup)
+    await state.set_state()
+
 

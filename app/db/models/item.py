@@ -17,4 +17,6 @@ class ItemDB(Base):
     sketch_id: Mapped[int] = mapped_column(ForeignKey('itemsketchdb.id'))
     quantity: Mapped[int] = mapped_column(default=1)
     sketch: Mapped[ItemSketchDB] = relationship(ItemSketchDB, uselist=False, lazy='joined', back_populates='items')
+    inventory: Mapped[Base] = relationship('InventoryDB', uselist=False, lazy='select', back_populates='items')
+
 

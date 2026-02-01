@@ -1,6 +1,6 @@
 from app.validate.sketchs.base import SketchsBasevalidate
 from pydantic import Field, field_validator
-from app.exeption.item import NotNameItemSketchError, NameNoValideError, EmodziNoValideError
+from app.exeption.item import NotNameItemSketchError, NameNoValideError, EmodziNoValideError, SizeNotIntItemSketchError
 
 class ItemSketchValide(SketchsBasevalidate):
     name: str | None = None
@@ -26,6 +26,14 @@ class ItemSketchValide(SketchsBasevalidate):
             if len(emodzi) != 1:
                 raise EmodziNoValideError('This user enter emodzi and len(emodzi) > 1')
         return emodzi    
+    
+    @field_validator('size', mode='after')
+    @classmethod
+    def name_valid(cls, size: str = '100'):
+        is_size = str(size)
+        if is_size.isdigit() == False:
+            raise SizeNotIntItemSketchError('This user enter size, but size no int')
+        return size
     
 class ItemValide(SketchsBasevalidate):
     inventory_id: int

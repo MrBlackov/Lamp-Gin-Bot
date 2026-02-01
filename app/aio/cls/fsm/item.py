@@ -19,5 +19,15 @@ class ListItemSketchsState(StatesGroup):
     name: str = State()
     page: int = 0
 
-
-
+class ChangeItemSketchState(StatesGroup):
+    msg: Message
+    page = 0
+    pages: list
+    datas: dict
+    items: dict[int, dict]
+    what_change: str
+    new_data = State()
+    item_id: int
+    action: str
+    action_data = State()
+    sketch_id: int
