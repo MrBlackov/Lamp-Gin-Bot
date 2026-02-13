@@ -31,21 +31,21 @@ async def cmd_new_char(message: Message, state: FSMContext):
 @add_char_router.callback_query(InfoCharChouse.filter(F.back == True))     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoCharChouse, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     markup, text = await Character(callback.from_user.id, state).info.get_chars()
     await callback.message.edit_text(text, reply_markup=markup)
 
 @add_char_router.callback_query(InfoCharList.filter())         
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoCharList, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     markup, text = await Character(callback.from_user.id, state).info.get_char(callback_data.char_id)
     await callback.message.edit_text(text, reply_markup=markup)
 
 @add_char_router.callback_query(InfoCharChouse.filter())         
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoCharList, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     markup, text = await Character(callback.from_user.id, state).info.char_to_main(callback_data.char_id)
     await callback.message.edit_text(text, reply_markup=markup)    
 

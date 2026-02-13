@@ -20,6 +20,9 @@ class SizeNotIntItemSketchError(ItemError):
     msg = '❌ Вес должен быть челым числом'
     code = '401.10'
 
+class NameNoValideError(ItemError):
+    msg = '❌ Значение должно быть bool-типа(0 или 1)'
+    code = '401.11'
 
 
 class NoFindItemSketchForID(ItemError):

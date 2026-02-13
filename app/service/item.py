@@ -10,7 +10,6 @@ from app.exeption.item import GiveItemQuantityLessOne, GiveItemNoEnterNameOrID, 
 from app.logic.query import LetterSearch
 from app.aio.msg.item import ItemSketchText, CharItemText
 from app.exeption.item import ThrowAwayQuantityNoInt
-
 from app.aio.config import admins
 
 class ItemBaseService(BaseService):
@@ -89,7 +88,7 @@ class ChangeItemService(ItemBaseService):
         pages = await self.state.get_value('pages')
         await self.state.update_data(page=page)
         max_page = len(pages)
-        return f'Предметы ({page}/{max_page}стр) ', self.IKB.to_items(pages[page], page, max_page, back_where)
+        return f'Предметы {f'[{page + 1}/{max_page}стр]' if max_page > 1 else ''} ', self.IKB.to_items(pages[page], page, max_page, back_where)
     
     async def to_item(self, item_id: int, back_where: str = 'char_items'):
         items: dict[int, dict] = await self.state.get_value('items')
@@ -171,7 +170,6 @@ class GiveItemService(ItemBaseService):
         if item:
             return f'Выдан предмет({item.sketch.name}) в количестве {quantity} шт'
 
-
 class ListItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
@@ -188,7 +186,7 @@ class ListItemService(ItemBaseService):
         sketches = await self.state.get_value('searchs')
         await self.state.update_data(page=page)
         max_page = len(sketches)
-        return f'Предметы ({page}/{max_page}стр) ', self.IKB.list_items(sketches[page], page, max_page, back_where)
+        return f'Предметы {f'[{page + 1}/{max_page}стр]' if max_page > 1 else ''}', self.IKB.list_items(sketches[page], page, max_page, back_where)
     
     async def to_item(self, item_id: int):
         sketch_ids: dict = await self.state.get_value('sketch_ids')

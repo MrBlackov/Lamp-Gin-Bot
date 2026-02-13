@@ -7,12 +7,12 @@ from app.validate.api.query import CreateCharSkecth
 from app.db.metods.gets import get_user_for_tg_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory
 from app.db.metods.updates import update_main_char, update_char, update_exist
 from app.db.metods.adds import add_char, add_db_obj
-from app.logic.char import CharService
+from app.logic.char import CharLogic
 from app.validate.add.characters import Character_add
 from app.db.models.char import CharacterDB, ExistenceDB, InventoryDB, AttributePointDB
 from app.logic.item import ItemSketchsLogic, ItemsLogic
 
-class CreateCharacter:
+class CreateCharacterLayer:
     def get_sketchs(gender: Gender = 'M', quantity: int = 5):
         prs = person(gender)
         print(gender)
@@ -53,27 +53,29 @@ class CreateCharacter:
         await update_char(filters={'id':char_db.id}, new_data={'exist':new_exist_db})
         return True
 
-class InfoCharacter:
-    async def get_chars(self, tg_id: int) -> UserChars:
-        service = CharService(tg_id)
-        user_id = await service.user_id()
-        chars = await service.get_chars(user_id)
+class InfoCharacterLayer:
+    def __init__(self, tg_id: int):
+        self.logic = CharLogic(tg_id)
+        self.tg_id = tg_id
+
+    async def get_chars(self) -> UserChars:
+        user_id = await self.logic.user_id()
+        chars = await self.logic.get_chars(user_id)
         if chars:
-            main_char_id = await service.get_main_char_id(user_id)
+            main_char_id = await self.logic.get_main_char_id(user_id)
             return UserChars(chars=chars, main_id=main_char_id)
         return UserChars(no_chars=True)
 
-    async def char_to_main(self, tg_id: int, char_id: int):
-        service = CharService(tg_id)
-        user_id = await service.user_id()
+    async def char_to_main(self, char_id: int):
+        user_id = await self.logic.user_id()
         update = await update_main_char(user_id, char_id)
-        data = await self.get_chars(tg_id)
+        data = await self.get_chars()
         return data
 
     async def locator(self):
-        pass
+        return await self.logic.get_all_chars()
 
-class InventoryCharacter:
+class InventoryCharacterLayer:
     def __init__(self, tg_id: int):
         self.tg_id = tg_id
 

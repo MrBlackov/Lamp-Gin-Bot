@@ -35,14 +35,14 @@ async def cmd_add_item_name(message: Message, command: CommandObject, state: FSM
 @change_item_router.callback_query(ChangeItemSketchBackCall.filter(F.where == 'info'))     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchBackCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.to_sketch()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @change_item_router.callback_query(ChangeItemSketchCall.filter(F.to_items == False))     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.to_change_data(callback_data.what, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)    
 
@@ -65,28 +65,28 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @change_item_router.callback_query(ChangeItemSketchBackCall.filter(F.where == 'char_items'))   
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.to_char_items()
     await callback.message.edit_text(msg, reply_markup=markup)  
     
 @change_item_router.callback_query(ChangeItemSketchToPageCall.filter())     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchToPageCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.to_page(page=callback_data.page)
     await callback.message.edit_text(msg, reply_markup=markup)  
 
 @change_item_router.callback_query(ChangeItemSketchItemCall.filter())     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchItemCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.to_item(callback_data.item_id)
     await callback.message.edit_text(msg, reply_markup=markup) 
 
 @change_item_router.callback_query(ChangeItemSketchBackCall.filter(F.where == 'item'))     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchBackCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     item_id = await state.get_value('item_id')
     msg, markup = await ItemService(callback.from_user.id, state).change.to_item(item_id)
     await callback.message.edit_text(msg, reply_markup=markup)
@@ -94,7 +94,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: Change
 @change_item_router.callback_query(ChangetemSketchItemInCharCall.filter())     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangetemSketchItemInCharCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.to_action_inventory(callback.message, callback_data.item_id, callback_data.action)
     await callback.message.edit_text(msg, reply_markup=markup) 
 
@@ -114,28 +114,28 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @change_item_router.callback_query(ChangeItemSketchDeleteItemsCall.filter(F.is_delete == False))     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchDeleteItemsCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.to_delete_items()
     await callback.message.edit_text(msg, reply_markup=markup)  
     
 @change_item_router.callback_query(ChangeItemSketchDeleteSketchCall.filter(F.is_delete == False))     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchDeleteSketchCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.to_delete_sketch()
     await callback.message.edit_text(msg, reply_markup=markup)  
 
 @change_item_router.callback_query(ChangeItemSketchDeleteItemsCall.filter(F.is_delete == True))     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchDeleteItemsCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.delete_items()
     await callback.message.edit_text(msg, reply_markup=markup)  
     
 @change_item_router.callback_query(ChangeItemSketchDeleteSketchCall.filter(F.is_delete == True))     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ChangeItemSketchDeleteSketchCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     msg, markup = await ItemService(callback.from_user.id, state).change.delete_sketch()
     await callback.message.edit_text(msg, reply_markup=markup) 
     

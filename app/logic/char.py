@@ -2,11 +2,11 @@ from app.db.models.char import CharacterDB
 from app.validate.info.characters import CharacterInfo, AttributePointsInfo, EXistanceInfo, ItemInfo
 from app.logged.botlog import logs
 from app.db.models.base import UserDB
-from app.db.metods.gets import get_chars_for_user_id, get_char_for_id, get_main_char_for_user_id, get_user_for_id, get_user_for_tg_id
+from app.db.metods.gets import get_chars_for_user_id, get_char_for_id, get_all_chars, get_main_char_for_user_id, get_user_for_id, get_user_for_tg_id
 from app.db.metods.updates import update_main_char
 from app.exeption.char import CharError
 
-class CharService:
+class CharLogic:
     def __init__(self, tg_id: int):
         self.tg_id = tg_id
 
@@ -40,6 +40,9 @@ class CharService:
                 char = await self.to_info(char_db)
                 chars.append(char)
             return chars
+        
+    async def get_all_chars(self) -> list[CharacterDB]:
+        return await get_all_chars()
 
     async def get_main_char_id(sself, user_id: int) -> int | None:
         return await get_main_char_for_user_id(user_id)

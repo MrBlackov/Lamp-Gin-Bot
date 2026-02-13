@@ -48,7 +48,7 @@ async def cmd_new_char(message: Message):
 @add_char_router.callback_query(AddCharGenderCall.filter())     
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: AddCharGenderCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_get_sketchs(callback_data.gender, callback_data.to_change)
     await callback.message.edit_text(f'Как выберем имя?', reply_markup=markup)
 
@@ -58,7 +58,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: AddCha
 @add_char_router.callback_query(AddCharQueryNameCall.filter(F.back == True))
 @log.decor(arg=True)
 async def callback_add_char_names(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext):
-    await callback.answer()
+    await callback.answer("⌛")
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_sketchs(callback_data.first_name)
     await callback.message.edit_text(f'Как выберем имя?', reply_markup=markup)
     await state.set_state(CreateCharState.to_create)

@@ -9,6 +9,7 @@ class ItemSketchValide(SketchsBasevalidate):
     size: int = 500
     image_id: int | None = None
     creator_id :int
+    is_delete: bool = True
 
     @field_validator('name', mode='before')
     @classmethod

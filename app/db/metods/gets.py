@@ -36,6 +36,8 @@ async def get_char_for_id(char_id: int) -> CharacterDB:
 async def get_chars_for_user_id(user_id: int) -> list[CharacterDB]:
     return await select_chars(filters={"user_id":user_id})
 
+async def get_all_chars() -> list[CharacterDB]:
+    return await select_chars()
 
 select_item = select_obj(ItemValide, ItemDAO)
 select_items = select_objs(ItemValide, ItemDAO)

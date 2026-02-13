@@ -18,7 +18,7 @@ class BotError(Exception):
     
     @property
     def to_msg(self):
-        return self.msg + f' ({self.code})'
+        return self.msg + f' [{self.code}]'
 
 def msg_error(bot_error: BotError | list[BotError]) -> str | list[str]:
     if type(bot_error) == BotError: return bot_error.to_msg()

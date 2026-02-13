@@ -29,7 +29,7 @@ class ItemSketchsLogic:
 class ItemsLogic:
     async def give(self, sketch_id: int, inventory_id: int, char_id: int, quantity: int = 1) -> ItemDB:
         item = await get_item(sketch_id, inventory_id)
-        sketch = item.sketch
+        sketch = item.sketch if item else await get_item_sketch(sketch_id)
         char = await get_char_for_id(char_id)
         items = await get_items_for_inventory(inventory_id)
         max_size = char.exist.attibute_point.strength*1000

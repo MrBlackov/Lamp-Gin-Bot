@@ -8,7 +8,7 @@ from app.aio.msg.char import SketchInfoText, CharInfoText, InventoryItemsText
 from app.aio.msg.utils import TextHTML
 import random
 from app.service.base import BaseService 
-from app.interlayer.char import CreateCharacter, InfoCharacter, InventoryCharacter
+from app.interlayer.char import CreateCharacterLayer, InfoCharacterLayer, InventoryCharacterLayer
 from app.aio.cls.fsm.char import InventoryState
 
 class AddCharacterService(BaseService):
@@ -22,7 +22,7 @@ class AddCharacterService(BaseService):
     async def to_get_sketchs(self, gender: Gender, to_changes: bool = False):
         if to_changes == False:
             print(gender)
-            api_data = CreateCharacter.get_sketchs(gender)
+            api_data = CreateCharacterLayer.get_sketchs(gender)
             logs.debug(f'Class Character give GetSketchs({api_data})')
             await self.state.update_data(
                 first_names=api_data.first_names, 
@@ -109,7 +109,7 @@ class AddCharacterService(BaseService):
  
     async def create(self, descript: str | None = None):
         char = await self.get_info(descript)
-        api_data = await CreateCharacter().add_char(self.tg_id, char.char)
+        api_data = await CreateCharacterLayer().add_char(self.tg_id, char.char)
         await self.state.clear()
         return True
 
@@ -119,7 +119,7 @@ class InfoCharacterService(BaseService):
         self.IKB = InfoCharIKB()
 
     async def get_chars(self):
-        datas = await InfoCharacter().get_chars(self.tg_id)
+        datas = await InfoCharacterLayer(self.tg_id).get_chars()
         if datas.no_chars:
             return None, '😕 У вас нет персонажей, создать - /newchar'
         chars = {}
@@ -137,7 +137,7 @@ class InfoCharacterService(BaseService):
         return self.IKB.chouse_main_char(char_id, True if char_id == main_id else False), CharInfoText(char).text
     
     async def char_to_main(self, char_id: int):
-        datas = await InfoCharacter().char_to_main(self.tg_id, char_id)
+        datas = await InfoCharacterLayer(self.tg_id).char_to_main(char_id)
         chars = {}
         data = datas.chars
         for d in data:
@@ -152,7 +152,7 @@ class InventoryService(BaseService):
         self.IKB = InventoryIKB()
 
     async def inventory(self):
-        inventory = await InventoryCharacter(self.tg_id).inventory()
+        inventory = await InventoryCharacterLayer(self.tg_id).inventory()
         items = {}
         if inventory.items:
             for item in inventory.items:
@@ -173,7 +173,7 @@ class InventoryService(BaseService):
         return InventoryItemsText.throw(), self.IKB.back('item')
 
     async def throw_away(self, item_id: int, quantity: int):
-        throw = await InventoryCharacter(self.tg_id).throw_away(item_id, quantity)
+        throw = await InventoryCharacterLayer(self.tg_id).throw_away(item_id, quantity)
         if throw: return await self.inventory()
         raise
 

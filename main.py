@@ -7,20 +7,20 @@ from app.logged.botlog import logs, log, tg_log
 from app.exeption import base
 
 async def loggers():
-    return asyncio.create_task(tg_log())
+    return asyncio.create_task(tg_log()) 
 
 async def main():
-    # scheduler.add_job(send_time_msg, 'interval', seconds=10)
-    # scheduler.start()
-    
-    dp.message.middleware(UpdateDataMiddleware())
-    dp.include_routers(base_router) 
-    asyncio.gather(loggers(), return_exceptions=True)
-    logs.debug('start polling bot')
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+    try:
+        # scheduler.add_job(send_time_msg, 'interval', seconds=10)
+        # scheduler.start()
+        dp.message.middleware(UpdateDataMiddleware())
+        dp.include_routers(base_router) 
+        asyncio.gather(loggers(), return_exceptions=True)
+        logs.debug('start polling bot')
+        await bot.delete_webhook(drop_pending_updates=True)
+        await dp.start_polling(bot)
+    except Exception as e:
+        logs.critical(f"Polling failed: {e}") 
 
 if __name__ == "__main__": 
     asyncio.run(main())
-
-    
