@@ -1,6 +1,6 @@
 from app.validate.sketchs.item_sketchs import ItemSketchValide
 from app.logic.item import ItemsLogic, ItemSketchsLogic
-from app.db.metods.gets import get_user_for_tg_id, get_main_char_for_user_id, get_char_for_id, get_item_for_name, get_item_sketch
+from app.db.metods.gets import get_user_for_tg_id, get_main_char_for_user_id, get_char_for_id, get_item_for_name, get_item_sketch, get_user_for_id
 from app.exeption.item import ItemError
 from app.db.models.item import ItemDB
 from app.db.models.char import CharacterDB
@@ -13,19 +13,21 @@ class ItemLayer:
         self.logic = ItemsLogic()
         self.sketch_logic = ItemSketchsLogic()
 
-    async def get_char_info(self):
-        self.user_id = await get_user_for_tg_id(self.tg_id)
-        self.char_id = await get_main_char_for_user_id(self.user_id)
+    async def get_char_info(self, user_id: int | None = None):
+        if user_id:
+            self.user = await get_user_for_id(user_id)
+        else:
+            self.user = await get_user_for_tg_id(self.tg_id, True)
+        self.char_id = await get_main_char_for_user_id(self.user.id)
         self.char = await get_char_for_id(self.char_id)
         return self
-
 
 
     async def create(self, item: dict):
         self = await self.get_char_info()
         new_sketch = await self.sketch_logic.create(ItemSketchValide(**item, creator_id=self.user_id))
         new_item = await self.logic.give(new_sketch.id, self.char.exist.inventory.id, self.char.id, )
-        return True
+        return self.user, new_item
 
 
 

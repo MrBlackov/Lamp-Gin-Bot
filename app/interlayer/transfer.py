@@ -15,9 +15,12 @@ class TransferLayer:
         self.item_sketch = ItemSketchsLogic()
         self.transfer = TransferLogic()
 
-    async def get_char_info(self):
-        self.user_id = await get_user_for_tg_id(self.tg_id)
-        self.char_id = await get_main_char_for_user_id(self.user_id)
+    async def get_char_info(self, user_id: int | None = None):
+        if user_id:
+            self.user = await get_user_for_id(user_id)
+        else:
+            self.user = await get_user_for_tg_id(self.tg_id, True)
+        self.char_id = await get_main_char_for_user_id(self.user.id)
         self.char_info = await get_char_for_id(self.char_id)
         return self
 
@@ -43,7 +46,7 @@ class TransferLayer:
                        char2: CharacterDB,
                        items1: list,
                        items2: list, 
-                       status: str) -> int:
+                       status: str):
         self = await self.get_char_info()
         if status == 'confirmed':
             inventory = await get_items_for_inventory(char1.exist.inventory.id)
@@ -51,7 +54,7 @@ class TransferLayer:
             await self.check_inventory(char1, items1)
         trade = await self.transfer.new_transfer(char1.id, char2.id, items1, items2, status)
         user = await get_user_for_id(char2.user_id)
-        return user.tg_id 
+        return user.tg_id, self.user, trade
     
     async def transfers(self):
         self = await self.get_char_info()

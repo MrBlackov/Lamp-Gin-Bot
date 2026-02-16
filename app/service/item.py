@@ -11,6 +11,8 @@ from app.logic.query import LetterSearch
 from app.aio.msg.item import ItemSketchText, CharItemText
 from app.exeption.item import ThrowAwayQuantityNoInt
 from app.aio.config import admins
+from app.aio.msg.base import UserText
+from app.logged.infolog import infolog
 
 class ItemBaseService(BaseService):
     def __init__(self, tg_id, state = None):
@@ -30,8 +32,9 @@ class AddItemService(ItemBaseService):
             with open('app/service/sketch.json', 'w', encoding='utf-8') as file:
                 line = file.read()
             sketch = json.loads(line)
-        add_item = await self.layer.create(sketch)
-        if add_item: 
+        user, item = await self.layer.create(sketch)
+        if user and item: 
+            await infolog.new_item(self.tg_id, UserText(user.tg_user, user).text + ' \n \n' + ItemSketchText(item).text(True))
             return '✅ Предмет создан, посмотреть /inventory'
 
 class ChangeItemService(ItemBaseService):

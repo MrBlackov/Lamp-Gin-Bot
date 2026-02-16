@@ -14,6 +14,8 @@ from app.aio.config import admins
 from app.exeption.transfer import TransferQuantityNoIntError, TransferError, TransferNoHaventItemError
 from app.logic.cls import MyTransfers
 from app.db.models.transfer import TransferDB
+from app.logged.infolog import infolog
+from app.aio.msg.base import UserText
 
 class NewItemTransferService(BaseService):
     def __init__(self, tg_id, state = None):
@@ -152,11 +154,15 @@ class NewItemTransferService(BaseService):
         char2: CharacterDB = await self.state.get_value('char2')
         items1 = await self.state.get_value('items1')
         items2 = await self.state.get_value('items2')
-        bayer_tg_id = await self.layer.newtrade(char1, char2, 
+        bayer_tg_id, user, trade = await self.layer.newtrade(char1, char2, 
                                                 [item for item in items1.values()] if items1 else None, 
                                                 [item for item in items2.values()] if items2 else None, 'confirmed')
 
         await to_msg(bayer_tg_id, f'✅ Пришла сделка для {char2.exist.full_name}, посмотреть /transfer')
+        await infolog.new_transfer(self.tg_id, UserText(user.tg_user, user).text + '\n \n' + self.text(char1, char2, 
+                                [item for item in items1.values()] if items1 else None, 
+                                [item for item in items2.values()] if items2 else None,
+                                ).text('🟢', '🔵'))
         return '✅ Сделка отправлена, посмотреть свои сделки /transfer', None
 
     async def to_created(self):

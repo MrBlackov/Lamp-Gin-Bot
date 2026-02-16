@@ -2,9 +2,11 @@ from aiogram.fsm.context import FSMContext
 from app.aio.inline_buttons.char import AddCharIKB, InfoCharIKB, InventoryIKB
 from app.enum_type.char import Gender
 from app.logged.botlog import logs
+from app.logged.infolog import infolog
 from app.validate.api.characters import CharSketchInfo
 from app.validate.api.query import CreateCharSkecth
 from app.aio.msg.char import SketchInfoText, CharInfoText, InventoryItemsText
+from app.aio.msg.base import UserText
 from app.aio.msg.utils import TextHTML
 import random
 from app.service.base import BaseService 
@@ -109,8 +111,9 @@ class AddCharacterService(BaseService):
  
     async def create(self, descript: str | None = None):
         char = await self.get_info(descript)
-        api_data = await CreateCharacterLayer().add_char(self.tg_id, char.char)
+        user = await CreateCharacterLayer().add_char(self.tg_id, char.char)
         await self.state.clear()
+        await infolog.new_char(self.tg_id, UserText(user.tg_user, user).text + '\n' + self.info_to_str)
         return True
 
 class InfoCharacterService(BaseService):

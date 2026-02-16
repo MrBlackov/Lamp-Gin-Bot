@@ -18,7 +18,6 @@ async def cmd_start(message: Message):
     await message.answer(f'Chat id: {message.chat.id}')
     if message.is_topic_message:
         await message.answer(f'Topic id: {message.message_thread_id}')       
-    await message.delete() 
 
 @start_router.message(Command('cancel'), F.chat.type == 'private')
 @log.decor(arg=True)
@@ -26,4 +25,3 @@ async def cmd_start(message: Message):
 async def cmd_cancel(message: Message, state: FSMContext):
     await state.clear()
     await message.answer('Отменено')
-    await message.delete()

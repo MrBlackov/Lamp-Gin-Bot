@@ -27,7 +27,6 @@ async def cmd_new_char(message: Message, state: FSMContext):
     user_id = message.from_user.id
     markup = Character(tg_id=user_id).to_create.chouse_gender()
     await message.answer('📲 Выберите пол', reply_markup=markup)
-    await message.delete()
 
 @add_char_router.callback_query(AddCharNameCall.filter(F.back == True))
 @log.decor(arg=True)
@@ -43,7 +42,6 @@ async def cmd_new_char(callback: CallbackQuery, callback_data: AddCharNameCall |
 async def cmd_new_char(message: Message):
     user_id = message.from_user.id
     await message.answer('😕 Создание персонажа происходит в лс')
-    await message.delete()
     
 @add_char_router.callback_query(AddCharGenderCall.filter())     
 @log.decor(arg=True)
@@ -202,8 +200,7 @@ async def callback_add_char_last_name(callback: CallbackQuery, callback_data: Ad
 @exept
 async def msg_query_for_names(message: Message, state: FSMContext):
     if len(message.text) > 1000:
-        await message.answer(f'❌ Макс. количесто симловов для описания - 1000, у вас {len(message.text)}')  
-        await msg.delete()
+        await message.answer(f'❌ Макс. количесто симловов для описания - 1000, у вас {len(message.text)}') 
         await state.set_state(CreateCharState.description)
         return 
     msg = await state.get_value('msg')

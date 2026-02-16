@@ -1,5 +1,5 @@
 from app.db.metods.base import add_or_update_obj, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide
-from app.db.dao.main import UserDAO, UserDB
+from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB
 from app.validate.add.characters import Character_add, Existence_add
@@ -16,9 +16,9 @@ select_char = select_obj(Character_add, CharacterDAO)
 select_chars = select_objs(Character_add, CharacterDAO)
 select_exist = select_obj(Existence_add, ExistenceDAO)
 
-async def get_user_for_tg_id(tg_id: int) -> int:
+async def get_user_for_tg_id(tg_id: int, to_user: bool = False) -> int | UserDB:
     user = await add_or_update_user(data={'tg_id':tg_id}, tg_id=tg_id)
-    return user.id
+    return user if to_user else user.id 
 
 async def get_user_for_id(user_id: int) -> UserDB:
     return await select_user(filters={'id':user_id})
@@ -29,8 +29,6 @@ async def get_main_char_for_user_id(user_id: int) -> int | None:
     user: UserDB = await get_user_for_id(user_id)
     if user.main_char:
         return user.main_char
-    else:
-        raise NoHaveMainChar(f'This user({user_id}) no have main char')
 
 async def get_char_for_id(char_id: int) -> CharacterDB:
     return await select_char(filters={'id':char_id})

@@ -6,6 +6,7 @@ from app.enum_type.bd import TgType, WorkType
 
 class TgUserDB(Base):
     tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+    #user_id: Mapped[int] = mapped_column(ForeignKey("userdb.id"))
     fullname: Mapped[str]
     username: Mapped[str | None] = mapped_column(String, default=None)
     data: Mapped[dict] = mapped_column(JSON)
@@ -32,5 +33,5 @@ class UserDB(Base):
     bans: Mapped[bool] = mapped_column(default=False)
     donates: Mapped[DonateDB | None] = relationship(DonateDB, uselist=False, lazy='joined', primaryjoin="foreign(DonateDB.user_id) == UserDB.id")
     main_char: Mapped[int | None] = mapped_column(ForeignKey("characterdb.id", ondelete='SET NULL'), default=None)
-
+    tg_user: Mapped[TgUserDB | None] = relationship(TgUserDB, uselist=False, lazy='joined', primaryjoin="foreign(TgUserDB.tg_id) == UserDB.tg_id")
     

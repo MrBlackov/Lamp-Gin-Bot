@@ -11,6 +11,7 @@ from app.logic.char import CharLogic
 from app.validate.add.characters import Character_add
 from app.db.models.char import CharacterDB, ExistenceDB, InventoryDB, AttributePointDB
 from app.logic.item import ItemSketchsLogic, ItemsLogic
+from app.logged.infolog import infolog
 
 class CreateCharacterLayer:
     def get_sketchs(gender: Gender = 'M', quantity: int = 5):
@@ -30,9 +31,11 @@ class CreateCharacterLayer:
                           user_id=user_id, 
                           descript=sketch.description
                           )
+        
 
-        return await self.valid_to_db_model(user_id, char)
-    
+        await self.valid_to_db_model(user_id, char)
+        return await get_user_for_tg_id(tg_id, True)  
+            
     async def valid_to_db_model(self, user_id: int, char: Character_add):
         exist = char.exist
         char_db = CharacterDB(user_id=user_id, description=char.description)
