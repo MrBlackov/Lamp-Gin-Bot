@@ -1,13 +1,14 @@
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
-from app.db.metods.adds import add_item, add_item_sketch, ItemDB, ItemSketchDB
+from app.db.metods.adds import add_item, add_item_sketch, ItemDB, ItemSketchDB, add_db_obj
 from app.db.metods.gets import get_item, get_item_for_id, get_char_for_id, get_items_for_inventory, get_item_sketch, get_item_sketchs
-from app.db.metods.updates import update_quantity_item, update_item_sketch_for_id
-from app.db.metods.deletes import delete_item_for_id, delete_item_sketch_for_id, delete_items_for_sketch_id
+from app.db.metods.updates import update_quantity_item, update_item_sketch_for_id, update_quantity_items
+from app.db.metods.deletes import delete_item_for_id, delete_item_sketch_for_id, delete_items_for_sketch_id, delete_items
 from app.db.metods.another import get_items_and_chars_for_sketch
 from app.logged.botlog import log
 from app.exeption.item import ThrowAwayQuantityLessOne, ThrowAwayQuantityMoreItemQuantity
 from app.exeption.char import InventaryOverFlowing
 from app.db.models.char import CharacterDB
+from app.exeption.transfer import TransferNoHaventItemError
 
 class ItemSketchsLogic:
     async def create(self, item: ItemSketchValide) -> ItemSketchDB:
@@ -67,12 +68,60 @@ class ItemsLogic:
    
         print(quan*item.sketch.size)
         print(max_size)
-        if size+(quan*item.sketch.size) > max_size:
+        if size+(quan*item.sketch.size) > max_size and action == '+':
             raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
         
         log.info(f'Action item(item_id: {item.id}) for user(char_id: {char.id}), quantity: {quantity}')            
         return True, await update_quantity_item(item.id, quan)
 
+    def check_size_inventory(self, char: CharacterDB, inventory_items: list[ItemDB] | None, new_items: list[ItemDB], action: str):
+        if new_items == None:
+            return True
+
+        if inventory_items == None:
+            inventory_items = []
+        max_size = char.exist.attibute_point.strength*1000
+        for inv_item in inventory_items:
+            max_size -= inv_item.quantity*inv_item.sketch.size
+  
+        if action == '+':
+            size = 0
+            for item in new_items:
+               size += item.quantity*item.sketch.size
+    
+            if size > max_size:
+                raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
+        return True
+      
+    @log.decor(arg=True)
+    async def action_for_items(self, items: list[ItemDB], char: CharacterDB, action: str):
+        inventory_items = await get_items_for_inventory(char.exist.inventory.id)
+
+        self.check_size_inventory(char, inventory_items, items, action)
+
+        inv_item_id = {i.sketch_id: i for i in (inventory_items or [])}
+        new_item: list[ItemDB] = []
+        delete_item: list[int] = []
+        update_item: dict[int, int] = {}
+        for item in (items or []):
+            # determine sketch id robustly (support objects with sketch or sketch_id)
+            inventory_item = inv_item_id.get(item.sketch_id)
+            if action == '+':
+                if inventory_item:
+                    update_item[inventory_item.id] = inventory_item.quantity + item.quantity
+                new_item.append(ItemDB(inventory_id=char.exist.inventory.id, sketch_id=item.sketch_id, quantity=item.quantity))
+            elif action == '-':
+                if inventory_item:
+                    if inventory_item.quantity - item.quantity <= 0:
+                        delete_item.append(inventory_item.id)
+                    else:
+                        update_item[inventory_item.id] = inventory_item.quantity - item.quantity
+                #raise TransferNoHaventItemError(f'This char(id={char.id}) has not enough item for transfers')
+
+        await add_db_obj(data=new_item)
+        await update_quantity_items(update_item)
+        await delete_items(delete_item)
+        return True
 
     async def throw_away(self, item_id: int, quantity: int = 1) -> bool:
         if quantity < 1:

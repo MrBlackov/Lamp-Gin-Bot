@@ -79,8 +79,9 @@ class ItemLayer:
         sketch =  await self.sketch_logic.get_items_for_sketch(sketch_id)
         datas = {}
         for item in sketch.items:
-            char = item.inventory.exist.char
-            datas[char] = item
+            if item.inventory_id:
+                char = item.inventory.exist.char
+                datas[char] = item
         return datas
 
     async def change_sketch(self, sketch_id: int, new_data: dict):

@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from app.logged.botlog import log
 from app.service.char import Character
-from app.exeption.decorator import exept
+from app.exeption.decorator import exept, call_exept
 from app.aio.cls.callback.char import InventoryItems, InventoryItemsGo, InventoryItemsThrow
 from app.aio.cls.fsm.char import InventoryState
 from app.exeption.item import ThrowAwayQuantityNoInt
@@ -21,30 +21,34 @@ async def cmd_inventory(message: Message, state: FSMContext):
 
 @inventory_router.callback_query(InventoryItemsGo.filter(F.where == 'inventory'))     
 @log.decor(arg=True)
+@call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InventoryItems, state: FSMContext):
-    await callback.answer("⌛")
+    
     msg, markup = await Character(callback.from_user.id, state).inventory.inventory()
     await callback.message.edit_text(msg, reply_markup=markup)
     
 @inventory_router.callback_query(InventoryItems.filter())     
 @log.decor(arg=True)
+@call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InventoryItems, state: FSMContext):
-    await callback.answer("⌛")
+    
     msg, markup = await Character(callback.from_user.id, state).inventory.get_item_info(callback_data.item)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.callback_query(InventoryItemsGo.filter(F.where == 'item'))     
 @log.decor(arg=True)
+@call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InventoryItemsGo, state: FSMContext):
-    await callback.answer("⌛")
+    
     item_id = await state.get_value('item')
     msg, markup = await Character(callback.from_user.id, state).inventory.get_item_info(item_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.callback_query(InventoryItemsThrow.filter())     
 @log.decor(arg=True)
+@call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InventoryItemsThrow, state: FSMContext):
-    await callback.answer("⌛")
+    
     msg, markup = await Character(callback.from_user.id, state).inventory.to_throw()
     await callback.message.edit_text(msg, reply_markup=markup)
 

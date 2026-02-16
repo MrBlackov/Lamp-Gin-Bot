@@ -4,11 +4,13 @@ from aiogram.types import Message
 from datetime import datetime
 from app.logged.botlog import log
 from aiogram.fsm.context import FSMContext
+from app.exeption.decorator import exept
 
 start_router = Router()
 
 @start_router.message(Command('chat_id'))
 @log.decor(arg=True)
+@exept
 async def cmd_start(message: Message):
     user_id = message.from_user.id
     full_name = message.from_user.full_name
@@ -20,6 +22,7 @@ async def cmd_start(message: Message):
 
 @start_router.message(Command('cancel'), F.chat.type == 'private')
 @log.decor(arg=True)
+@exept
 async def cmd_cancel(message: Message, state: FSMContext):
     await state.clear()
     await message.answer('Отменено')

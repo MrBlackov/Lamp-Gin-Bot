@@ -22,12 +22,14 @@ def add_obj(clsDAO: BaseDAO):
     return add_new_obj
 
 @connection()
-@log.decor()
+@log.decor(arg=True)
 async def add_db_obj(
                       session: AsyncSession,
-                      data: list[Base],
+                      data: list[Base] | None,
                       logger: bool = True
                      ):
+    if data == None or len(data) == 0:
+        return None
     try:
         session.add_all(data)
         await session.flush()
@@ -89,6 +91,24 @@ def select_obj(clsP: BaseModel, clsDAO: BaseDAO,):
         
     return _select_obj
 
+def select_obj_no_valide(clsDAO: BaseDAO,):
+    @connection()
+    @log.decor()
+    async def _select_obj(                      
+                          session: AsyncSession,
+                          filters: dict,
+                          logger: bool = True
+                        ):
+        data = await clsDAO.find_one_or_none(session, filters)
+        if logger and data: log.info(f"Select data in {data.__tablename__}, id: {data.id}, data:{data.__dict__}")
+        elif data: log.trace(f"Select data in {data.__tablename__}, id: {data.id}, data:{data.__dict__}")
+        elif logger: log.info(f"Select data in None, filtres: {filters}")
+        else: log.trace(f"Select data in None, filtres: {filters}")
+         
+        return data 
+        
+    return _select_obj
+
 def select_objs(clsP: BaseModel, clsDAO: BaseDAO,):
     @connection(commit=False)
     @log.decor()
@@ -104,6 +124,23 @@ def select_objs(clsP: BaseModel, clsDAO: BaseDAO,):
         else: log.trace(f'Select None, DAO: {clsDAO.model.__tablename__}, filtres: {filters}')               
         return data
     return _select_objs
+
+def select_objs_no_valide(clsDAO: BaseDAO,):
+    @connection(commit=False)
+    @log.decor()
+    async def _select_objs(                      
+                          session: AsyncSession,
+                          filters: dict | None = None,
+                          logger: bool = True
+                        ):
+        data = await clsDAO.find_all(session, filters)
+        if logger and data: log.info(f"Select data in {data[0].__tablename__} datas:{[d.__dict__ for d in data]}")
+        elif data: log.trace(f"Select data in {data[0].__tablename__} datas:{[d.__dict__ for d in data]}")
+        elif logger: log.info(f'Select None, DAO: {clsDAO.model.__tablename__}, filtres: {filters} datas:{[d.__dict__ for d in data]}')
+        else: log.trace(f'Select None, DAO: {clsDAO.model.__tablename__}, filtres: {filters} datas:{[d.__dict__ for d in data]}')               
+        return data
+    return _select_objs
+
 
 def update_obj(clsDAO: BaseDAO):
     @connection()

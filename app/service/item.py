@@ -32,7 +32,7 @@ class AddItemService(ItemBaseService):
             sketch = json.loads(line)
         add_item = await self.layer.create(sketch)
         if add_item: 
-            return 'Предмет создан, посмотреть /inventory'
+            return '✅ Предмет создан, посмотреть /inventory'
 
 class ChangeItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
@@ -58,7 +58,7 @@ class ChangeItemService(ItemBaseService):
     async def to_change_data(self, what_change: str, msg, back_where: str = 'info'):
         await self.state.update_data(what_change=what_change, msg=msg)
         await self.state.set_state(ChangeItemSketchState.new_data)
-        return 'Отправьте новое значение', self.IKB.back(back_where)
+        return '✒️ Отправьте новое значение', self.IKB.back(back_where)
     
     async def change_data(self, new_data: str):
         what_change = await self.state.get_value('what_change')
@@ -79,16 +79,16 @@ class ChangeItemService(ItemBaseService):
             if is_back:
                 return
             max_page = len(pages)
-            return f"Список персонажей с этим предметом {f'(0/{max_page}стр)' if max_page > 1 else ''}", self.IKB.to_items(pages[0], 0, max_page, back_where)
+            return f"📋 Список персонажей с этим предметом {f'(0/{max_page}стр)' if max_page > 1 else ''}", self.IKB.to_items(pages[0], 0, max_page, back_where)
         if is_back:
-            return        
-        return 'Этого предмета нет ни у кого', self.IKB.back(back_where)
+            return '😕 Какая то ошибка'
+        return '😕 Этого предмета нет ни у кого', self.IKB.back(back_where)
 
     async def to_page(self, page: int = 0, back_where: str = 'cmd'):
         pages = await self.state.get_value('pages')
         await self.state.update_data(page=page)
         max_page = len(pages)
-        return f'Предметы {f'[{page + 1}/{max_page}стр]' if max_page > 1 else ''} ', self.IKB.to_items(pages[page], page, max_page, back_where)
+        return f'📦 Предметы {f'[{page + 1}/{max_page}стр]' if max_page > 1 else ''} ', self.IKB.to_items(pages[page], page, max_page, back_where)
     
     async def to_item(self, item_id: int, back_where: str = 'char_items'):
         items: dict[int, dict] = await self.state.get_value('items')
@@ -100,7 +100,7 @@ class ChangeItemService(ItemBaseService):
     async def to_action_inventory(self, msg, item_id: int, action: str, back_where: str = 'item'):  
         await self.state.set_state(ChangeItemSketchState.action_data)      
         await self.state.update_data(msg=msg, action = action, item_id=item_id)
-        return 'Отправьте количество', self.IKB.back(back_where)
+        return '✒️ Отправьте количество', self.IKB.back(back_where)
     
     async def action_inventory(self, quantity: str, back_where: str = 'info'):
         item_id = await self.state.get_value('item_id')
@@ -124,20 +124,20 @@ class ChangeItemService(ItemBaseService):
 
 
     async def to_delete_sketch(self, back_where: str = 'info'):
-        return 'Вы точно хотите удалить предмет(эскиз)?', self.IKB.to_delete_sketch(back_where)
+        return '❔ Вы точно хотите удалить предмет(эскиз)?', self.IKB.to_delete_sketch(back_where)
 
     async def to_delete_items(self, back_where: str = 'info'):
-        return 'Вы точно хотите забрать все предметы?' , self.IKB.to_delete_items(back_where) 
+        return '❔ Вы точно хотите забрать все предметы?' , self.IKB.to_delete_items(back_where)
 
     async def delete_sketch(self, back_where: str = 'info'):
         sketch_id = await self.state.get_value('sketch_id')
         is_delete = await self.layer.delete_sketch(sketch_id)
-        return ('Эскиз предмета был удален', None) if is_delete else ('Эскиз предмета не был удален', self.IKB.back(back_where))
+        return ('🗑️ Эскиз предмета был удален', None) if is_delete else ('❌ Эскиз предмета не был удален', self.IKB.back(back_where))
 
     async def delete_items(self, back_where: str = 'info'):
         sketch_id = await self.state.get_value('sketch_id')
         is_delete = await self.layer.delete_items(sketch_id)
-        return ('Предметы былы удалены' if is_delete else 'Предметы не былы удалены'), self.IKB.back(back_where)
+        return ('🗑️ Предметы былы удалены' if is_delete else '❌ Предметы не былы удалены'), self.IKB.back(back_where)
 
 class GiveItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
@@ -168,7 +168,7 @@ class GiveItemService(ItemBaseService):
             item = await self.layer.give(name=name, quantity=int(quantity))
 
         if item:
-            return f'Выдан предмет({item.sketch.name}) в количестве {quantity} шт'
+            return f'✅ Выдан предмет({item.sketch.name}) в количестве {quantity} шт.'
 
 class ListItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
@@ -180,13 +180,13 @@ class ListItemService(ItemBaseService):
         pages = [tuple(sketches[i:i+value_in_page]) for i in range(0, len(sketches), value_in_page)]
         sketchs_ids = {s.id:s for s in sketches}
         await self.state.update_data(sketches=sketches, searchs=pages, sketch_ids=sketchs_ids)
-        return 'Что выберем?', self.IKB.start_menu()
+        return '❔ Что выберем?', self.IKB.start_menu()
     
     async def list_items(self, page: int = 0, back_where: str = 'cmd'):
         sketches = await self.state.get_value('searchs')
         await self.state.update_data(page=page)
         max_page = len(sketches)
-        return f'Предметы {f'[{page + 1}/{max_page}стр]' if max_page > 1 else ''}', self.IKB.list_items(sketches[page], page, max_page, back_where)
+        return f'📦 Предметы {f'[{page + 1}/{max_page}стр]' if max_page > 1 else ''}', self.IKB.list_items(sketches[page], page, max_page, back_where)
     
     async def to_item(self, item_id: int):
         sketch_ids: dict = await self.state.get_value('sketch_ids')
@@ -198,7 +198,7 @@ class ListItemService(ItemBaseService):
     async def to_search(self, msg, back_where: str = 'cmd'):
         await self.state.update_data(msg=msg)
         await self.state.set_state(ListItemSketchsState.name)
-        return 'Отправьте название предмета', self.IKB.back(back_where)
+        return '✒️ Отправьте название предмета', self.IKB.back(back_where)
     
     async def search(self, find: str, back_where: str = 'cmd', value_in_page = 10):
         sketches: list[ItemSketchDB] = await self.state.get_value('sketches')
@@ -210,9 +210,9 @@ class ListItemService(ItemBaseService):
         await self.state.update_data(searchs=pages)
         max_pages = len(pages)
         if max_pages > 0:
-            return f'Предметы (0/{max_pages}стр)', self.IKB.list_items(pages[0], 0, max_pages, back_where)
+            return f'📦 Предметы (0/{max_pages}стр)', self.IKB.list_items(pages[0], 0, max_pages, back_where)
         await self.state.set_state(ListItemSketchsState.name)
-        return 'Предмет не найден. Отправьте другое название', self.IKB.back(back_where)
+        return '❌ Предмет не найден. Отправьте другое название', self.IKB.back(back_where)
 
 
 class ItemService:

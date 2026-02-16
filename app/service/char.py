@@ -57,16 +57,16 @@ class AddCharacterService(BaseService):
         if len(names) > 0:
             name_pages = [tuple(names[i:i+values_in_page]) for i in range(0, len(names), values_in_page)]
             await self.state.update_data(name_pages=name_pages)
-            return self.IKB.get_pages_names(list(name_pages[0]), 0, len(name_pages), first_names), f'Держите список, Страница: 0/{len(name_pages)}'
+            return self.IKB.get_pages_names(list(name_pages[0]), 0, len(name_pages), first_names), f'📋 Держите список, Страница: 0/{len(name_pages)}'
         else: 
-            return self.IKB.query_back(first_names), 'Ничего не найдено'
+            return self.IKB.query_back(first_names), '❌ Ничего не найдено'
     
 
 
     async def get_name_pages(self, page: int):
         first_names: bool = await self.state.get_value('is_first_name')
         pages: list[tuple[str]] = await self.state.get_value('name_pages')
-        return self.IKB.get_pages_names(list(pages[page]), page, len(pages), first_names), f'Держите список, Страница: {page}/{len(pages)}'
+        return self.IKB.get_pages_names(list(pages[page]), page, len(pages), first_names), f'📋 Держите список, Страница: {page}/{len(pages)}'
  
     async def to_chouse_sketchs(self, sketch_id: int = 0, another: bool = False):
         sketchs: list[CharSketchInfo] = await self.state.get_value('sketchs')

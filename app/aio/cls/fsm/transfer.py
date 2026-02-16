@@ -20,3 +20,13 @@ class ItemTransferState(StatesGroup):
     item_id: int = None
     action = None
     msg = None
+
+
+class InfoTransferState(StatesGroup):
+    transfers = None
+    text = None
+    transfer_pages = None
+    back_where = None
+    search = State()
+    search_type = None
+

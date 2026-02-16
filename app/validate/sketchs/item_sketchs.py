@@ -37,7 +37,7 @@ class ItemSketchValide(SketchsBasevalidate):
         return size
     
 class ItemValide(SketchsBasevalidate):
-    inventory_id: int
+    inventory_id: int | None = None
     sketch_id: int
     quantity: int = 1
 

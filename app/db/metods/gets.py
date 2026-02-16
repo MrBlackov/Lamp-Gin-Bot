@@ -1,4 +1,4 @@
-from app.db.metods.base import add_or_update_obj, select_obj, select_objs
+from app.db.metods.base import add_or_update_obj, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide
 from app.db.dao.main import UserDAO, UserDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB
@@ -6,6 +6,8 @@ from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.exeption.char import NoHaveMainChar
+from app.db.dao.transfer import TransferDAO, TransferDB
+from app.logic.cls import MyTransfers
 
 add_or_update_user = add_or_update_obj(UserDAO)
 
@@ -61,3 +63,23 @@ async def get_items_for_inventory(inventory_id: int) -> list[ItemDB] | None:
 
 async def get_item_sketchs() -> list[ItemSketchDB]:
     return await select_item_sketchs()
+
+select_transfer = select_obj_no_valide(TransferDAO)
+select_transfers = select_objs_no_valide(TransferDAO)
+
+async def get_items_for_transfer(transfer_id: int, from_char: bool) -> list[ItemDB] | None:
+    return await select_items(filters={'transfer_id':transfer_id, 'from_char_transfers':from_char})
+
+async def get_transfer_for_id(transfer_id: int) -> TransferDB | None:
+    return await select_transfer(filters={'id':transfer_id})
+
+async def get_transfers(char_id: int) -> MyTransfers:
+    from_me = await select_transfers(filters={'seller_id':char_id})
+    to_me = await select_transfers(filters={'buyer_id':char_id})
+    return MyTransfers(from_me, to_me)
+
+async def get_transfers_for_char_id(my_char_id: int, char_id: int) -> MyTransfers:
+    from_me = await select_transfers(filters={'seller_id':my_char_id, 'buyer_id':char_id})
+    to_me = await select_transfers(filters={'seller_id':char_id, 'buyer_id':my_char_id})
+    return MyTransfers(from_me, to_me)
+
