@@ -5,6 +5,8 @@ from app.validate.add.characters import Points
 from collections import OrderedDict
 from app.enum_type.char import Gender
 from app.exeption.another import DiceError
+from app.validate.add.characters import ItemValide, ItemSketchDB
+import random
 
 lokals = {
     'loen':'en_US'
@@ -100,6 +102,7 @@ class person:
         self.provider = providers[local]
         self.coins = coins
         self.gender = gender
+        self.random = random
 
     def get_names(self, local:  Literal['loen'] | None = None): 
         if local:
@@ -156,11 +159,30 @@ class person:
             spirituality=dop_point_list[1] if dop_point_list[1] > 0 else 0
             )
 
-    def to_point(self, args: list[dice] = [dice(14, 7), dice(13, 8)]):
+    def to_point(self, args: list[dice] = [dice(18, 8), dice(13, 10)]):
         point = int(dices(args).medium)
         self.coins -= point
         return point
-        
+    
+    def check_size(self, max_size: int, size: int, quantity: int, accuracy: int = 1, inventory_part: float = 1.5, n = 0):
+        if n > 900:
+            return 0
+        if max_size/inventory_part < size*quantity:
+            return self.check_size(max_size, size, quantity-accuracy, n=n+1)
+        return quantity
+
+    def to_inventory(self, max_size: int, sketchs: list[ItemSketchDB]):
+        items: list[ItemValide] = []
+        for sketch in sketchs:
+            random_int = self.random.random()
+            if random_int > sketch.rarity:
+                continue
+            rnd_quantity = self.random.randint(sketch.min_drop, sketch.max_drop)
+            quan = self.check_size(max_size, sketch.size, rnd_quantity)
+            if quan > 0:
+                items.append(ItemValide(sketch_id=sketch.id, quantity=quan, sketch=sketch))
+        return items
+    
 
 
 if __name__ == '__main__':   

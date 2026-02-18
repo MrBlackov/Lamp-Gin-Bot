@@ -49,15 +49,6 @@ class ItemLayer:
         return await self.sketch_logic.get_sketchs()
     
 
-
-    async def sell(self, item_id: int, buyer_char_id: int, price: int | None = None, cost: int | None = None, quantity: int = 1):
-        pass
-
-    async def transfer(self, my_item_id: int, seller_char_id: int, get_char_id: int, my_quantity: int = 1, get_quantity: int = 1):
-        pass   
-
-
-   
     async def get_item_sketch(self, item_id: int):
         data = await get_item_sketch(item_id)
         if data == None:

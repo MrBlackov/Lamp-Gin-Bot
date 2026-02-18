@@ -125,7 +125,7 @@ def select_objs(clsP: BaseModel, clsDAO: BaseDAO,):
         return data
     return _select_objs
 
-def select_objs_no_valide(clsDAO: BaseDAO,):
+def select_objs_no_valide(clsDAO: BaseDAO):
     @connection(commit=False)
     @log.decor()
     async def _select_objs(                      

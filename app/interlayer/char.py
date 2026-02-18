@@ -4,20 +4,20 @@ from app.validate.service.info import UserChars
 from app.enum_type.char import Gender
 from app.validate.api.characters import GetSketchsInfo
 from app.validate.api.query import CreateCharSkecth
-from app.db.metods.gets import get_user_for_tg_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory
+from app.db.metods.gets import get_user_for_tg_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory, get_item_sketchs
 from app.db.metods.updates import update_main_char, update_char, update_exist
 from app.db.metods.adds import add_char, add_db_obj
 from app.logic.char import CharLogic
 from app.validate.add.characters import Character_add
 from app.db.models.char import CharacterDB, ExistenceDB, InventoryDB, AttributePointDB
-from app.logic.item import ItemSketchsLogic, ItemsLogic
+from app.logic.item import ItemSketchsLogic, ItemsLogic, ItemDB
 from app.logged.infolog import infolog
 
 class CreateCharacterLayer:
-    def get_sketchs(gender: Gender = 'M', quantity: int = 5):
+    async def get_sketchs(gender: Gender = 'M', quantity: int = 5):
         prs = person(gender)
-        print(gender)
-        sketchs = CreateExistence(gender, prs).create_char_skecths(quantity)
+        items = await get_item_sketchs()
+        sketchs = CreateExistence(gender, prs).create_char_skecths(items, quantity)
         first_names = prs.names[0]
         last_names = prs.names[1]
         return GetSketchsInfo(sketchs=sketchs, first_names=first_names, last_names=last_names)
@@ -28,7 +28,8 @@ class CreateCharacterLayer:
             gender=sketch.sketch.gender, 
             prs=person(sketch.sketch.gender)
             ).create_char(sketch.full_name, 
-                          user_id=user_id, 
+                          user_id=user_id,
+                          sketch=sketch.sketch,
                           descript=sketch.description
                           )
         
@@ -52,6 +53,8 @@ class CreateCharacterLayer:
         inventory_db = InventoryDB(exist_id=exist_db.id)
         attibute_point_db = AttributePointDB(exist_id=exist_db.id, **attibute_point.model_dump())        
         await add_db_obj(data=[inventory_db, attibute_point_db])
+        items = [ItemDB(inventory_id=inventory_db.id, sketch_id=item.sketch.id, quantity=item.quantity) for item in inventory.items]       
+        await add_db_obj(data=items)
         new_exist_db = await select_exist(filters={'id':exist_db.id})
         await update_char(filters={'id':char_db.id}, new_data={'exist':new_exist_db})
         return True

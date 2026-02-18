@@ -1,6 +1,7 @@
 from app.enum_type.char import Gender
 from pydantic import BaseModel, ConfigDict, Field, field_validator, ValidationError
-import ast
+from app.db.models.item import ItemDB
+from app.validate.add.characters import ItemValide
 
 class BaseInfoValid(BaseModel):
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
@@ -22,6 +23,7 @@ class CharSketchInfo(BaseInfoValid):
     age: int
     amount_life: int
     gender: str
+    items: list[ItemValide]
 
     @field_validator('points', mode='before')
     @classmethod

@@ -24,16 +24,16 @@ class AddCharQueryNameCall(CallbackData, prefix='add_char_name_query'):
     first_name: bool = True
     back: bool = False
 
-class AddCharSketch(CallbackData, prefix='add_char_sketch'):
+class AddCharSketchCall(CallbackData, prefix='add_char_sketch'):
     id: int | None = None
     another: bool | None = None
     back: bool = False
 
-class AddCharDescript(CallbackData, prefix='add_char_descript'):
+class AddCharDescriptCall(CallbackData, prefix='add_char_descript'):
     to_pass: bool = False
     back: bool = False
 
-class AddCharFinish(CallbackData, prefix='add_char_finish'):
+class AddCharFinishCall(CallbackData, prefix='add_char_finish'):
     go: bool | None = None
  
 

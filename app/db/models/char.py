@@ -2,11 +2,12 @@ from sqlalchemy import String, ARRAY, BigInteger, ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.enum_type.char import Gender
-from app.db.models.item import ItemDB
+from app.db.models.item import ItemDB, KitDB
 
 class InventoryDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))
     exist: Mapped['ExistenceDB'] = relationship('ExistenceDB', uselist=False, lazy='select', cascade='all', back_populates='inventory')
+    kit: Mapped[list[KitDB] | None] = relationship(KitDB, uselist=True, lazy='select', cascade='all, delete-orphan')
     items: Mapped[list[ItemDB] | None] = relationship(ItemDB, uselist=True, lazy='select', cascade='all, delete-orphan')
 
 #class LocationDB(Base):

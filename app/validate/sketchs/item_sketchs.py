@@ -8,8 +8,12 @@ class ItemSketchValide(SketchsBasevalidate):
     descriprtion: str | None = None
     size: int = 500
     image_id: int | None = None
-    creator_id :int
+    creator_id: int
     is_delete: bool = True
+    rarity: float = 0.1
+    min_drop: int = 1
+    max_drop: int = 1
+    nbt: dict = {}
 
     @field_validator('name', mode='before')
     @classmethod
@@ -40,4 +44,6 @@ class ItemValide(SketchsBasevalidate):
     inventory_id: int | None = None
     sketch_id: int
     quantity: int = 1
+    transfer_id: int | None = None
+    from_char_transfers: bool | None = None
 

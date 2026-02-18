@@ -1,4 +1,4 @@
-from app.validate.api.characters import CharSketchInfo
+from app.validate.add.characters import CharSketch
 from app.validate.info.characters import CharacterInfo
 from app.aio.msg.utils import TextHTML
 from app.db.models.item import ItemDB
@@ -6,7 +6,7 @@ from app.aio.msg.item import ItemText
 
 class SketchInfoText:
 
-    def __init__(self, sketch: CharSketchInfo):
+    def __init__(self, sketch: CharSketch):
         self.sketch = sketch
 
     @property
@@ -46,7 +46,6 @@ class SketchInfoText:
                '🏃 Бонус к Скорости: {SPEED_BONUS} \n' \
                '🔮 Духовность: {SPIRITUALITY} \n' \
                '⌛ Возраст: {AGE} \n' \
-               #'🪙 Пенни: {PENNY}(фунтов: {LBS})'
 
     @property
     def gender_template(self):
@@ -65,19 +64,21 @@ class SketchInfoText:
             'SPEED_BONUS':self.speed_bonus,
             'SPIRITUALITY':self.spirituality,
             'AGE':self.age,
-            #'PENNY':self.sketch.penny,
-            #'LBS':self.sketch.penny//400
             }
         
         if and_gender: 
-            format_dict |= {'GENDER':'👨 Пол: Мужской' if self.gender == 'M' else '👩 Пол: Женский'}
-            return self.gender_template.format(**format_dict)
+            format_dict |= {'GENDER':('👨 Пол: Мужской' if self.gender == 'M' else '👩 Пол: Женский')}
+            return TextHTML(self.gender_template.format(**format_dict)).blockquote()  + self.inventory_items
 
-        return self.template.format(**format_dict)
+        return TextHTML(self.template.format(**format_dict)).blockquote()  + self.inventory_items
     
     @property
     def gender(self):
         return self.sketch.gender
+    
+    @property
+    def inventory_items(self):
+        return '📦 Предметы \n' + TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity} шт.)' for item in self.sketch.items])).blockquote()
 
 class CharInfoText:
     def __init__(self, char: CharacterInfo):

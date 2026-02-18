@@ -19,7 +19,7 @@ char_router.include_router(add_char_router)
 char_router.include_router(item_router)
 char_router.include_router(inventory_router)
 
-@char_router.message(Command('mychar'), F.chat.type == 'private')
+@char_router.message(Command('mychar'))
 @log.decor(arg=True)
 @exept
 async def cmd_new_char(message: Message, state: FSMContext):

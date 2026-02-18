@@ -3,6 +3,7 @@ from app.aio.cmd.char.mychar import char_router
 from app.aio.cmd.start import start_router
 from app.aio.cmd.faq import faq_router
 from app.aio.cmd.transfer.transfer import transfer_router
+from app.aio.cmd.kit.kit import kit_router
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery

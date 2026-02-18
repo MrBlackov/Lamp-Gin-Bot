@@ -19,12 +19,12 @@ class AddCharacterService(BaseService):
         self.IKB = AddCharIKB()
 
     def chouse_gender(self, to_change: bool = False):
-        return self.IKB.chouse_gender(to_change)
+        return '📲 Выберите пол', self.IKB.chouse_gender(to_change)
     
     async def to_get_sketchs(self, gender: Gender, to_changes: bool = False):
         if to_changes == False:
             print(gender)
-            api_data = CreateCharacterLayer.get_sketchs(gender)
+            api_data = await CreateCharacterLayer.get_sketchs(gender)
             logs.debug(f'Class Character give GetSketchs({api_data})')
             await self.state.update_data(
                 first_names=api_data.first_names, 
@@ -77,7 +77,6 @@ class AddCharacterService(BaseService):
         return self.IKB.get_sketchs(sketch_id, len(sketchs)), SketchInfoText(sketchs[sketch_id]).text
      
     async def to_descript(self, sketch_id: int):
-        print(sketch_id)
         last_name: str = await self.state.get_value('last_name')
         first_name: str = await self.state.get_value('first_name')
         sketchs: list[CharSketchInfo] = await self.state.get_value('sketchs')
@@ -101,8 +100,8 @@ class AddCharacterService(BaseService):
 
     @property
     def info_to_str(self):
-        text = [f'🪪 {self.char.full_name}', f'\n{TextHTML(SketchInfoText(self.char.sketch).to_text(True)).blockquote()}']
-        if self.char.description: text.append(f'\n{TextHTML(TextHTML(self.char.description).blockquote(True)).unescape}')
+        text = [f'🪪 {self.char.full_name}', f'\n{SketchInfoText(self.char.sketch).to_text(True)}']
+        if self.char.description: text.append(f'\n 📜 Описание \n{TextHTML(TextHTML(self.char.description).blockquote(True)).unescape}')
         return ''.join(text)
     
     async def markup_to_info(self):

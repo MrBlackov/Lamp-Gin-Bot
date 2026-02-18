@@ -1,7 +1,7 @@
 from app.db.metods.base import add_or_update_obj, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide
 from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
-from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB
+from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
@@ -80,4 +80,33 @@ async def get_transfers_for_char_id(my_char_id: int, char_id: int) -> MyTransfer
     from_me = await select_transfers(filters={'seller_id':my_char_id, 'buyer_id':char_id})
     to_me = await select_transfers(filters={'seller_id':char_id, 'buyer_id':my_char_id})
     return MyTransfers(from_me, to_me)
+
+select_kit = select_obj_no_valide(KitDAO)
+select_kits = select_obj_no_valide(KitDAO)
+select_kit_sketch = select_objs_no_valide(KitSketchDAO)
+select_kit_sketchs = select_objs_no_valide(KitSketchDAO)
+
+async def get_kit_for_id(kit_id: int) -> KitDB | None:
+    return await select_kit(filters={'id':kit_id})
+
+async def get_kit_for_sketch_id(sketch_id: int) -> KitDB | None:
+    return await select_kit(filters={'sketch_id':sketch_id})
+
+async def get_kits(inventory_id: int | None) -> list[KitDB] | None:
+    filters = {'sketch_id':inventory_id} if inventory_id else {}
+    return await select_kits(filters=filters)
+
+async def get_kit_sketch_for_id(sketch_id: int) -> KitSketchDB | None:
+    return await select_kit_sketch(filters={'id':sketch_id})
+
+async def get_kit_sketch_for_code(code: str) -> KitSketchDB | None:
+    return await select_kit_sketch(filters={'code':code})
+
+async def get_kit_sketch_for_hide(hide: bool) -> list[KitSketchDB] | None:
+    return await select_kit_sketchs(filters={'hide':hide})
+
+
+
+
+
 

@@ -3,11 +3,12 @@ from app.db.models.char import ExistenceDB, AttributePointDB, InventoryDB
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.validate.add.base import BaseAddValid
 from app.exeption.char import CharHastNameError
+from app.db.models.item import ItemSketchDB
+
+
 
 class Inventory_add(BaseAddValid):
-    exist_id: int
-    size: int = 30
-    items: list | None = None
+    items: list['ItemValide']
 
 class AttributePoint_add(BaseAddValid):
     exist_id: int
@@ -17,6 +18,14 @@ class AttributePoint_add(BaseAddValid):
     intelligence: int
     speed_value: int = 0
     spirituality: int = 0
+
+class ItemValide(BaseAddValid):
+    inventory_id: int | None = None
+    sketch_id: int
+    sketch: ItemSketchDB
+    quantity: int = 1
+    transfer_id: int | None = None
+    from_char_transfers: bool | None = None
 
 class Points(BaseAddValid):
     dexterity: int
@@ -35,7 +44,7 @@ class CharSketch(BaseAddValid):
     age: int
     amount_life: int
     gender: Gender
-
+    items: list[ItemValide]
 
     @field_validator('gender', mode='before')
     @classmethod
