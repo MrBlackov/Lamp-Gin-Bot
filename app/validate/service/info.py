@@ -8,3 +8,5 @@ class UserChars(BaseServiceValidate):
     chars: list[CharacterInfo] | None = None
     main_id: int | None = None
     no_chars: bool = False
+    max_chars: int
+    use_bonus: bool = False

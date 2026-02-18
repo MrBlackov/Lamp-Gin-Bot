@@ -10,6 +10,7 @@ class AddCharNameCall(CallbackData, prefix='add_char_name'):
     first_name: bool = True
     back: bool = False
     to_pass: bool = False
+    get_bonus: bool = False
 
 class AddCharRandomNameCall(CallbackData, prefix='add_char_name_random'):
     name: str | None = None
@@ -32,10 +33,9 @@ class AddCharSketchCall(CallbackData, prefix='add_char_sketch'):
 class AddCharDescriptCall(CallbackData, prefix='add_char_descript'):
     to_pass: bool = False
     back: bool = False
-
+ 
 class AddCharFinishCall(CallbackData, prefix='add_char_finish'):
     go: bool | None = None
- 
 
 
 class InfoCharList(CallbackData, prefix='info_char_list'):

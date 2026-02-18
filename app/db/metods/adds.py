@@ -1,5 +1,5 @@
 from app.db.metods.base import add_or_update_obj, add_obj, add_obj_dict, add_db_obj
-from app.db.dao.main import TgChatDAO, TgUserDAO
+from app.db.dao.main import TgChatDAO, TgUserDAO, DonateDAO
 from app.db.dao.chars import CharacterDAO, ExistenceDAO, AttributePointDAO, InventoryDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitSketchDB, KitDB, KitDAO, KitSketchDAO
 from app.db.dao.transfer import TransferDAO, TransferDB

@@ -4,7 +4,7 @@ from app.validate.service.info import UserChars
 from app.enum_type.char import Gender
 from app.validate.api.characters import GetSketchsInfo
 from app.validate.api.query import CreateCharSkecth
-from app.db.metods.gets import get_user_for_tg_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory, get_item_sketchs
+from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory, get_item_sketchs
 from app.db.metods.updates import update_main_char, update_char, update_exist
 from app.db.metods.adds import add_char, add_db_obj
 from app.logic.char import CharLogic
@@ -12,6 +12,10 @@ from app.validate.add.characters import Character_add
 from app.db.models.char import CharacterDB, ExistenceDB, InventoryDB, AttributePointDB
 from app.logic.item import ItemSketchsLogic, ItemsLogic, ItemDB
 from app.logged.infolog import infolog
+from app.aio.config import admins, bot, newspaper_id
+from aiogram.types.chat_member_banned import ChatMemberStatus
+from app.exeption.char import NoHaveMainChar
+
 
 class CreateCharacterLayer:
     async def get_sketchs(gender: Gender = 'M', quantity: int = 5):
@@ -64,13 +68,32 @@ class InfoCharacterLayer:
         self.logic = CharLogic(tg_id)
         self.tg_id = tg_id
 
+    async def get_char_info(self, user_id: int | None = None):
+        if user_id:
+            self.user = await get_user_for_id(user_id)
+        else:
+            self.user = await get_user_for_tg_id(self.tg_id, True)
+        self.char_id = await get_main_char_for_user_id(self.user.id)
+        self.char = await get_char_for_id(self.char_id)
+        return self
+
+    async def get_chat_member(self, tg_id: int | None = None):
+        if tg_id:
+            return await bot.get_chat_member(newspaper_id, tg_id)
+        return await bot.get_chat_member(newspaper_id, self.tg_id)
+
     async def get_chars(self) -> UserChars:
-        user_id = await self.logic.user_id()
-        chars = await self.logic.get_chars(user_id)
+        self = await self.get_char_info()
+        channel_member = await self.get_chat_member()
+        use_bonus = False
+        if channel_member:
+            if channel_member.status != ChatMemberStatus.LEFT and channel_member.status != ChatMemberStatus.KICKED:
+                use_bonus = True
+        chars = await self.logic.get_chars(user_id=self.user.id)
         if chars:
-            main_char_id = await self.logic.get_main_char_id(user_id)
-            return UserChars(chars=chars, main_id=main_char_id)
-        return UserChars(no_chars=True)
+            main_char_id = await self.logic.get_main_char_id(user_id=self.user.id)
+            return UserChars(chars=chars, main_id=main_char_id, max_chars=self.user.donates.char_quantity, use_bonus=use_bonus)
+        return UserChars(no_chars=True, max_chars=self.user.donates.char_quantity, use_bonus=use_bonus)
 
     async def char_to_main(self, char_id: int):
         user_id = await self.logic.user_id()
@@ -93,6 +116,8 @@ class InventoryCharacterLayer:
     
     async def inventory(self):
         self = await self.get_char_info()
+        if self.char == None:
+            raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         inventory = self.char.exist.inventory
         self.items = await get_items_for_inventory(inventory.id)
         self.max_size = self.char.exist.attibute_point.strength

@@ -1,15 +1,16 @@
 from app.db.metods.base import add_or_update_obj, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide
-from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB
+from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
-from app.exeption.char import NoHaveMainChar
 from app.db.dao.transfer import TransferDAO, TransferDB
 from app.logic.cls import MyTransfers
 
 add_or_update_user = add_or_update_obj(UserDAO)
+add_or_update_donate = add_or_update_obj(DonateDAO)
+
 
 select_user = select_obj(Users_add, UserDAO)
 select_char = select_obj(Character_add, CharacterDAO)
@@ -18,6 +19,7 @@ select_exist = select_obj(Existence_add, ExistenceDAO)
 
 async def get_user_for_tg_id(tg_id: int, to_user: bool = False) -> int | UserDB:
     user = await add_or_update_user(data={'tg_id':tg_id}, tg_id=tg_id)
+    donate = await add_or_update_donate(data={'user_id':user.id}, user_id=user.id)
     return user if to_user else user.id 
 
 async def get_user_for_id(user_id: int) -> UserDB:

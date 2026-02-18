@@ -6,6 +6,7 @@ from app.db.models.char import CharacterDB
 from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory
 from app.exeption.transfer import TransferNoHaventItemError, TransferQuantityNoIntError, TransferSellerNoHaventItemError, TransferError, TransferNoFindError
 from app.db.models.transfer import TransferDB
+from app.exeption.char import NoHaveMainChar
 
 class TransferLayer:
     def __init__(self, tg_id: int):
@@ -27,6 +28,8 @@ class TransferLayer:
     async def locator(self):
         await self.get_char_info()
         chars = await self.char.get_all_chars()
+        if self.char == None:
+            raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         return [char for char in chars if char.id != self.char_id]
 
     async def check_inventory(self, char: CharacterDB, items: list[ItemDB] | None, is_seller: bool = False):
@@ -58,6 +61,8 @@ class TransferLayer:
     
     async def transfers(self):
         self = await self.get_char_info()
+        if self.char == None:
+            raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         return await self.transfer.get_transfers(self.char_id)
     
     async def search(self, query: str, search_type: str):
@@ -65,6 +70,8 @@ class TransferLayer:
             raise TransferQuantityNoIntError(f'This user(tg_id={self.tg_id}) enter quantity to transfer no int')
         query = int(query)
         self = await self.get_char_info()
+        if self.char == None:
+            raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         print(search_type)
         if search_type == 'transfer_id':
             result = await self.transfer.search_for_id(self.char_id, query)

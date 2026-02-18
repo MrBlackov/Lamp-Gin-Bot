@@ -5,7 +5,7 @@ from app.exeption.item import ItemError
 from app.db.models.item import ItemDB
 from app.db.models.char import CharacterDB
 from app.exeption.item import SizeNotIntItemSketchError, NameNoValideError, EmodziNoValideError, NoFindItemSketchForID
-
+from app.exeption.char import NoHaveMainChar
 
 class ItemLayer:
     def __init__(self, tg_id: int):
@@ -25,6 +25,8 @@ class ItemLayer:
 
     async def create(self, item: dict):
         self = await self.get_char_info()
+        if self.char == None:
+            raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         new_sketch = await self.sketch_logic.create(ItemSketchValide(**item, creator_id=self.user_id))
         new_item = await self.logic.give(new_sketch.id, self.char.exist.inventory.id, self.char.id, )
         return self.user, new_item
@@ -33,6 +35,8 @@ class ItemLayer:
 
     async def give(self, sketch_id: int | None = None, name: str | None = None, quantity: int = 1):
         self = await self.get_char_info()
+        if self.char == None:
+            raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         if sketch_id == None and name:
             item0 = await get_item_for_name(name)
             item = await self.logic.give(item0.id, self.char.exist.inventory.id, self.char.id, quantity)

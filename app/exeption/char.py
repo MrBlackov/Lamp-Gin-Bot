@@ -8,6 +8,10 @@ class CharHastNameError(CharError):
     msg = '⁉️ Персонаж Безымянный, буквально...'    
     code = '500.1'
 
+class BonusCharSubError(CharError):
+    msg = '❌ Вы не подписались на канал'    
+    code = '405.1'
+
 class NoHaveMainChar(CharError):
     msg = '❌ У вас не выбран действующий персонаж'    
     code = '503.1'    

@@ -27,6 +27,11 @@ class AddCharIKB(BotIKB):
         self.builder.adjust(2)
         return self.builder.as_markup()
     
+    def get_bonus_char(self, url: str):
+        self.builder.button(text='➕ Подписаться', url=url)
+        self.builder.button(text='✅ Проверить', callback_data=AddCharNameCall(get_bonus=True))
+        return self.builder.adjust(1).as_markup()
+
     def chouse_regim_name(self, first_name: bool = True):
         self.builder.button(text='🔍 Поищем', callback_data=AddCharNameCall(regim='query', first_name=first_name))
         self.builder.button(text='🎲 Случайно', callback_data=AddCharNameCall(regim='random', first_name=first_name))

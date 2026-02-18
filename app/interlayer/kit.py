@@ -1,6 +1,8 @@
 from app.db.metods.gets import get_user_for_tg_id, get_main_char_for_user_id, get_char_for_id, get_user_for_id
 from app.logic.kit import KitLogic, KitDB, KitSketchDB
 from app.logic.item import ItemSketchsLogic
+from app.exeption.char import NoHaveMainChar
+
 
 class KitLayer:
     def __init__(self, tg_id: int):
@@ -23,6 +25,8 @@ class KitLayer:
 
     async def my_kits(self):
         self = await self.get_char_info()
+        if self.char == None:
+            raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         return await self.logic.get_kits_for_inventory(self.char.exist.inventory.id), await self.logic.get_kits_no_hide() 
 
     async def get_kit_for_code(self, code: str):

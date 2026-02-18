@@ -8,6 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
 admins = int(config('owner'))
 owner = int(config('owner'))
+newspaper_id = int(config('newcpaper_id'))
 token = config('token')
 bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())

@@ -24,14 +24,21 @@ add_char_router = Router()
 @exept
 async def cmd_new_char(message: Message, state: FSMContext):
     await state.clear()
-    msg, markup = Character(message.from_user.id, state).to_create.chouse_gender()
+    msg, markup = await Character(message.from_user.id, state).to_create.chouse_gender()
     await message.answer(msg, reply_markup=markup)
+
+@add_char_router.callback_query(AddCharNameCall.filter(F.get_bonus == True))
+@log.decor(arg=True)
+@call_exept
+async def cmd_new_char(callback: CallbackQuery, callback_data: AddCharNameCall | None = None):
+    msg, markup = await Character(callback.from_user.id).to_create.chouse_gender_bonus(callback_data.back if callback_data else False)
+    await callback.message.edit_text(msg, reply_markup=markup)
 
 @add_char_router.callback_query(AddCharNameCall.filter(F.back == True))
 @log.decor(arg=True)
 @call_exept
 async def cmd_new_char(callback: CallbackQuery, callback_data: AddCharNameCall | None = None):
-    msg, markup = Character(callback.from_user.id).to_create.chouse_gender(callback_data.back if callback_data else False)
+    msg, markup = await Character(callback.from_user.id).to_create.chouse_gender(callback_data.back if callback_data else False)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @add_char_router.callback_query(AddCharGenderCall.filter())     

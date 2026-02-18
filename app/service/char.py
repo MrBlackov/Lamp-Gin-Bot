@@ -12,15 +12,32 @@ import random
 from app.service.base import BaseService 
 from app.interlayer.char import CreateCharacterLayer, InfoCharacterLayer, InventoryCharacterLayer
 from app.aio.cls.fsm.char import InventoryState
+from app.exeption.char import BonusCharSubError
+from aiogram.types.chat_member_banned import ChatMemberStatus
 
 class AddCharacterService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.IKB = AddCharIKB()
 
-    def chouse_gender(self, to_change: bool = False):
+    async def chouse_gender(self, to_change: bool = False):
+        my_chars = await InfoCharacterLayer(self.tg_id).get_chars()
+        if my_chars.chars:
+            if len(my_chars.chars) == my_chars.max_chars and my_chars.use_bonus == False:
+                channel = await self.get_channel_info()
+                return '😕 У вас уже максимальное количество персонажей,' \
+                ' но вы можете получить бонусного персонажа подписавшись на Газету Нила', self.IKB.get_bonus_char(channel.invite_link)
+            if len(my_chars.chars) > my_chars.max_chars:
+                return '😕 У вас уже максимальное количество персонажей', None
         return '📲 Выберите пол', self.IKB.chouse_gender(to_change)
     
+    async def chouse_gender_bonus(self, to_change: bool = False):
+        to_member = await self.get_chat_member()
+        if to_member:
+            if to_member.status != ChatMemberStatus.LEFT and to_member.status != ChatMemberStatus.KICKED:    
+                return '📲 Выберите пол', self.IKB.chouse_gender(to_change)
+        raise BonusCharSubError(f'This user(tg_id:{self.tg_id}) dont sub to newspaper')
+
     async def to_get_sketchs(self, gender: Gender, to_changes: bool = False):
         if to_changes == False:
             print(gender)
