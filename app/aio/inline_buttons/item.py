@@ -25,8 +25,8 @@ class NewItemIKB(BotIKB):
         return self.builder.button(text='↩️ Назад', callback_data=NewItemBackCall(where=where)).as_markup()
 
     def to_rules(self):
+        self.builder.button(text='📖 FAQ по предметам', callback_data=NewItemACtionCall(to_faq=True))
         self.builder.button(text='📜 Требования', callback_data=NewItemACtionCall(to_read_rules=True))
-        self.builder.button(text='📖 FAQ', callback_data=NewItemACtionCall(to_faq=True))
         self.builder.button(text='✅ Согласиться', callback_data=NewItemACtionCall(to_argree_rules=True))
         return self.builder.adjust(1).as_markup()
     
@@ -44,6 +44,7 @@ class NewItemIKB(BotIKB):
                 self.builder.button(text='👤 Изменить создателя', callback_data=NewItemACtionCall(to_redact=True, redact_key='creator_id'))
             self.builder.button(text='➕ Создать', callback_data=NewItemACtionCall(to_create=True))
         self.builder.button(text='📜 Требования', callback_data=NewItemACtionCall(to_read_rules=True))
+        self.builder.button(text='📖 FAQ по предметам', callback_data=NewItemACtionCall(to_faq=True))
         return self.builder.adjust(2, 2, 2, 1).as_markup()
 
     def moderator_menu(self, sketch_id: int):
