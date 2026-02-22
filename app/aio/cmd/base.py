@@ -1,6 +1,5 @@
 from aiogram import Router, F
 from app.aio.cmd.char.mychar import char_router
-from app.aio.cmd.start import start_router
 from app.aio.cmd.faq import faq_router
 from app.aio.cmd.transfer.transfer import transfer_router
 from app.aio.cmd.kit.kit import kit_router
@@ -14,7 +13,7 @@ from app.exeption.decorator import exept
 
 
 base_router = Router()
-base_router.include_routers(start_router, char_router, transfer_router, faq_router)
+base_router.include_routers(char_router, transfer_router, faq_router)
 
 @base_router.message(Command('user'))
 @log.decor(arg=True)
@@ -31,4 +30,14 @@ async def cmd_add_item_name(message: Message, command: CommandObject, state: FSM
     else:
         await message.answer('⁉️ Неизввестная ошибка')
 
+@base_router.message(Command('chat_id'))
+@log.decor(arg=True)
+@exept
+async def cmd_start(message: Message):
+    user_id = message.from_user.id
+    full_name = message.from_user.full_name
+    user_name = message.from_user.username
+    await message.answer(f'Chat id: {message.chat.id}')
+    if message.is_topic_message:
+        await message.answer(f'Topic id: {message.message_thread_id}')    
 

@@ -1,17 +1,18 @@
 from app.service.base import BaseService
 from app.interlayer.item import ItemLayer
-from app.aio.inline_buttons.item import ListItemSketchIKB, ItemSketchDB, ChangeItemSketchIKB
+from app.aio.inline_buttons.item import ListItemSketchIKB, ItemSketchDB, ChangeItemSketchIKB, NewItemIKB
 from aiogram.types import Document
-from app.aio.config import bot
-from app.service.utils import str_to_json
+from app.aio.config import bot, admins
+from app.service.utils import str_to_json, to_msg
 import json
 from app.aio.cls.fsm.item import ListItemSketchsState, ChangeItemSketchState
-from app.exeption.item import GiveItemQuantityLessOne, GiveItemNoEnterNameOrID, GiveItemNoInt, GiveItemNoEnterID
+from app.exeption.item import GiveItemQuantityLessOne, GiveItemNoEnterNameOrID, GiveItemNoInt, GiveItemNoEnterID, ItemNoHideCreatedError
 from app.logic.query import LetterSearch
-from app.aio.msg.item import ItemSketchText, CharItemText
+from app.aio.msg.item import ItemSketchText, CharItemText, NewItemText
 from app.exeption.item import ThrowAwayQuantityNoInt
-from app.aio.config import admins
 from app.aio.msg.base import UserText
+from app.aio.cls.fsm.item import NewItemState
+from app.validate.sketchs.item_sketchs import ItemSketchValide
 from app.logged.infolog import infolog
 
 class ItemBaseService(BaseService):
@@ -22,6 +23,8 @@ class ItemBaseService(BaseService):
 class AddItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
+        self.IKB = NewItemIKB()
+        self.text = NewItemText
 
     async def add_data_item(self, string: str | None = None, document: Document | None = None):
         if string:
@@ -32,10 +35,88 @@ class AddItemService(ItemBaseService):
             with open('app/service/sketch.json', 'w', encoding='utf-8') as file:
                 line = file.read()
             sketch = json.loads(line)
-        user, item = await self.layer.create(sketch)
+        user, item = await self.layer.create(item = sketch | {'is_hide':False})
         if user and item: 
-            await infolog.new_item(self.tg_id, UserText(user.tg_user, user).text + ' \n \n' + ItemSketchText(item).text(True))
+            await infolog.new_item(user.id, UserText(user.tg_user, user).text + ' \n' + ItemSketchText(item).text(True))
             return '✅ Предмет создан, посмотреть /inventory'
+        
+    async def to_create_item(self):
+        return ' Прочитайте требования к будущему эскизу', self.IKB.to_rules()
+
+    async def to_name(self):
+        await self.state.set_state(NewItemState.to_name)
+        return self.text.to_redact_text('name'), None
+    
+    async def to_emodzi(self, name: str, msg):
+        await self.state.set_state(NewItemState.to_emodzi)
+        await self.state.update_data(msg=msg)
+        await self.state.update_data(sketch=ItemSketchValide(name=name).model_dump())
+        return self.text.to_redact_text('emodzi'), None
+    
+    async def to_menu(self, emodzi: str):
+        return await self.redact_value(emodzi, 'emodzi')
+ 
+    async def to_redact(self, redact_key: str, msg):
+        await self.state.set_state(NewItemState.to_redact)
+        await self.state.update_data(redact_key=redact_key, msg=msg)
+        return self.text.to_redact_text(redact_key), self.IKB.back('menu')
+
+    async def redact(self, value: str):
+        key = await self.state.get_value('redact_key')
+        return await self.redact_value(value, key)
+
+    async def redact_value(self, value: str, key: str):
+        sketch = await self.state.get_value('sketch')
+        sketch[key] = value
+        await self.state.update_data(sketch=sketch)
+        return await self.menu()
+
+    async def menu(self):
+        sketch = await self.state.get_value('sketch')
+        is_redact = await self.state.get_value('is_redact')
+        sketch = ItemSketchValide(**sketch)
+        return self.text(sketch).text(), self.IKB.to_menu(True if self.tg_id in self.admins else False, is_redact)
+
+    async def to_send(self):
+        sketch = await self.state.get_value('sketch')
+        sketch = ItemSketchValide(**sketch).model_dump()
+        user, item = await self.layer.create(sketch)
+        if user and item:
+            await infolog.new_sketch_no_moderate(self.tg_id, UserText(user.tg_user, user).text + '\n' + ItemSketchText(item).text(True), self.IKB.moderator_menu(item.id))
+            return '✅ Предмет отправлен на модерацию', None
+        raise 
+        
+    async def create(self):
+        if self.tg_id not in admins:
+            raise
+        sketch = await self.state.get_value('sketch')
+        sketch = ItemSketchValide(**sketch).model_dump()
+        sketch['is_hide'] = False
+        user, item = await self.layer.create(sketch)
+        if user and item:
+            await infolog.new_item(user.id, UserText(user.tg_user, user).text + ' \n \n' + ItemSketchText(item).text(True))
+            return '✅ Предмет создан, проверьте инвентарь - /inventory', None
+        raise    
+    
+    async def create_after_moderating(self, sketch_id: int, to_create: bool):
+        try:
+            if self.tg_id not in admins:
+                raise
+            user, create, item = await self.layer.create_before_moder(sketch_id, to_create)
+            if user and create:
+                await to_msg(user.tg_id, f"✅ Ваш эскиз предмета был принят, предмет: {item.emodzi} {item.name}, проверьте инвентарь - /inventory")
+                await infolog.new_item(user.id, UserText(user.tg_user, user).text + ' \n' + ItemSketchText(item).text(True))
+                return f'✅ Сообщение подтверждения отправлено, предмет: {item.emodzi} {item.name} [id:{item.id}]', None
+            elif user:
+                await to_msg(user.tg_id, f"❌ Ваш эскиз предмета был отклонен, предмет: {item.emodzi} {item.name}")
+                return f'✅ Сообщение отказа отправлено, предмет: {item.emodzi} {item.name} [id:{item.id}]', None
+            raise
+        except ItemNoHideCreatedError as e:
+            return '✅ Этот предмет уже был промодерирован', None
+        except Exception:
+            raise
+            
+    
 
 class ChangeItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
@@ -196,7 +277,7 @@ class ListItemService(ItemBaseService):
         sketch = sketch_ids.get(item_id, None)
         if sketch:
             page = await self.state.get_value('page')
-            return ItemSketchText(sketch).text(True if self.tg_id == admins else False), self.IKB.to_page(page)
+            return ItemSketchText(sketch).text(True if self.tg_id in self.admins else False), self.IKB.to_page(page)
 
     async def to_search(self, msg, back_where: str = 'cmd'):
         await self.state.update_data(msg=msg)

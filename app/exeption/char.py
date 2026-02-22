@@ -6,7 +6,7 @@ class CharError(BotError):
 
 class CharHastNameError(CharError):
     msg = '⁉️ Персонаж Безымянный, буквально...'    
-    code = '500.1'
+    code = '500.7'
 
 class BonusCharSubError(CharError):
     msg = '❌ Вы не подписались на канал'    

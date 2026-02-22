@@ -1,17 +1,23 @@
 from aiogram.filters.callback_data import CallbackData
 from typing import Any, Literal
 
-class AddItemTypeCall(CallbackData, prefix='add_item_type'):
-    type: str
+class NewItemACtionCall(CallbackData, prefix='new_item_action'):
+    to_argree_rules: bool = False
+    to_read_rules: bool = False
+    to_redact: bool = False
+    redact_key: str | None = None
+    to_send: bool = False
+    to_create: bool = False
+    to_faq: bool = False
 
-class AddItemBackCall(CallbackData, prefix='add_item_back'):
+class NewItemAdminACtionCall(CallbackData, prefix='new_item_admin_action'):
+    sketch_id: int
+    to_redact: bool = False
+    to_create: bool | None = None    
+
+class NewItemBackCall(CallbackData, prefix='new_item_back'):
     where: str
 
-class AddItemMisskCall(CallbackData, prefix='add_item_Miss'):
-    where: str
-
-class AddItemToCreate(CallbackData, prefix='add_item_to_create'):
-    to_create: bool = True
 
 
 

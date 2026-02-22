@@ -7,7 +7,7 @@ from app.service.char import Character
 from app.exeption.decorator import exept, call_exept
 from app.aio.cls.callback.char import InventoryItems, InventoryItemsGo, InventoryItemsThrow
 from app.aio.cls.fsm.char import InventoryState
-from app.exeption.item import ThrowAwayQuantityNoInt
+from app.service.utils import is_natural_int
 
 inventory_router = Router()
 
@@ -49,18 +49,19 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: Invent
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InventoryItemsThrow, state: FSMContext):
     
-    msg, markup = await Character(callback.from_user.id, state).inventory.to_throw()
+    msg, markup = await Character(callback.from_user.id, state).inventory.to_throw(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.message(InventoryState.throw_quantity, F.content_type == 'text')
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
+    msg0 = await state.get_value('msg')
     item_id = await state.get_value('item')
-    if message.text.isdigit() == False:
-        raise ThrowAwayQuantityNoInt(f'This user(tg_id={message.from_user.id}) enter no int')
-    msg, markup = await Character(message.from_user.id, state).inventory.throw_away(item_id, int(message.text))
-    await message.answer(msg, reply_markup=markup)
+    quan = is_natural_int(message.text, message.from_user.id)
+    msg, markup = await Character(message.from_user.id, state).inventory.throw_away(item_id, quan)
+    msg2 = await message.answer(msg, reply_markup=markup)
+    await state.update_data(msg=msg2)
     await state.set_state()
-
+    await msg0.delete()
 

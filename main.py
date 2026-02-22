@@ -4,7 +4,7 @@ from app.aio.config import bot, dp, scheduler
 from app.aio.cmd.base import base_router
 from app.aio.middlewares.update import UpdateDataMiddleware
 from app.logged.botlog import logs, log, tg_log
-from app.exeption import base
+from app.exeption import error_faq
 
 async def loggers():
     return asyncio.create_task(tg_log()) 
@@ -24,3 +24,4 @@ async def main():
 
 if __name__ == "__main__": 
     asyncio.run(main())
+    

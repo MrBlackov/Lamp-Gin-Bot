@@ -3,6 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from app.exeption.base import BotError
 from app.logged.botlog import log
 from app.aio.config import owner
+from app.aio.inline_buttons.faq import FaqIKB
 
 def exept(func):
     @wraps(func)
@@ -14,7 +15,8 @@ def exept(func):
             return result
         except BotError as bote:
             log.warning(f'AioPartPath: {bote}')
-            await message.answer(bote.to_msg)
+            markup = FaqIKB().to_error_faq(bote.code) if len(bote.faq) > 0 else None
+            await message.answer(bote.to_msg, reply_markup=markup)
         except Exception as e:
             log.error(f'AioPartPath: {e}')
             if message.from_user.id == owner:

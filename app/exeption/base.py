@@ -4,14 +4,17 @@ from typing import Literal
 class BotError(Exception):
     msg = '🐞 Непредвиденная ошибка в боте'
     code = '500.1'
-    faq = ''
+    faq = 'Если вы видите эту ошибку, значит ошибка была не предусмотрина или FAQ на ошибку не написана, пожалуйста, сообщите об этом разработчикам бота, предоставив код ошибки и описание ситуации, при которой возникла ошибка. Это поможет нам быстрее исправить проблему.'
+    
 
-    def __init__(self, *args, level: Literal['trace', 'debug', 'info', 'success', 'warning', 'error', 'critical'] = 'warning', **kwargs):
+    def __init__(self, *args, level: Literal['trace', 'debug', 'info', 'success', 'warning', 'error', 'critical'] = 'warning', is_error: bool = True, **kwargs):
         self.level = level
         self.args = args
         self.kwargs = kwargs
-        super().__init__(*args)
-        getattr(logs, level)(f'{self.__class__.__name__}, msg: {self.args}, kwargs: {self.kwargs}')
+        self.is_error = is_error
+        if is_error:
+            super().__init__(*args)
+            getattr(logs, level)(f'{self.__class__.__name__}, msg: {self.args}, kwargs: {self.kwargs}')
 
     def __str__(self):
         return super().__str__()
@@ -19,6 +22,10 @@ class BotError(Exception):
     @property
     def to_msg(self):
         return self.msg + f' [{self.code}]'
+    
+    @property
+    def name(self):
+        return self.__class__.__name__
 
 def msg_error(bot_error: BotError | list[BotError]) -> str | list[str]:
     if type(bot_error) == BotError: return bot_error.to_msg()
@@ -46,4 +53,3 @@ def get_error_faq() -> dict[str, BotError]:
         error_faq |= {error.code: error}
     return error_faq
 
-error_faq: dict[str, BotError] = get_error_faq()

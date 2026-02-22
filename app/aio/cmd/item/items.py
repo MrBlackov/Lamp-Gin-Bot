@@ -4,8 +4,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from app.logged.botlog import log
 from app.service.item import ItemService
-from app.aio.cmd.item.add_and_give import add_item_router
+from app.aio.cmd.item.admin import add_item_router
 from app.aio.cmd.item.change import change_item_router
+from app.aio.cmd.item.newitem import new_item_router
 from app.exeption.decorator import exept, call_exept
 from app.aio.cls.fsm.item import ListItemSketchsState
 from app.aio.cls.callback.item import (ListItemSketchBackCall, 
@@ -17,6 +18,7 @@ from app.aio.cls.callback.item import (ListItemSketchBackCall,
 item_router = Router()
 item_router.include_router(add_item_router)
 item_router.include_router(change_item_router)
+item_router.include_router(new_item_router)
 
 @item_router.message(Command('items'))
 @log.decor(arg=True)

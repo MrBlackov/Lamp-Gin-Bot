@@ -4,7 +4,7 @@ from app.db.metods.gets import get_user_for_tg_id, get_main_char_for_user_id, ge
 from app.exeption.item import ItemError
 from app.db.models.item import ItemDB
 from app.db.models.char import CharacterDB
-from app.exeption.item import SizeNotIntItemSketchError, NameNoValideError, EmodziNoValideError, NoFindItemSketchForID
+from app.exeption.item import SizeNotIntItemSketchError, NameNoValideError, EmodziNoValideError, NoFindItemSketchForID, ItemNoHideCreatedError
 from app.exeption.char import NoHaveMainChar
 
 class ItemLayer:
@@ -20,28 +20,32 @@ class ItemLayer:
             self.user = await get_user_for_tg_id(self.tg_id, True)
         self.char_id = await get_main_char_for_user_id(self.user.id)
         self.char = await get_char_for_id(self.char_id)
+        self.user_id = self.user.id
         return self
 
-
-    async def create(self, item: dict):
-        self = await self.get_char_info()
+    async def create(self, item: dict, user_id: int | None = None):
+        self = await self.get_char_info(user_id)
         if self.char == None:
             raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
-        new_sketch = await self.sketch_logic.create(ItemSketchValide(**item, creator_id=self.user_id))
-        new_item = await self.logic.give(new_sketch.id, self.char.exist.inventory.id, self.char.id, )
-        return self.user, new_item
+        item.pop('creator_id')
+        new_sketch = await self.sketch_logic.create(ItemSketchValide(**item, creator_id=self.user.id))
+        is_hide = item.get('is_hide')
+        if is_hide:
+            return self.user, new_sketch
+        new_item = await self.logic.give(new_sketch.id, self.char.exist.inventory.id, self.char.id, size_except=False)
+        if new_item:
+            return self.user, new_item.sketch
+        return self.user, new_sketch
 
-
-
-    async def give(self, sketch_id: int | None = None, name: str | None = None, quantity: int = 1):
-        self = await self.get_char_info()
+    async def give(self, sketch_id: int | None = None, name: str | None = None, quantity: int = 1, user_id: int | None = None, size_except: bool = True):
+        self = await self.get_char_info(user_id)
         if self.char == None:
             raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         if sketch_id == None and name:
             item0 = await get_item_for_name(name)
-            item = await self.logic.give(item0.id, self.char.exist.inventory.id, self.char.id, quantity)
+            item = await self.logic.give(item0.id, self.char.exist.inventory.id, self.char.id, quantity, size_except)
         elif sketch_id: 
-            item = await self.logic.give(sketch_id, self.char.exist.inventory.id, self.char.id, quantity)
+            item = await self.logic.give(sketch_id, self.char.exist.inventory.id, self.char.id, quantity, size_except)
         else:
             raise ItemError('To give, but not enter sketcth_id or sketch_name')
         return item
@@ -89,4 +93,22 @@ class ItemLayer:
 
     async def delete_items(self, sketch_id: int) -> bool:
         return await self.logic.delete_items(sketch_id)
-  
+
+ 
+    async def create_before_moder(self, sketch_id: int, to_create: bool):
+        sketch = await self.sketch_logic.get_sketch(sketch_id)
+        if to_create and sketch.is_hide:
+            sketch = await self.sketch_logic.create_sketch_for_user(sketch_id)
+            create = True
+        elif sketch.is_hide:
+            sketch = await self.sketch_logic.delete_sketch_for_user(sketch_id)
+            create = False
+        else:
+            raise ItemNoHideCreatedError(f'ItemSketch(id:{sketch_id}) created, dont to be create')
+        self = await self.get_char_info(sketch.creator_id)
+        await self.give(sketch_id, user_id=self.user_id, size_except=False)
+        return self.user, create, sketch
+
+
+
+

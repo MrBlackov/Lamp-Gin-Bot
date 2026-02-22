@@ -187,7 +187,8 @@ class InventoryService(BaseService):
         if items:
             return InventoryItemsText.item(items[item_id]), self.IKB.throw('inventory')
 
-    async def to_throw(self):
+    async def to_throw(self, msg):
+        await self.state.update_data(msg=msg)
         await self.state.set_state(InventoryState.throw_quantity)
         return InventoryItemsText.throw(), self.IKB.back('item')
 

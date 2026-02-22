@@ -2,10 +2,9 @@ from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from app.db.models.item import ItemSketchDB, ItemDB
 from app.db.models.char import CharacterDB
-from app.aio.cls.callback.item import (AddItemBackCall, 
-                                       AddItemTypeCall, 
-                                       AddItemMisskCall, 
-                                       AddItemToCreate, 
+from app.aio.cls.callback.item import (NewItemACtionCall, 
+                                       NewItemBackCall,
+                                       NewItemAdminACtionCall,
                                        ListItemSketchBackCall, 
                                        ListItemSketchToListCall, 
                                        ListItemSketchToPageCall, 
@@ -21,21 +20,39 @@ from app.aio.cls.callback.item import (AddItemBackCall,
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
-class AddItemIKB(BotIKB):
+class NewItemIKB(BotIKB):
     def back(self, where: str):
-        self.builder.button(text='↩️ Назад', callback_data=AddItemBackCall(where=where))
+        return self.builder.button(text='↩️ Назад', callback_data=NewItemBackCall(where=where)).as_markup()
 
-    def to_miss(self, back_where: str, next_where: str | None = None):
-        if next_where:
-            self.builder.button(text='❌ Пропустить', callback_data=AddItemMisskCall(where=next_where))
-        self.back(back_where)
+    def to_rules(self):
+        self.builder.button(text='📜 Требования', callback_data=NewItemACtionCall(to_read_rules=True))
+        self.builder.button(text='📖 FAQ', callback_data=NewItemACtionCall(to_read_rules=True))
+        self.builder.button(text='✅ Согласиться', callback_data=NewItemACtionCall(to_argree_rules=True))
         return self.builder.adjust(1).as_markup()
     
-    def to_check(self, where: str):
-        self.builder.button(text='✅ Создать', callback_data=AddItemToCreate())
-        self.back(where)
-        return self.builder.adjust(1).as_markup()
-    
+    def to_menu(self, is_admin: bool = False, is_redact: bool = False):
+        self.builder.button(text='🪪 Имя', callback_data=NewItemACtionCall(to_redact=True, redact_key='name'))
+        self.builder.button(text='🧠 Эмодзи', callback_data=NewItemACtionCall(to_redact=True, redact_key='emodzi'))
+        self.builder.button(text='📏 Размер', callback_data=NewItemACtionCall(to_redact=True, redact_key='size'))
+        self.builder.button(text='🎯 Редкость', callback_data=NewItemACtionCall(to_redact=True, redact_key='rarity'))
+        self.builder.button(text='📉 Мин. выпадения', callback_data=NewItemACtionCall(to_redact=True, redact_key='min_drop'))
+        self.builder.button(text='📈 Макс. выпадения', callback_data=NewItemACtionCall(to_redact=True, redact_key='max_drop'))
+        self.builder.button(text='📃 Описание', callback_data=NewItemACtionCall(to_redact=True, redact_key='description'))
+        self.builder.button(text='📨 Отправить на проверку', callback_data=NewItemACtionCall(to_send=True))
+        if is_admin:
+            if is_redact:
+                self.builder.button(text='👤 Изменить создателя', callback_data=NewItemACtionCall(to_redact=True, redact_key='creator_id'))
+            self.builder.button(text='➕ Создать', callback_data=NewItemACtionCall(to_create=True))
+        self.builder.button(text='📜 Требования', callback_data=NewItemACtionCall(to_read_rules=True))
+        return self.builder.adjust(2, 2, 2, 1).as_markup()
+
+    def moderator_menu(self, sketch_id: int):
+        self.builder.button(text='✅ Создать', callback_data=NewItemAdminACtionCall(sketch_id=sketch_id, to_create=True))
+        self.builder.button(text='❌ Отказать', callback_data=NewItemAdminACtionCall(sketch_id=sketch_id, to_create=False))
+        #self.builder.button(text='✒️ Изменить', callback_data=NewItemAdminACtionCall(sketch_id=sketch_id, to_redact=True))
+        return self.builder.adjust(2, 1).as_markup()
+            
+
 class ListItemSketchIKB(BotIKB):
     def back(self, where: str):
         self.builder.button(text='↩️ Назад', callback_data=ListItemSketchBackCall(where=where))

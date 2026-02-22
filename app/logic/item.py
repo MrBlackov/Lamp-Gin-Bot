@@ -12,40 +12,61 @@ from app.exeption.transfer import TransferNoHaventItemError
 
 class ItemSketchsLogic:
     async def create(self, item: ItemSketchValide) -> ItemSketchDB:
+        if item.max_drop < item.min_drop:
+            raise
         log.info(f' User({item.creator_id}) created new item_sketch: {item.model_dump()}')
         return await add_item_sketch(data=item)
     
+    async def get_sketch(self, sketch_id: int):
+        return await get_item_sketch(sketch_id)
+
     async def get_sketchs(self):
         return await get_item_sketchs()
     
     async def update_sketch(self, item_id: int, new_data: dict):
         return await update_item_sketch_for_id(item_id, new_data)
-    
+
     async def get_items_for_sketch(self, sketch_id: int) -> ItemSketchDB:
         return await get_items_and_chars_for_sketch(sketch_id=sketch_id)
     
     async def delete_sketch(self, sketch_id: int):
         return await delete_item_sketch_for_id(sketch_id)
+    
+    async def create_sketch_for_user(self, sketch_id: int):
+        return await self.update_sketch(sketch_id, {'is_hide':False})
+    
+    async def delete_sketch_for_user(self, sketch_id: int):
+        sketch = await get_item_sketch(sketch_id)
+        await self.delete_sketch(sketch_id)
+        return sketch
+
 
 class ItemsLogic:
-    async def give(self, sketch_id: int, inventory_id: int, char_id: int, quantity: int = 1) -> ItemDB:
-        item = await get_item(sketch_id, inventory_id)
-        sketch = item.sketch if item else await get_item_sketch(sketch_id)
-        char = await get_char_for_id(char_id)
-        items = await get_items_for_inventory(inventory_id)
-        max_size = char.exist.attibute_point.strength*1000
-        size = 0
-        for i in items:
-            size += i.sketch.size*i.quantity
-
-        if size+sketch.size*quantity > max_size:
-            raise InventaryOverFlowing(f'This char({char_id}) inventary is full')
-
-        log.info(f'Give item(sketch_id: {sketch_id}) for char(char_id: {char_id}), quantity: {quantity}')
-        if item:
-            return await update_quantity_item(item.id, item.quantity + quantity)
-        return await add_item(data=ItemValide(inventory_id=inventory_id, sketch_id=sketch_id, quantity=quantity))
+    async def give(self, sketch_id: int, inventory_id: int, char_id: int, quantity: int = 1, size_except: bool = True) -> ItemDB:
+        try:
+            item = await get_item(sketch_id, inventory_id)
+            sketch = item.sketch if item else await get_item_sketch(sketch_id)
+            char = await get_char_for_id(char_id)
+            items = await get_items_for_inventory(inventory_id)
+            max_size = char.exist.attibute_point.strength*1000
+            size = 0
+            for i in items:
+                size += i.sketch.size*i.quantity
     
+            if size+sketch.size*quantity > max_size:
+                raise InventaryOverFlowing(f'This char({char_id}) inventary is full')
+    
+            log.info(f'Give item(sketch_id: {sketch_id}) for char(char_id: {char_id}), quantity: {quantity}')
+            if item:
+                return await update_quantity_item(item.id, item.quantity + quantity)
+            return await add_item(data=ItemValide(inventory_id=inventory_id, sketch_id=sketch_id, quantity=quantity))
+        except InventaryOverFlowing as e:
+            if size_except:
+                raise 
+            return None
+        except Exception:
+            raise
+        
     @log.decor(arg=True)
     async def action(self, item: ItemDB, char: CharacterDB, action: str, quantity: int = 1):
         items = await get_items_for_inventory(char.exist.inventory.id)
@@ -99,7 +120,7 @@ class ItemsLogic:
 
         self.check_size_inventory(char, inventory_items, items, action)
 
-        inv_item_id = {i.sketch_id: i for i in (inventory_items or [])}
+        inv_item_id = {i.sketch_id: i for i in inventory_items}
         new_item: list[ItemDB] = []
         delete_item: list[int] = []
         update_item: dict[int, int] = {}
@@ -109,7 +130,8 @@ class ItemsLogic:
             if action == '+':
                 if inventory_item:
                     update_item[inventory_item.id] = inventory_item.quantity + item.quantity
-                new_item.append(ItemDB(inventory_id=char.exist.inventory.id, sketch_id=item.sketch_id, quantity=item.quantity))
+                else:
+                    new_item.append(ItemDB(inventory_id=char.exist.inventory.id, sketch_id=item.sketch_id, quantity=item.quantity))
             elif action == '-':
                 if inventory_item:
                     if inventory_item.quantity - item.quantity <= 0:

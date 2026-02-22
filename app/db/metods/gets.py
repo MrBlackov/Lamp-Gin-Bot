@@ -58,11 +58,12 @@ async def get_item_for_id(item_id: int) -> ItemDB:
 async def get_item_for_name(name: str) -> ItemDB:
     return await select_item_sketch(filters={'name':name})
 
-async def get_items_for_inventory(inventory_id: int) -> list[ItemDB] | None:
-    return await select_items(filters={'inventory_id':inventory_id})
+async def get_items_for_inventory(inventory_id: int) -> list[ItemDB]:
+    result = await select_items(filters={'inventory_id':inventory_id})
+    return result if result else []
 
-async def get_item_sketchs() -> list[ItemSketchDB]:
-    return await select_item_sketchs()
+async def get_item_sketchs(is_hide: bool = False) -> list[ItemSketchDB]:
+    return await select_item_sketchs(filters={'is_hide':is_hide})
 
 select_transfer = select_obj_no_valide(TransferDAO)
 select_transfers = select_objs_no_valide(TransferDAO)

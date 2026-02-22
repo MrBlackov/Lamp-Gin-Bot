@@ -58,7 +58,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: AddCha
 async def callback_add_char_names(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext):
     
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_sketchs(callback_data.first_name)
-    await callback.message.edit_text(f'Как выберем имя?', reply_markup=markup)
+    await callback.message.edit_text(f'❔ Как выберем {'имя' if callback_data.first_name else 'фамилию'}?', reply_markup=markup)
     await state.set_state(CreateCharState.to_create)
     
 
@@ -82,7 +82,6 @@ async def msg_query_for_names(message: Message, state: FSMContext):
     await msg.delete()
     markup, msg_text = await Character(tg_id=message.from_user.id, state=state).to_create.to_query_names_to_pages(None if msg_text == '!all' else msg_text)
     await message.answer(msg_text, reply_markup=markup)
-    await message.delete()
     await state.set_state(CreateCharState.to_create)
 
 @add_char_router.callback_query(AddCharQueryNameCall.filter(F.next_page == True))
@@ -113,7 +112,6 @@ async def callback_add_char_name_rnd(callback: CallbackQuery, callback_data: Add
 @log.decor(arg=True)     
 @call_exept   
 async def callback_add_char_name(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext):
-    print('IJP')
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_sketchs(False)
     await state.update_data(first_name = callback_data.name)
     await callback.message.edit_text(f'🎴 Имя: {callback_data.name} \n Как выберем фамилию?', reply_markup=markup)
@@ -122,7 +120,6 @@ async def callback_add_char_name(callback: CallbackQuery, callback_data: AddChar
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_name(callback: CallbackQuery, callback_data: AddCharSketchCall, state: FSMContext):
-    print('IJP')
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_sketchs(False)
     first_name = await state.get_value('first_name')
     await callback.message.edit_text(f'🎴 Имя: {first_name} \n Как выберем фамилию?', reply_markup=markup)  

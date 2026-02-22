@@ -15,6 +15,7 @@ class ItemSketchDB(Base):
     min_drop: Mapped[int] = mapped_column(default=1)
     max_drop: Mapped[int] = mapped_column(default=1)
     nbt: Mapped[dict] = mapped_column(JSON, default={})
+    is_hide: Mapped[bool] = mapped_column(default=False, nullable=True)
 
 class ItemDB(Base):
     inventory_id: Mapped[int | None] = mapped_column(ForeignKey('inventorydb.id'), nullable=True)

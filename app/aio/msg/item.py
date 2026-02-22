@@ -1,5 +1,6 @@
 from app.db.models.item import ItemDB, ItemSketchDB
 from app.db.models.char import CharacterDB
+from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.aio.msg.utils import TextHTML
 
 class ItemText:
@@ -32,6 +33,52 @@ class ItemText:
         )
         return value
 
+class NewItemText:
+    def __init__(self, sketch: ItemSketchValide):
+        self.sketch = sketch
+ 
+    @property
+    def temperate(self):
+        return '{EMODZI} {NAME}' + TextHTML('\n'.join([
+            '⏲️ Вес одного: {WEIGHT}кг',
+            '🎲 Шанс выпадения: {RARITY}%',
+            '📈 Макс. выпадения: {MAX_DROP}',
+            '📉 Мин. выпадения: {MIN_DROP}',
+            '📜 Описание: {DESCRIPT}',
+        ])).blockquote()
+    
+    def text(self):
+        return self.temperate.format(
+            EMODZI=self.sketch.emodzi,
+            NAME=self.sketch.name,
+            DESCRIPT=self.sketch.description if self.sketch.description else '❌',
+            WEIGHT=self.sketch.size/1000,
+            RARITY=str(self.sketch.rarity*100)[:6],
+            MAX_DROP=self.sketch.max_drop,
+            MIN_DROP=self.sketch.min_drop
+        )
+
+    def to_redact_text(redact_key: str):
+        match redact_key:
+            case 'name':
+                return '✒️ Отправьте имя предмета. Количество символов должно быть не больше 30'
+            case 'emodzi':
+                return '✒️ Отправьте эмодзи для предмета. Эмодзи должен быть 1'
+            case 'size':
+                return '✒️ Отправьте вес одного предмета в граммах. Вес должен быть целым числом'
+            case 'description':
+                return '✒️ Отправьте описание для предмета. Количество символов должно быть не больше 200'
+            case 'rarity':
+                return '✒️ Отправьте редкость предмета в виде десятичной дроби от 0 до 1. Например, 0.1 будет означать 10% шанс выпадения'
+            case 'max_drop':
+                return '✒️ Отправьте максимальное количество предметов, которое может выпасть. Должно быть целым числом'
+            case 'min_drop':
+                return '✒️ Отправьте минимальное количество предметов, которое может выпасть. Должно быть целым числом и не больше максимального количества'
+            case 'creator_id':
+                return '✒️ Отправьте user_id создателя'
+            case _:
+                return '✒️ Отправьте значение'
+
 class ItemSketchText:
     def __init__(self, sketch: ItemSketchDB):
         self.sketch = sketch
@@ -41,6 +88,9 @@ class ItemSketchText:
         return '{EMODZI} {NAME}' + TextHTML('\n'.join([
             '♣️ Эскиз ID: {ID}',
             '⏲️ Вес одного: {WEIGHT}кг',
+            '🎲 Шанс выпадения: {RARITY}%',
+            '📈 Макс. выпадения: {MAX_DROP}',
+            '📉 Мин. выпадения: {MIN_DROP}',
             '📜 Описание: {DESCRIPT}',
         ])).blockquote()
  
@@ -50,8 +100,11 @@ class ItemSketchText:
             '👤 Создатель: {USER_ID}',
             '♣️ Эскиз ID: {ID}',
             '⏲️ Вес одного: {WEIGHT}кг',
+            '🎲 Шанс выпадения: {RARITY}%',
+            '📈 Макс. выпадения: {MAX_DROP}',
+            '📉 Мин. выпадения: {MIN_DROP}',
             '📜 Описание: {DESCRIPT}',
-        ])).blockquote()  
+        ])).blockquote()
     
     def text(self, is_admin: bool = False):
         if is_admin:
@@ -61,7 +114,10 @@ class ItemSketchText:
             NAME=self.sketch.name,
             DESCRIPT=self.sketch.description if self.sketch.description else '❌',
             WEIGHT=self.sketch.size/1000,
-            ID=self.sketch.id
+            ID=self.sketch.id,
+            RARITY=self.sketch.rarity*100,
+            MAX_DROP=self.sketch.max_drop,
+            MIN_DROP=self.sketch.min_drop
         )
             return value
         value = self.temperate.format(
@@ -69,7 +125,10 @@ class ItemSketchText:
             NAME=self.sketch.name,
             DESCRIPT=self.sketch.description if self.sketch.description else '❌',
             WEIGHT=self.sketch.size/1000,
-            ID=self.sketch.id
+            ID=self.sketch.id,
+            RARITY=self.sketch.rarity*100,
+            MAX_DROP=self.sketch.max_drop,
+            MIN_DROP=self.sketch.min_drop
         )
         return value
 
