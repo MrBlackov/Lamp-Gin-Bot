@@ -1,4 +1,6 @@
-from app.db.models.transfer import TransferDB, ItemDB
+from app.db.models.transfer import TransferDB, ItemDB, ItemSketchDB
+from app.db.models.char import CharacterDB
+from app.db.models.base import UserDB
 from enum import Enum
 
 class TransferStatus:
@@ -50,3 +52,25 @@ class MyTransfers:
     COMPLETED = TransferStatus('completed', 2, '✅', 'Завершенные сделки')
     REJECTED = TransferStatus('rejected', 3, '❌', 'Отклоненные сделки')
     CREATED = TransferStatus('created', 0, '📝', 'Черновики')
+
+class Stats:
+    def __init__(self, 
+                 users: list[UserDB] | None = None, 
+                 chars: list[CharacterDB] | None = None, 
+                 items: list[ItemDB] | None = None, 
+                 item_sketchs: list[ItemSketchDB] | None = None, 
+                 transfers: list[TransferDB] | None = None):
+        self.users = users if users else []
+        self.items = items if items else []
+        self.chars = chars if chars else []
+        self.item_sketchs = item_sketchs if item_sketchs else []
+        self.transfers = transfers if transfers else []
+
+    @property
+    def coins(self):
+        self.users_coins = len(self.users)
+        self.chars_coins = len(self.chars)
+        self.items_coins = len(self.items)
+        self.item_sketchs_coins = len(self.item_sketchs)
+        self.transfers_coins = len(self.transfers)
+        return self

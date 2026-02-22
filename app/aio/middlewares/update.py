@@ -31,7 +31,7 @@ class UpdateDataMiddleware(BaseMiddleware):
         await add_or_update_tg_user(data={'tg_id':user.id, 'fullname':user.full_name, 'username':user.username, 'data':user.__dict__}, tg_id=user.id)
         await get_user_for_tg_id(user.id)
         await add_or_update_tg_chat(data={'tg_id':chat.id, 'tg_type':chat.type.upper(), 'fullname':chat.full_name, 'username':chat.username, 'data':chat.__dict__}, tg_id=chat.id)
-
+        
         result = await handler(event, data)    
         
         return result

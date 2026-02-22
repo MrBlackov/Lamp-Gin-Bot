@@ -3,6 +3,7 @@ from app.aio.cmd.char.mychar import char_router
 from app.aio.cmd.faq import faq_router
 from app.aio.cmd.transfer.transfer import transfer_router
 from app.aio.cmd.kit.kit import kit_router
+from app.aio.cmd.stats import stats_router
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
@@ -13,7 +14,7 @@ from app.exeption.decorator import exept
 
 
 base_router = Router()
-base_router.include_routers(char_router, transfer_router, faq_router)
+base_router.include_routers(char_router, transfer_router, faq_router, stats_router)
 
 @base_router.message(Command('user'))
 @log.decor(arg=True)

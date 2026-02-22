@@ -59,11 +59,20 @@ async def cmd_help(message: Message, state: FSMContext):
     await message.answer(msg, reply_markup=markup)
 
 @faq_router.message(Command('help'), F.text.contains('item'))
+@faq_router.message(Command('helpitem'))
 @log.decor(arg=True)
 @exept
 async def cmd_help(message: Message, state: FSMContext):
     msg, markup = FaqService(message.from_user.id, state).help_items()
     await message.answer(msg, reply_markup=markup)
+
+@faq_router.callback_query(NewItemACtionCall.filter(F.to_faq == True))     
+@log.decor(arg=True)
+@call_exept
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext):
+    msg, markup = FaqService(callback.from_user.id, state).help_items()
+    await callback.message.answer(msg, reply_markup=markup)
+
 @faq_router.message(Command('helpcmd'))
 @faq_router.message(Command('help'), F.text.contains('cmd'))
 @log.decor(arg=True)

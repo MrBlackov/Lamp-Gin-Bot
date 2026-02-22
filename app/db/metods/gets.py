@@ -13,6 +13,7 @@ add_or_update_donate = add_or_update_obj(DonateDAO)
 
 
 select_user = select_obj(Users_add, UserDAO)
+select_users = select_objs(Users_add, UserDAO)
 select_char = select_obj(Character_add, CharacterDAO)
 select_chars = select_objs(Character_add, CharacterDAO)
 select_exist = select_obj(Existence_add, ExistenceDAO)
@@ -25,6 +26,8 @@ async def get_user_for_tg_id(tg_id: int, to_user: bool = False) -> int | UserDB:
 async def get_user_for_id(user_id: int) -> UserDB:
     return await select_user(filters={'id':user_id})
 
+async def get_users() -> list[UserDB]:
+    return await select_users()
 
 
 async def get_main_char_for_user_id(user_id: int) -> int | None:
@@ -58,6 +61,9 @@ async def get_item_for_id(item_id: int) -> ItemDB:
 async def get_item_for_name(name: str) -> ItemDB:
     return await select_item_sketch(filters={'name':name})
 
+async def get_items() -> list[ItemDB]:
+    return await select_items()
+
 async def get_items_for_inventory(inventory_id: int) -> list[ItemDB]:
     result = await select_items(filters={'inventory_id':inventory_id})
     return result if result else []
@@ -78,6 +84,10 @@ async def get_transfers(char_id: int) -> MyTransfers:
     from_me = await select_transfers(filters={'seller_id':char_id})
     to_me = await select_transfers(filters={'buyer_id':char_id})
     return MyTransfers(from_me, to_me)
+
+async def get_all_transfers() -> list[TransferDB] | None:
+    return await select_transfers()
+
 
 async def get_transfers_for_char_id(my_char_id: int, char_id: int) -> MyTransfers:
     from_me = await select_transfers(filters={'seller_id':my_char_id, 'buyer_id':char_id})

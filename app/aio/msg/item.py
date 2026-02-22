@@ -39,6 +39,12 @@ class NewItemText:
  
     @property
     def temperate(self):
+        if self.sketch.rarity == 0:
+            return '{EMODZI} {NAME}' + TextHTML('\n'.join([
+            '⏲️ Вес одного: {WEIGHT}кг',
+            '🎲 Шанс выпадения: {RARITY}%',
+            '📜 Описание: {DESCRIPT}',
+        ])).blockquote()
         return '{EMODZI} {NAME}' + TextHTML('\n'.join([
             '⏲️ Вес одного: {WEIGHT}кг',
             '🎲 Шанс выпадения: {RARITY}%',
@@ -48,6 +54,14 @@ class NewItemText:
         ])).blockquote()
     
     def text(self):
+        if self.sketch.rarity == 0:
+            return self.temperate.format(
+            EMODZI=self.sketch.emodzi,
+            NAME=self.sketch.name,
+            DESCRIPT=self.sketch.description if self.sketch.description else '❌',
+            WEIGHT=self.sketch.size/1000,
+            RARITY=str(self.sketch.rarity*100)[:6]
+        )
         return self.temperate.format(
             EMODZI=self.sketch.emodzi,
             NAME=self.sketch.name,
@@ -85,8 +99,13 @@ class ItemSketchText:
  
     @property
     def temperate(self):
+        if self.sketch.rarity == 0:
+            return '{EMODZI} {NAME}' + TextHTML('\n'.join([
+            '⏲️ Вес одного: {WEIGHT}кг',
+            '🎲 Шанс выпадения: {RARITY}%',
+            '📜 Описание: {DESCRIPT}',
+        ])).blockquote()
         return '{EMODZI} {NAME}' + TextHTML('\n'.join([
-            '♣️ Эскиз ID: {ID}',
             '⏲️ Вес одного: {WEIGHT}кг',
             '🎲 Шанс выпадения: {RARITY}%',
             '📈 Макс. выпадения: {MAX_DROP}',
@@ -120,17 +139,23 @@ class ItemSketchText:
             MIN_DROP=self.sketch.min_drop
         )
             return value
-        value = self.temperate.format(
+        if self.sketch.rarity == 0:
+            return self.temperate.format(
             EMODZI=self.sketch.emodzi,
             NAME=self.sketch.name,
             DESCRIPT=self.sketch.description if self.sketch.description else '❌',
             WEIGHT=self.sketch.size/1000,
-            ID=self.sketch.id,
-            RARITY=self.sketch.rarity*100,
+            RARITY=str(self.sketch.rarity*100)[:6]
+        )
+        return self.temperate.format(
+            EMODZI=self.sketch.emodzi,
+            NAME=self.sketch.name,
+            DESCRIPT=self.sketch.description if self.sketch.description else '❌',
+            WEIGHT=self.sketch.size/1000,
+            RARITY=str(self.sketch.rarity*100)[:6],
             MAX_DROP=self.sketch.max_drop,
             MIN_DROP=self.sketch.min_drop
         )
-        return value
 
 class CharItemText:    
     def __init__(self, char: CharacterDB, item: ItemDB):

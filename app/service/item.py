@@ -35,7 +35,8 @@ class AddItemService(ItemBaseService):
             with open('app/service/sketch.json', 'w', encoding='utf-8') as file:
                 line = file.read()
             sketch = json.loads(line)
-        user, item = await self.layer.create(item = sketch | {'is_hide':False})
+            sketch['is_hide'] = False
+        user, item = await self.layer.create(item = sketch)
         if user and item: 
             await infolog.new_item(user.id, UserText(user.tg_user, user).text + ' \n' + ItemSketchText(item).text(True))
             return '✅ Предмет создан, посмотреть /inventory'

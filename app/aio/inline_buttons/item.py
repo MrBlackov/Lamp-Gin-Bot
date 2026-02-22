@@ -26,14 +26,14 @@ class NewItemIKB(BotIKB):
 
     def to_rules(self):
         self.builder.button(text='📜 Требования', callback_data=NewItemACtionCall(to_read_rules=True))
-        self.builder.button(text='📖 FAQ', callback_data=NewItemACtionCall(to_read_rules=True))
+        self.builder.button(text='📖 FAQ', callback_data=NewItemACtionCall(to_faq=True))
         self.builder.button(text='✅ Согласиться', callback_data=NewItemACtionCall(to_argree_rules=True))
         return self.builder.adjust(1).as_markup()
     
     def to_menu(self, is_admin: bool = False, is_redact: bool = False):
         self.builder.button(text='🪪 Имя', callback_data=NewItemACtionCall(to_redact=True, redact_key='name'))
         self.builder.button(text='🧠 Эмодзи', callback_data=NewItemACtionCall(to_redact=True, redact_key='emodzi'))
-        self.builder.button(text='📏 Размер', callback_data=NewItemACtionCall(to_redact=True, redact_key='size'))
+        self.builder.button(text='📏 Вес', callback_data=NewItemACtionCall(to_redact=True, redact_key='size'))
         self.builder.button(text='🎯 Редкость', callback_data=NewItemACtionCall(to_redact=True, redact_key='rarity'))
         self.builder.button(text='📉 Мин. выпадения', callback_data=NewItemACtionCall(to_redact=True, redact_key='min_drop'))
         self.builder.button(text='📈 Макс. выпадения', callback_data=NewItemACtionCall(to_redact=True, redact_key='max_drop'))

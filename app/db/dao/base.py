@@ -57,7 +57,7 @@ class BaseDAO(Generic[T]):
         except SQLAlchemyError as e:
             await session.rollback()
             raise e
-        return new_instance
+        return await cls.find_one_or_none_by_id(new_instance.id, session)
 
     @classmethod
     async def add_dict(cls, session: AsyncSession, values: dict):
