@@ -14,6 +14,7 @@ from app.interlayer.char import CreateCharacterLayer, InfoCharacterLayer, Invent
 from app.aio.cls.fsm.char import InventoryState
 from app.exeption.char import BonusCharSubError
 from aiogram.types.chat_member_banned import ChatMemberStatus
+from app.exeption.item import ItemError
 
 class AddCharacterService(BaseService):
     def __init__(self, tg_id, state = None):
@@ -195,7 +196,7 @@ class InventoryService(BaseService):
     async def throw_away(self, item_id: int, quantity: int):
         throw = await InventoryCharacterLayer(self.tg_id).throw_away(item_id, quantity)
         if throw: return await self.inventory()
-        raise
+        raise ItemError('Dont throw away')
 
 class Character:
     def __init__(self, tg_id: int, state: FSMContext | None = None):

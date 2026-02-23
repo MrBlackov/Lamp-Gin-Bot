@@ -10,10 +10,12 @@ from app.exeption.item import GiveItemQuantityLessOne, GiveItemNoEnterNameOrID, 
 from app.logic.query import LetterSearch
 from app.aio.msg.item import ItemSketchText, CharItemText, NewItemText
 from app.exeption.item import ThrowAwayQuantityNoInt
+from app.exeption.base import PermissionError
 from app.aio.msg.base import UserText
 from app.aio.cls.fsm.item import NewItemState
 from app.validate.sketchs.item_sketchs import ItemSketchValide
 from app.logged.infolog import infolog
+from app.exeption.item import ItemError
 
 class ItemBaseService(BaseService):
     def __init__(self, tg_id, state = None):
@@ -85,11 +87,11 @@ class AddItemService(ItemBaseService):
         if user and item:
             await infolog.new_sketch_no_moderate(self.tg_id, UserText(user.tg_user, user).text + '\n' + ItemSketchText(item).text(True), self.IKB.moderator_menu(item.id))
             return '✅ Предмет отправлен на модерацию', None
-        raise 
+        raise ItemError('Dont have user or item')
         
     async def create(self):
         if self.tg_id not in admins:
-            raise
+            raise PermissionError(f'This user(tg_id:{self.tg_id}) no admin')
         sketch = await self.state.get_value('sketch')
         sketch = ItemSketchValide(**sketch).model_dump()
         sketch['is_hide'] = False
@@ -97,12 +99,12 @@ class AddItemService(ItemBaseService):
         if user and item:
             await infolog.new_item(user.id, UserText(user.tg_user, user).text + ' \n \n' + ItemSketchText(item).text(True))
             return '✅ Предмет создан, проверьте инвентарь - /inventory', None
-        raise    
+        raise ItemError('Dont have user or item')
     
     async def create_after_moderating(self, sketch_id: int, to_create: bool):
         try:
             if self.tg_id not in admins:
-                raise
+                raise PermissionError(f'This user(tg_id:{self.tg_id}) no admin')
             user, create, item = await self.layer.create_before_moder(sketch_id, to_create)
             if user and create:
                 await to_msg(user.tg_id, f"✅ Ваш эскиз предмета был принят, предмет: {item.emodzi} {item.name}, проверьте инвентарь - /inventory")
@@ -111,7 +113,7 @@ class AddItemService(ItemBaseService):
             elif user:
                 await to_msg(user.tg_id, f"❌ Ваш эскиз предмета был отклонен, предмет: {item.emodzi} {item.name}")
                 return f'✅ Сообщение отказа отправлено, предмет: {item.emodzi} {item.name} [id:{item.id}]', None
-            raise
+            raise ItemError('Dont have user or item')
         except ItemNoHideCreatedError as e:
             return '✅ Этот предмет уже был промодерирован', None
         except Exception:
@@ -205,7 +207,7 @@ class ChangeItemService(ItemBaseService):
         elif is_action == False:
             return await self.to_char_items()
         else:
-            raise
+            raise ItemError(f'Dont have item')
 
 
     async def to_delete_sketch(self, back_where: str = 'info'):

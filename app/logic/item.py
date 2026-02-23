@@ -5,7 +5,7 @@ from app.db.metods.updates import update_quantity_item, update_item_sketch_for_i
 from app.db.metods.deletes import delete_item_for_id, delete_item_sketch_for_id, delete_items_for_sketch_id, delete_items
 from app.db.metods.another import get_items_and_chars_for_sketch
 from app.logged.botlog import log
-from app.exeption.item import ThrowAwayQuantityLessOne, ThrowAwayQuantityMoreItemQuantity
+from app.exeption.item import ThrowAwayQuantityLessOne, ThrowAwayQuantityMoreItemQuantity, MaxDropLessMinDropError, ItemError
 from app.exeption.char import InventaryOverFlowing
 from app.db.models.char import CharacterDB
 from app.exeption.transfer import TransferNoHaventItemError
@@ -13,7 +13,7 @@ from app.exeption.transfer import TransferNoHaventItemError
 class ItemSketchsLogic:
     async def create(self, item: ItemSketchValide) -> ItemSketchDB:
         if item.max_drop < item.min_drop:
-            raise
+            raise MaxDropLessMinDropError(f'This item(name:{item.name}) to created, but max_drop < min_drop')
         log.info(f' User({item.creator_id}) created new item_sketch: {item.model_dump()}')
         return await add_item_sketch(data=item)
     
@@ -82,7 +82,7 @@ class ItemsLogic:
         elif action == '-':
             quan -= quantity
         else:
-            raise
+            raise ItemError(f'Action({action}) not + or -')
 
         if quan <= 0:
             return (False, None) if await delete_item_for_id(item.id) else (None, item)
@@ -138,7 +138,7 @@ class ItemsLogic:
                         delete_item.append(inventory_item.id)
                     else:
                         update_item[inventory_item.id] = inventory_item.quantity - item.quantity
-                #raise TransferNoHaventItemError(f'This char(id={char.id}) has not enough item for transfers')
+                raise TransferNoHaventItemError(f'This char(id={char.id}) has not enough item for transfers')
 
         await add_db_obj(data=new_item)
         await update_quantity_items(update_item)

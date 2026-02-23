@@ -26,3 +26,7 @@ class TransferNoFindError(TransferError):
     code = '402.10'
     faq = ''
 
+class TransferEnoughError(TransferError):
+    msg = '❌ Сделка должна передавать предмет хотя бы в одну сторону '
+    code = '402.11'
+    faq = 'В вашей сделке не указаны предметы для обмена. Укажите хотя бы один предмет'

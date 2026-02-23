@@ -1,9 +1,9 @@
 from .another import DiceError, AnotherError
 from .api import ApiError, ValidationApiError
 from .base import BotError, get_error_faq
-from .item import EmodziNoValideError, ItemError, GiveItemNoEnterID, GiveItemNoEnterNameOrID, NameNoValideError, NotNameItemSketchError, SizeNotIntItemSketchError, ThrowAwayQuantityFloat, ThrowAwayQuantityLessOne, ThrowAwayQuantityMoreItemQuantity, ThrowAwayQuantityNoInt
+from .item import EmodziNoValideError, ItemNoHideCreatedError, GiveItemNoInt, GiveItemQuantityLessOne, NoFindItemSketchForID, DropNotIntItemSketchError, SizeLessOneItemSketchError, DropLessZeroItemSketchError, ItemError, GiveItemNoEnterID, GiveItemNoEnterNameOrID, NameNoValideError, NotNameItemSketchError, SizeNotIntItemSketchError, ThrowAwayQuantityFloat, ThrowAwayQuantityLessOne, ThrowAwayQuantityMoreItemQuantity, ThrowAwayQuantityNoInt
 from .service import ValidStrToJSONError, ValidToIntError, ValidToTypeError, ValidToStrError, ValidToStrLenError, ValidToIntPositiveError
-from .transfer import TransferError, TransferNoFindError, TransferNoHaventItemError, TransferQuantityNoIntError, TransferSellerNoHaventItemError
+from .transfer import TransferError, TransferEnoughError, TransferNoFindError, TransferNoHaventItemError, TransferQuantityNoIntError, TransferSellerNoHaventItemError
 from .char import CharError, CharHastNameError, BonusCharSubError, NoHaveMainChar
 from .faq import FaqError, FaqErrorNoEnterError, FaqErrorNoFindError
 

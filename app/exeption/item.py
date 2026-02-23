@@ -22,7 +22,7 @@ class EmodziNoValideError(ItemError):
     
 class SizeNotIntItemSketchError(ItemError):
     msg = '❌ Вес должен быть челым числом'
-    code = '401.10'
+    code = '401.1й'
     faq = 'Вы отправили вес десятичным числом, нужно целое число.'
 
 class SizeLessOneItemSketchError(ItemError):
@@ -32,25 +32,29 @@ class SizeLessOneItemSketchError(ItemError):
 
 class DropNotIntItemSketchError(ItemError):
     msg = '❌ Это значение должно быть целым числом'
-    code = '401.11'
+    code = '401.13'
     faq = 'Вы отправили не целое число, нужно целое число.'
 
 class DropLessZeroItemSketchError(ItemError):
     msg = '❌ Это значение должно быть целым числом больше нуля'
-    code = '401.12'
+    code = '401.14'
     faq = 'Вы отправили число меньше нуля, нужно целое число больше нуля.'
 
 class NameNoValideError(ItemError):
     msg = '❌ Значение должно быть bool-типа(0 или 1)'
-    code = '401.13'
+    code = '401.15'
     faq = 'Вы отправили значение не того типа, отправьте 0 или 1'
 
 class RariryValideError(ItemError):
     msg = '❌ Значение должно быть числом от 0 до 1 с плавающей точкой'
-    code = '401.14'
+    code = '401.16'
     faq = 'Вы отправили значение не того типа, отправьте число от 0 до 1 с плавающей точкой. Например, 0.1 будет означать 10% шанс выпадения'
 
-
+class MaxDropLessMinDropError(ItemError):
+    msg = '❌ Значение максимального дропа должно быть больше чем значение минимального дропа'
+    code = '401.17'
+    faq = ''
+ 
 
 
 

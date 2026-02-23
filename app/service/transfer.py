@@ -11,7 +11,7 @@ from app.aio.cls.fsm.transfer import ItemTransferState, InfoTransferState
 from app.aio.msg.transfer import ItemTransferText, InfoTransferText, TextHTML
 from app.aio.msg.item import ItemSketchText, ItemSketchDB, ItemDB
 from app.aio.config import admins
-from app.exeption.transfer import TransferQuantityNoIntError, TransferError, TransferNoHaventItemError
+from app.exeption.transfer import TransferQuantityNoIntError, TransferError, TransferEnoughError
 from app.logic.cls import MyTransfers
 from app.db.models.transfer import TransferDB
 from app.logged.infolog import infolog
@@ -154,6 +154,8 @@ class NewItemTransferService(BaseService):
         char2: CharacterDB = await self.state.get_value('char2')
         items1 = await self.state.get_value('items1')
         items2 = await self.state.get_value('items2')
+        if items1 == None and items2 == None:
+            raise TransferEnoughError(f'This transfers dont have items in items1 ot items2')
         bayer_tg_id, user, trade = await self.layer.newtrade(char1, char2, 
                                                 [item for item in items1.values()] if items1 else None, 
                                                 [item for item in items2.values()] if items2 else None, 'confirmed')
@@ -261,7 +263,7 @@ class InfoTransferService(BaseService):
             buttons = self.IKB.back(back_where)
         else:
             raise TransferError('Unknown transfer status')
-        return ItemTransferText(transfer.seller, transfer.buyer, items.from_me_items, items.to_me_items).text('🟢', '🔵'), buttons
+        return ItemTransferText(transfer.seller, transfer.buyer, items.from_me_items, items.to_me_items).text('🟢', '🔵', transfer.status), buttons
 
     async def new_status(self, transfer_id: int, new_status: str):
         layer = await self.layer.update_status(transfer_id, new_status)
