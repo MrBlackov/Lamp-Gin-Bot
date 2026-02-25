@@ -9,4 +9,4 @@ aiogram
 loguru
 pytest
 flask
-
+faker
