@@ -142,6 +142,14 @@ def select_objs_no_valide(clsDAO: BaseDAO):
     return _select_objs
 
 
+def get_for_ids(clsDAO: BaseDAO):
+    @connection()
+    @log.decor()
+    async def update_(session: AsyncSession, ids: list[int]):
+        return await clsDAO.select_for_ids(session, ids=ids)
+    return update_
+
+
 def update_obj(clsDAO: BaseDAO):
     @connection()
     @log.decor()

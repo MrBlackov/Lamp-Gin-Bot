@@ -34,6 +34,22 @@ class BaseDAO(Generic[T]):
             raise
 
     @classmethod
+    async def select_for_ids(cls, 
+                             session: AsyncSession,
+                             ids: list[int],                        
+                            ):
+        try:
+            query = select(cls.model).where(cls.model.id.in_(ids))
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.debug(f"Select data in {cls.model.__tablename__}, ids: {ids}, data:{[r.__dict__ for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise        
+
+    @classmethod
     async def find_all(cls, session: AsyncSession, filters: dict | None = None, order_by: dict | None = None):
         filter_dict = filters if filters else {}
         order_dict = order_by if order_by else {}        

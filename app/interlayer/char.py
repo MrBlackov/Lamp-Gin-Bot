@@ -80,6 +80,7 @@ class InfoCharacterLayer:
     async def get_chat_member(self, tg_id: int | None = None):
         if tg_id:
             return await bot.get_chat_member(newspaper_id, tg_id)
+        print(newspaper_id)
         return await bot.get_chat_member(newspaper_id, self.tg_id)
 
     async def get_chars(self) -> UserChars:

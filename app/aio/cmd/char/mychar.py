@@ -6,7 +6,9 @@ from app.logged.botlog import log
 from app.service.char import Character
 from app.aio.cmd.char.newchar import add_char_router
 from app.aio.cmd.item.items import item_router
+from app.aio.cmd.item.craft import craft_router
 from app.aio.cmd.char.inventory import inventory_router
+from app.aio.cmd.transfer.transfer import transfer_router
 from app.aio.cls.callback.char import (
                                        InfoCharChouse, 
                                        InfoCharList,
@@ -15,9 +17,7 @@ from app.aio.cls.callback.char import (
 from app.exeption.decorator import exept, call_exept
 
 char_router = Router()
-char_router.include_router(add_char_router)
-char_router.include_router(item_router)
-char_router.include_router(inventory_router)
+char_router.include_routers(add_char_router, item_router, inventory_router, transfer_router, craft_router)
 
 @char_router.message(Command('mychar'))
 @log.decor(arg=True)

@@ -1,7 +1,7 @@
-from app.db.metods.base import add_or_update_obj, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide
+from app.db.metods.base import add_or_update_obj, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide, get_for_ids
 from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
-from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB
+from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB, CraftDB, CraftDAO
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
@@ -48,6 +48,7 @@ select_item = select_obj(ItemValide, ItemDAO)
 select_items = select_objs(ItemValide, ItemDAO)
 select_item_sketch = select_obj(ItemSketchValide, ItemSketchDAO)
 select_item_sketchs = select_objs(ItemSketchValide, ItemSketchDAO)
+select_items_for_ids = get_for_ids(ItemDAO)
 
 async def get_item(sketch_id: int, inventory_id: int) -> ItemDB:
     return await select_item(filters={'sketch_id':sketch_id, 'inventory_id':inventory_id})
@@ -67,6 +68,9 @@ async def get_items() -> list[ItemDB]:
 async def get_items_for_inventory(inventory_id: int) -> list[ItemDB]:
     result = await select_items(filters={'inventory_id':inventory_id})
     return result if result else []
+
+async def get_items_for_ids(ids: list[int]) -> list[ItemDB] | None:
+    return await select_items_for_ids(ids=ids)
 
 async def get_item_sketchs(is_hide: bool = False) -> list[ItemSketchDB]:
     return await select_item_sketchs(filters={'is_hide':is_hide})
@@ -95,7 +99,7 @@ async def get_transfers_for_char_id(my_char_id: int, char_id: int) -> MyTransfer
     return MyTransfers(from_me, to_me)
 
 select_kit = select_obj_no_valide(KitDAO)
-select_kits = select_obj_no_valide(KitDAO)
+select_kits = select_objs_no_valide(KitDAO)
 select_kit_sketch = select_objs_no_valide(KitSketchDAO)
 select_kit_sketchs = select_objs_no_valide(KitSketchDAO)
 
@@ -119,7 +123,15 @@ async def get_kit_sketch_for_hide(hide: bool) -> list[KitSketchDB] | None:
     return await select_kit_sketchs(filters={'hide':hide})
 
 
+select_craft = select_obj_no_valide(CraftDAO)
+select_crafts = select_objs_no_valide(CraftDAO)
 
+async def get_craft_for_id(craft_id: int) -> CraftDB | None:
+    craft: CraftDB = await select_craft(filters={'id':craft_id})
+    craft.ingredients = await get_items_for_ids(ids=craft.ingredient_ids) if craft.ingredient_ids else []
+    craft.results = await get_items_for_ids(ids=craft.result_ids) if craft.result_ids else []
+    craft.tools = await get_items_for_ids(ids=craft.tool_ids) if craft.tool_ids else []
+    return craft
 
-
-
+async def get_crafts(no_hide: bool | None = True) -> list[CraftDB] | None:
+    return await select_crafts(filters={'no_hide':no_hide}) if type(no_hide) == bool else await select_crafts()

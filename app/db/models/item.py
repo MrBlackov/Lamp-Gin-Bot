@@ -21,11 +21,13 @@ class ItemDB(Base):
     inventory_id: Mapped[int | None] = mapped_column(ForeignKey('inventorydb.id'), nullable=True)
     transfer_id: Mapped[int | None] = mapped_column(ForeignKey('transferdb.id'), nullable=True)
     kitsketch_id: Mapped[int] = mapped_column(ForeignKey('kitsketchdb.id'), nullable=True)
+    craft_id: Mapped[int] = mapped_column(ForeignKey('craftdb.id'), nullable=True)
     from_char_transfers: Mapped[bool | None] = mapped_column(default=None)
     sketch_id: Mapped[int] = mapped_column(ForeignKey('itemsketchdb.id'))
     quantity: Mapped[int] = mapped_column(default=1)
     sketch: Mapped[ItemSketchDB] = relationship(ItemSketchDB, uselist=False, lazy='joined', back_populates='items')
     inventory: Mapped[Base] = relationship('InventoryDB', uselist=False, lazy='joined', back_populates='items')
+    nbt: Mapped[dict] = mapped_column(JSON, default={})
     
     @property
     def to_char_transfer(self):
@@ -45,3 +47,24 @@ class KitDB(Base):
     inventory_id: Mapped[int | None] = mapped_column(ForeignKey('inventorydb.id'), nullable=True)
     sketch: Mapped[KitSketchDB] = relationship(KitSketchDB, uselist=False, lazy='joined', back_populates='kits')   
     inventory: Mapped[Base] = relationship('InventoryDB', uselist=False, lazy='select', back_populates='kit') 
+
+class CraftDB(Base):
+    ingredient_ids: Mapped[list[ItemDB] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
+    result_ids: Mapped[list[ItemDB] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
+    tool_ids: Mapped[list[ItemDB] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
+    is_hide: Mapped[bool] = mapped_column(default=True)
+    ingredients: Mapped[list[ItemDB]] = relationship('ItemDB', uselist=True, lazy='noload')
+    results: Mapped[list[ItemDB]] = relationship('ItemDB', uselist=True, lazy='noload')
+    tools: Mapped[list[ItemDB]] = relationship('ItemDB', uselist=True, lazy='noload')
+
+    def ingredients_emodzi(self, to_str: bool = False, sep: str = ''):
+        emodzi_list = [i.sketch.emodzi for i in self.ingredients] if self.ingredients else []
+        return sep.join(emodzi_list) if to_str else emodzi_list
+    
+    def results_emodzi(self, to_str: bool = False, sep: str = ''):
+        emodzi_list = [i.sketch.emodzi for i in self.results] if self.results else []
+        return sep.join(emodzi_list) if to_str else emodzi_list
+    
+    def tools_emodzi(self, to_str: bool = False, sep: str = ''):
+        emodzi_list = [i.sketch.emodzi for i in self.tools] if self.tools else []
+        return sep.join(emodzi_list) if to_str else emodzi_list  
