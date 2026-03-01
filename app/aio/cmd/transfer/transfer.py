@@ -17,6 +17,7 @@ from app.aio.cls.callback.transfer import (InfoTransferInfoCall,
                                            InfoTransferActionCall,
                                            InfoTransferSearchCall,)
 from app.aio.cls.fsm.transfer import InfoTransferState
+from app.aio.cls.fsm.utils import TransferFSM
 
 transfer_router = Router()
 transfer_router.include_routers(new_transfer_router)
@@ -27,7 +28,6 @@ transfer_router.include_routers(new_transfer_router)
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    await state.clear()
     msg, markup = await TransferService(message.from_user.id, state).info.main_menu()
     await message.answer(msg, reply_markup=markup)
 
@@ -35,7 +35,6 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoTransferBackCall, state: FSMContext):
-    await state.clear()
     msg, markup = await TransferService(callback.from_user.id, state).info.main_menu()
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -43,7 +42,6 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoTr
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoTransferBackCall, state: FSMContext):
-    await state.clear()
     msg, markup = await TransferService(callback.from_user.id, state).info.to_pages()
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -65,7 +63,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoTr
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    msg0 = await state.get_value('msg')
+    msg0 = await TransferFSM(state, 'info').get_value('msg')
     msg, markup = await TransferService(message.from_user.id, state).info.search(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
@@ -106,8 +104,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoTr
 @new_transfer_router.message(Command('transfer'))
 @log.decor(arg=True)
 @exept
-async def cmd_inventory(message: Message, command: CommandObject, state: FSMContext):
-    await state.clear()  
+async def cmd_inventory(message: Message, command: CommandObject, state: FSMContext):  
     msg, markup = await TransferService(message.from_user.id, state).info.to_transfer_for_id(command.args)
     await message.answer(msg, reply_markup=markup)
 

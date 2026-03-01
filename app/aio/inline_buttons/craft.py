@@ -20,21 +20,17 @@ class CraftIKB(BotIKB):
             pages.append(InlineKeyboardButton(text='➡️', callback_data=CraftPageCall(page=page+1).pack()))
         if len(pages) > 0: 
             self.builder.row(*pages)
-        self.builder.row(InlineKeyboardButton(text='🧪 Попробовать самому', callback_data=CraftActionCall(to_craft_hiden=True).pack()))
+        #self.builder.row(InlineKeyboardButton(text='🧪 Попробовать самому', callback_data=CraftActionCall(to_craft_hiden=True).pack()))
         return self.builder.as_markup()
-    
-    def to_craft_hiden(self):
-        self.builder.button(text='🧪 Попробовать самому', callback_data=CraftActionCall(to_craft_hiden=True).pack())
-        return self.builder.adjust(1).as_markup()
     
     def craft_hiden(self, where: str):
         self.builder.button(text=f'💮 Ингредиенты', callback_data=CraftActionCall(to_faq_ingredient=True))
-        self.builder.button(text='➕', callback_data=CraftActionHidenCall(action='+', is_ingredient=True)) 
-        self.builder.button(text='➖', callback_data=CraftActionHidenCall(action='-', is_ingredient=True))
+        self.builder.button(text='➕', callback_data=CraftActionHidenCall(action='+', item_type='ingredient')) 
+        self.builder.button(text='➖', callback_data=CraftActionHidenCall(action='-', item_type='ingredient'))
         self.builder.button(text=f'🛠️ Инструменты', callback_data=CraftActionCall(to_faq_tool=True))        
-        self.builder.button(text='➕', callback_data=CraftActionHidenCall(action='+')) 
-        self.builder.button(text='➖', callback_data=CraftActionHidenCall(action='-'))       
-        self.builder.button(text=' Скрафтить', callback_data=CraftActionCall(status=''))
+        self.builder.button(text='➕', callback_data=CraftActionHidenCall(action='+', item_type='tools')) 
+        self.builder.button(text='➖', callback_data=CraftActionHidenCall(action='-', item_type='tools'))       
+        self.builder.button(text='✅ Скрафтить', callback_data=CraftActionCall(to_craft=True))
         self.builder.button(text='↩️ Назад', callback_data=CraftBackCall(where=where))        
         return self.builder.adjust(3, 3, 1).as_markup()   
     

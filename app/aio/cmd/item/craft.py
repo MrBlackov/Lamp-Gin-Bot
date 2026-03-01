@@ -6,7 +6,7 @@ from app.logged.botlog import log
 from app.aio.config import admins
 from app.exeption.decorator import exept, call_exept
 from app.service.craft import CraftService
-from app.aio.cls.callback.craft import CraftBackCall, CraftIdCall, CraftPageCall, CraftActionCall
+from app.aio.cls.callback.craft import CraftBackCall, CraftIdCall, CraftPageCall, CraftActionCall, CraftActionHidenCall
 
 craft_router = Router()
 
@@ -14,7 +14,6 @@ craft_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_new_char(message: Message, state: FSMContext):
-    await state.clear()
     markup, text = await CraftService(message.from_user.id, state).get_no_hide_craft()
     await message.answer(text, reply_markup=markup)
 

@@ -5,3 +5,9 @@ class CraftState(StatesGroup):
     page: int = 0
     back_where: str
     pages: list
+    item_type: str
+    items_pages: str
+    itempage: str
+    items_dict: str
+    item_id: str
+    

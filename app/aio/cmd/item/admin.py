@@ -14,7 +14,6 @@ add_item_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_add_item_name(message: Message, command: CommandObject, state: FSMContext):
-    await state.clear()
     if command.args != None and message.from_user.id == owner:
         msg = await ItemService(message.from_user.id).add.add_data_item(command.args)
         await message.answer(msg)
@@ -29,7 +28,6 @@ async def cmd_add_item_name(message: Message, command: CommandObject, state: FSM
 @log.decor(arg=True)
 @exept
 async def cmd_add_item_name(message: Message, command: CommandObject, state: FSMContext):
-    await state.clear()
     if command.args != None and message.from_user.id == owner:
         msg = await ItemService(message.from_user.id).give.give(command.args)
         await message.answer(msg)

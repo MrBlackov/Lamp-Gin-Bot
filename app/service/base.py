@@ -2,11 +2,12 @@ from aiogram.fsm.context import FSMContext
 from app.aio.inline_buttons.char import BotIKB
 from app.logged.botlog import logs
 from app.aio.config import admins, bot, newspaper_id
+from app.aio.cls.fsm.utils import FSMUtils
 
 class BaseService:
     def __init__(self, tg_id: int, state: FSMContext | None = None):
         self.tg_id = tg_id
-        self.state = state
+        self.state: FSMUtils = FSMUtils(state)
         self.IKB = BotIKB()
         self.newspaper_id = newspaper_id
         self.admins = admins

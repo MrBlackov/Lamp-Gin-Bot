@@ -23,7 +23,6 @@ char_router.include_routers(add_char_router, item_router, inventory_router, tran
 @log.decor(arg=True)
 @exept
 async def cmd_new_char(message: Message, state: FSMContext):
-    await state.clear()
     markup, text = await Character(message.from_user.id, state).info.get_chars()
     await message.answer(text, reply_markup=markup)
     
@@ -31,7 +30,6 @@ async def cmd_new_char(message: Message, state: FSMContext):
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoCharChouse, state: FSMContext):
-    
     markup, text = await Character(callback.from_user.id, state).info.get_chars()
     await callback.message.edit_text(text, reply_markup=markup)
 
@@ -39,7 +37,6 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoCh
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoCharList, state: FSMContext):
-    
     markup, text = await Character(callback.from_user.id, state).info.get_char(callback_data.char_id)
     await callback.message.edit_text(text, reply_markup=markup)
 
@@ -47,7 +44,6 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoCh
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: InfoCharList, state: FSMContext):
-    
     markup, text = await Character(callback.from_user.id, state).info.char_to_main(callback_data.char_id)
     await callback.message.edit_text(text, reply_markup=markup)    
 

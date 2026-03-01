@@ -16,6 +16,7 @@ from app.aio.cls.fsm.item import NewItemState
 from app.validate.sketchs.item_sketchs import ItemSketchValide
 from app.logged.infolog import infolog
 from app.exeption.item import ItemError
+from app.aio.cls.fsm.utils import ItemFSM
 
 class ItemBaseService(BaseService):
     def __init__(self, tg_id, state = None):
@@ -25,6 +26,7 @@ class ItemBaseService(BaseService):
 class AddItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
+        self.state = ItemFSM(state, 'add')
         self.IKB = NewItemIKB()
         self.text = NewItemText
 
@@ -124,6 +126,7 @@ class AddItemService(ItemBaseService):
 class ChangeItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
+        self.state = ItemFSM(state, 'change')
         self.IKB = ChangeItemSketchIKB()
 
     async def start(self, string: str):
@@ -229,6 +232,7 @@ class ChangeItemService(ItemBaseService):
 class GiveItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
+        self.state = ItemFSM(state, 'give')
 
     async def give(self, string: str):
         data = str_to_json(string)
@@ -261,6 +265,7 @@ class ListItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.IKB = ListItemSketchIKB()
+        self.state = ItemFSM(state)
 
     async def get_item_sketchs(self, value_in_page: int = 10):
         sketches = await self.layer.get_item_sketchs()

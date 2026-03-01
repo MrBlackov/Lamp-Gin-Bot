@@ -10,6 +10,7 @@ from app.aio.cls.fsm.item import NewItemState
 from app.aio.cls.callback.item import (NewItemACtionCall, 
                                        NewItemBackCall, 
                                        NewItemAdminACtionCall)
+from app.aio.cls.fsm.utils import ItemFSM
 
 new_item_router = Router()
 
@@ -19,7 +20,6 @@ new_item_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    await state.clear()
     msg, markup = await ItemService(message.from_user.id, state).add.to_name()
     msg0 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg0)
@@ -28,7 +28,6 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    await state.clear()
     msg, markup = await ItemService(message.from_user.id, state).add.to_create_item()
     await message.answer(msg, reply_markup=markup)
 
@@ -44,7 +43,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: NewIte
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    msg0 = await state.get_value('msg')
+    msg0 = await ItemFSM(state, 'new').get_value('msg')
     msg, markup = await ItemService(message.from_user.id, state).add.to_emodzi(message.text, message)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
@@ -54,7 +53,7 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    msg0 = await state.get_value('msg')
+    msg0 = await ItemFSM(state, 'new').get_value('msg')
     msg, markup = await ItemService(message.from_user.id, state).add.to_menu(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
@@ -79,7 +78,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: NewIte
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    msg0 = await state.get_value('msg')
+    msg0 = await ItemFSM(state, 'new').get_value('msg')
     msg, markup = await ItemService(message.from_user.id, state).add.redact(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)

@@ -5,11 +5,13 @@ from app.aio.msg.base import UserText
 from app.aio.msg.utils import TextHTML
 from app.service.base import BaseService 
 from app.interlayer.main import UserLayer
+from app.aio.cls.fsm.utils import MainFSM
 
 class UserService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.layer = UserLayer(tg_id)
+        self.state = MainFSM(state)
 
     async def get_info(self, user_id: int | None = None):
         layer = await self.layer.get_char_info()

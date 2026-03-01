@@ -14,6 +14,7 @@ from app.aio.cls.callback.item import (ListItemSketchBackCall,
                                        ListItemSketchToPageCall, 
                                        ListItemSketchToQueryCall,
                                        ListItemSketchItemCall)
+from app.aio.cls.fsm.utils import ItemFSM
 
 item_router = Router()
 item_router.include_router(add_item_router)
@@ -24,7 +25,6 @@ item_router.include_router(new_item_router)
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    await state.clear()
     msg, markup = await ItemService(message.from_user.id, state).list.get_item_sketchs()
     await message.answer(msg, reply_markup=markup)
 
@@ -32,7 +32,6 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ListItemSketchToListCall, state: FSMContext):
-    
     msg, markup = await ItemService(callback.from_user.id, state).list.get_item_sketchs()
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -40,7 +39,6 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: ListIt
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ListItemSketchToListCall, state: FSMContext):
-    
     msg, markup = await ItemService(callback.from_user.id, state).list.list_items(back_where='cmd')
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -48,7 +46,6 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: ListIt
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ListItemSketchToPageCall, state: FSMContext):
-    
     msg, markup = await ItemService(callback.from_user.id, state).list.list_items(callback_data.page)
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -56,7 +53,6 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: ListIt
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ListItemSketchToQueryCall, state: FSMContext):
-    
     msg, markup = await ItemService(callback.from_user.id, state).list.to_search(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -64,7 +60,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: ListIt
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    msg0 = await state.get_value('msg')
+    msg0 = await ItemFSM(state, 'list').get_value('msg')
     msg, markup = await ItemService(message.from_user.id, state).list.search(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
@@ -75,6 +71,5 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: ListItemSketchItemCall, state: FSMContext):
-    
     msg, markup = await ItemService(callback.from_user.id, state).list.to_item(callback_data.item)
     await callback.message.edit_text(msg, reply_markup=markup)

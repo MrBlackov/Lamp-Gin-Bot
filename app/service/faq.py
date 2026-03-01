@@ -8,10 +8,12 @@ from app.service.base import BaseService
 from app.exeption import error_faq, BotError
 from aiogram.types.chat_member_banned import ChatMemberStatus
 from app.exeption.faq import FaqErrorNoEnterError, FaqErrorNoFindError
+from app.aio.cls.fsm.utils import FaqFSM
 
 class FaqService(BaseService):
     def __init__(self, tg_id: int, state: FSMContext | None = None):
         super().__init__(tg_id, state)
+        self.state = FaqFSM(state)
         self.IKB = FaqIKB()
         self.text = FaqText
 

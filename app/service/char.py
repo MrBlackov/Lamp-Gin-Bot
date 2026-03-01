@@ -15,10 +15,12 @@ from app.aio.cls.fsm.char import InventoryState
 from app.exeption.char import BonusCharSubError
 from aiogram.types.chat_member_banned import ChatMemberStatus
 from app.exeption.item import ItemError
+from app.aio.cls.fsm.utils import CharFSM
 
 class AddCharacterService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
+        self.state = CharFSM(state, 'add')
         self.IKB = AddCharIKB()
 
     async def chouse_gender(self, to_change: bool = False):
@@ -136,6 +138,7 @@ class AddCharacterService(BaseService):
 class InfoCharacterService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
+        self.state = CharFSM(state, 'info')
         self.IKB = InfoCharIKB()
 
     async def get_chars(self):
@@ -169,6 +172,7 @@ class InfoCharacterService(BaseService):
 class InventoryService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
+        self.state = CharFSM(state, 'inventory')
         self.IKB = InventoryIKB()
 
     async def inventory(self):

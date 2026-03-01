@@ -8,7 +8,7 @@ class CraftText(TextHTML):
     @property
     def text(self) -> str:
         return (
-            '📜 Рецепт крафта \n' 
+            '📜 Рецепт \n' 
             f'\n Ингредиенты: {TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity}шт.)' for item in self.craft.ingredients])).blockquote()}' 
             f'\n Результат: {TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity}шт.)' for item in self.craft.results])).blockquote()}' 
             f'\n Инструменты: {TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity}шт.)' for item in self.craft.tools])).blockquote()}' 

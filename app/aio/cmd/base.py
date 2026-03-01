@@ -19,7 +19,6 @@ base_router.include_routers(char_router, faq_router, stats_router)
 @log.decor(arg=True)
 @exept
 async def cmd_add_item_name(message: Message, command: CommandObject, state: FSMContext):
-    await state.clear()
     if command.args != None and message.from_user.id == owner:
         msg = await UserService(message.from_user.id, state).get_info(command.args)
         await message.answer(msg)

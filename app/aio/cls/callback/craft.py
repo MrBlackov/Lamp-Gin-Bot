@@ -14,10 +14,10 @@ class CraftActionCall(CallbackData, prefix='craft_action'):
     craft_hiden: bool = False
     to_faq_ingredient: bool = False
     to_faq_tool: bool = False
+    to_craft: bool = False
 
 class CraftActionHidenCall(CallbackData, prefix='craft_action_hiden'):
-    is_ingredient: bool = False
-    is_tool: bool = False
+    item_type: str
     action: str
 
 

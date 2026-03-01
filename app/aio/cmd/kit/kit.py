@@ -7,6 +7,7 @@ from app.service.kit import KitService
 from app.exeption.decorator import exept, call_exept
 from app.aio.cls.callback.kit import KitActionCall, KitBackCall, KitIdCall
 from app.aio.cls.fsm.kit import KitState
+from app.aio.cls.fsm.utils import KitFSM
 
 kit_router = Router()
 
@@ -14,7 +15,6 @@ kit_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_new_char(message: Message, state: FSMContext):
-    await state.clear()
     msg, markup = await KitService(message.from_user.id, state).kits()
     await message.answer(msg, reply_markup=markup)
 
@@ -22,7 +22,6 @@ async def cmd_new_char(message: Message, state: FSMContext):
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: KitBackCall, state: FSMContext):
-    await state.clear()
     msg, markup = await KitService(callback.from_user.id, state).kits()
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -44,7 +43,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: KitAct
 @log.decor(arg=True)
 @exept
 async def cmd_inventory(message: Message, state: FSMContext):
-    msg0 = await state.get_value('msg')
+    msg0 = await KitFSM(state).get_value('msg')
     msg, markup = await KitService(message.from_user.id, state).enter_code(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)

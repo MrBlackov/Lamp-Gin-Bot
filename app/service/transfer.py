@@ -16,6 +16,7 @@ from app.logic.cls import MyTransfers
 from app.db.models.transfer import TransferDB
 from app.logged.infolog import infolog
 from app.aio.msg.base import UserText
+from app.aio.cls.fsm.utils import TransferFSM
 
 class NewItemTransferService(BaseService):
     def __init__(self, tg_id, state = None):
@@ -23,6 +24,7 @@ class NewItemTransferService(BaseService):
         self.IKB = ItemTransferIKB()
         self.layer = TransferLayer(tg_id)
         self.text = ItemTransferText
+        self.state = TransferFSM(state, 'new')
         
     async def new_transfer(self):
         return '📲 Выберите режим сделки:', self.IKB.new_transfer()
@@ -184,6 +186,7 @@ class InfoTransferService(BaseService):
         self.IKB = InfoTransferIKB()
         self.layer = TransferLayer(tg_id)
         self.text = ItemTransferText
+        self.state = TransferFSM(state, 'info')
 
     async def main_menu(self):
         transfers = await self.layer.transfers()
