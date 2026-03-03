@@ -12,12 +12,19 @@ class CraftPageCall(CallbackData, prefix='craft_page'):
 class CraftActionCall(CallbackData, prefix='craft_action'):
     to_craft_hiden: bool = False
     craft_hiden: bool = False
-    to_faq_ingredient: bool = False
-    to_faq_tool: bool = False
+    to_faq: bool = False
+    faq: str | None = None
     to_craft: bool = False
+    to_send: bool = False
+    to_time: bool = False
 
-class CraftActionHidenCall(CallbackData, prefix='craft_action_hiden'):
+class CraftCreateActionCall(CallbackData, prefix='craft_action_hiden'):
     item_type: str
     action: str
 
+class CraftItemPagesCall(CallbackData, prefix='craft_item_pages'):
+    page: int
+    item_type: str
 
+class CraftItemIdCall(CallbackData, prefix='craft_item_id'):
+    item_id: int

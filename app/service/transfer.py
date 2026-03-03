@@ -167,6 +167,7 @@ class NewItemTransferService(BaseService):
                                 [item for item in items1.values()] if items1 else None, 
                                 [item for item in items2.values()] if items2 else None,
                                 ).text('🟢', '🔵'))
+        await self.state.clear_this_state()
         return '✅ Сделка отправлена, посмотреть свои сделки /transfer', None
 
     async def to_created(self):
@@ -177,6 +178,7 @@ class NewItemTransferService(BaseService):
         bayer_tg_id = await self.layer.newtrade(char1, char2, 
                                                 [item for item in items1.values()] if items1 else None, 
                                                 [item for item in items2.values()] if items2 else None, 'created')
+        await self.state.clear_this_state()
         return '💾 Сделка сохранена в виде черновика, посмотреть свои сделки - /transfer', None    
 
 

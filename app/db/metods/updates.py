@@ -1,9 +1,10 @@
-from app.db.metods.base import update_obj
+from app.db.metods.base import update_obj, update_obj_for_ids
 from app.db.dao.main import UserDAO, UserDB
 from app.db.dao.chars import ExistenceDB, CharacterDB, CharacterDAO, ExistenceDAO
-from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB
+from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.db.dao.transfer import TransferDAO
+from typing import Literal
 
 update_user = update_obj(UserDAO)
 update_char = update_obj(CharacterDAO)
@@ -11,6 +12,7 @@ update_exist = update_obj(ExistenceDAO)
 
 
 update_item = update_obj(ItemDAO)
+update_item_for_ids = update_obj_for_ids(ItemDAO)
 update_item_sketch = update_obj(ItemSketchDAO)
 
 
@@ -27,3 +29,11 @@ async def update_item_sketch_for_id(item_id: int, new_data: dict) -> ItemSketchD
     return await update_item_sketch(filters={'id':item_id}, new_data=new_data)
 
 update_transfer = update_obj(TransferDAO)
+
+update_craft = update_obj(CraftDAO)
+
+async def update_craft_items(craft_id: int, new_data: list[int], type: Literal['ingredient', 'tool', 'result']) -> CraftDB:
+    return await update_craft(filters={'id':craft_id}, new_data={f'{type}_ids': new_data})
+
+async def update_item_on_craft_id(craft_id: int, item_ids: list[int]):
+    return await update_item_for_ids(ids=item_ids, new_data={'craft_id':craft_id})

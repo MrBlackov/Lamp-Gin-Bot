@@ -88,6 +88,7 @@ class AddItemService(ItemBaseService):
         user, item = await self.layer.create(sketch)
         if user and item:
             await infolog.new_sketch_no_moderate(self.tg_id, UserText(user.tg_user, user).text + '\n' + ItemSketchText(item).text(True), self.IKB.moderator_menu(item.id))
+            await self.state.clear_this_state()
             return '✅ Предмет отправлен на модерацию', None
         raise ItemError('Dont have user or item')
         
@@ -100,6 +101,7 @@ class AddItemService(ItemBaseService):
         user, item = await self.layer.create(sketch)
         if user and item:
             await infolog.new_item(user.id, UserText(user.tg_user, user).text + ' \n \n' + ItemSketchText(item).text(True))
+            await self.state.clear_this_state()
             return '✅ Предмет создан, проверьте инвентарь - /inventory', None
         raise ItemError('Dont have user or item')
     
@@ -222,6 +224,7 @@ class ChangeItemService(ItemBaseService):
     async def delete_sketch(self, back_where: str = 'info'):
         sketch_id = await self.state.get_value('sketch_id')
         is_delete = await self.layer.delete_sketch(sketch_id)
+        await self.state.clear_this_state()
         return ('🗑️ Эскиз предмета был удален', None) if is_delete else ('❌ Эскиз предмета не был удален', self.IKB.back(back_where))
 
     async def delete_items(self, back_where: str = 'info'):

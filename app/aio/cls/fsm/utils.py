@@ -9,15 +9,14 @@ class FSMUtils:
 
     @property
     def prefix(self):
-        return '_'.join(self.prefixs + [self.prefix_two])
+        return '_'.join(self.prefixs + [self.prefix_two]) + ('_' if len(self.prefixs + [self.prefix_two]) > 0 else '')
     
     def get_value(self, key: str, default = None):
-        print(self.prefix + key)
         return self.state.get_value(self.prefix + key, default)
     
-    def update_data(self, **kwargs):
-        print({self.prefix + k: v for k, v in kwargs.items()})
-        return self.state.update_data(**{self.prefix + k: v for k, v in kwargs.items()})
+    async def update_data(self, **kwargs):
+        state_keys = await self.get_value('state_keys', [])
+        return await self.state.update_data(**{self.prefix + k: v for k, v in kwargs.items()} | {self.prefix + 'state_keys': state_keys + [self.prefix + k for k in kwargs.keys()]})
     
     def set_state(self, new_state = None):
         return self.state.set_state(new_state)
@@ -27,6 +26,11 @@ class FSMUtils:
 
     def clear(self):
         return self.state.clear()
+    
+    async def clear_this_state(self):
+        data = await self.get_data()
+        new_data = {k:v for k, v in data.items() if k not in data.get(self.prefix + 'state_keys', [])}
+        return await self.state.set_data(new_data)
 
 class CharFSM(FSMUtils):
     prefixs = ['char']

@@ -159,6 +159,14 @@ def update_obj(clsDAO: BaseDAO):
         return update
     return update_
 
+def update_obj_for_ids(clsDAO: BaseDAO):
+    @connection()
+    @log.decor()
+    async def update_(session: AsyncSession, ids: list[int], new_data: dict):
+        update = await clsDAO.update_many_for_ids(session, ids=ids, values=new_data)
+        return update
+    return update_
+
 def delete_obj(clsDAO: BaseDAO):
     @connection()
     @log.decor()

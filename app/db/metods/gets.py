@@ -6,7 +6,7 @@ from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.db.dao.transfer import TransferDAO, TransferDB
-from app.logic.cls import MyTransfers
+from app.logic.cls import MyTransfers, Craft
 
 add_or_update_user = add_or_update_obj(UserDAO)
 add_or_update_donate = add_or_update_obj(DonateDAO)
@@ -81,6 +81,9 @@ select_transfers = select_objs_no_valide(TransferDAO)
 async def get_items_for_transfer(transfer_id: int, from_char: bool) -> list[ItemDB] | None:
     return await select_items(filters={'transfer_id':transfer_id, 'from_char_transfers':from_char})
 
+async def get_items_for_craft(craft_id: int) -> list[ItemDB] | None:
+    return await select_items(filters={'craft_id':craft_id})
+
 async def get_transfer_for_id(transfer_id: int) -> TransferDB | None:
     return await select_transfer(filters={'id':transfer_id})
 
@@ -126,12 +129,13 @@ async def get_kit_sketch_for_hide(hide: bool) -> list[KitSketchDB] | None:
 select_craft = select_obj_no_valide(CraftDAO)
 select_crafts = select_objs_no_valide(CraftDAO)
 
-async def get_craft_for_id(craft_id: int) -> CraftDB | None:
+async def get_craft_for_id(craft_id: int):
     craft: CraftDB = await select_craft(filters={'id':craft_id})
-    craft.ingredients = await get_items_for_ids(ids=craft.ingredient_ids) if craft.ingredient_ids else []
-    craft.results = await get_items_for_ids(ids=craft.result_ids) if craft.result_ids else []
-    craft.tools = await get_items_for_ids(ids=craft.tool_ids) if craft.tool_ids else []
-    return craft
+    items = await get_items_for_craft(craft.id)
+    return craft.add_items(items)
 
-async def get_crafts(no_hide: bool | None = True) -> list[CraftDB] | None:
-    return await select_crafts(filters={'no_hide':no_hide}) if type(no_hide) == bool else await select_crafts()
+async def get_crafts(is_hide: bool | None = True) -> list[CraftDB] | None:
+    crafts: list[CraftDB] = await select_crafts(filters={'is_hide':is_hide, 'is_create':True}) if type(is_hide) == bool else await select_crafts()
+    if crafts:
+        return [craft.add_items(await get_items_for_craft(craft.id)) for craft in crafts]
+    return crafts

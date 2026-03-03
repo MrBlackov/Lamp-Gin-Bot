@@ -172,6 +172,18 @@ class BaseDAO(Generic[T]):
         except SQLAlchemyError as e:
             log.error(f"Error in mass update: {e}")
             raise e
+
+    @classmethod
+    async def update_many_for_ids(cls, session: AsyncSession, ids: list[int], values: dict):
+        try:
+            stmt = update(cls.model).where(cls.model.id.in_(ids)).values(**values)
+            result = await session.execute(stmt)
+            await session.flush()
+            return result.rowcount
+        except SQLAlchemyError as e:
+            log.error(f"Error in mass update: {e}")
+            raise e        
+        
         
     @classmethod
     async def delete_one_by_id(cls, data_id: int, session: AsyncSession):

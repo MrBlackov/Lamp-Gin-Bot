@@ -49,22 +49,73 @@ class KitDB(Base):
     inventory: Mapped[Base] = relationship('InventoryDB', uselist=False, lazy='select', back_populates='kit') 
 
 class CraftDB(Base):
-    ingredient_ids: Mapped[list[ItemDB] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
-    result_ids: Mapped[list[ItemDB] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
-    tool_ids: Mapped[list[ItemDB] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
+    ingredient_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
+    result_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
+    tool_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
     is_hide: Mapped[bool] = mapped_column(default=True)
-    ingredients: Mapped[list[ItemDB]] = relationship('ItemDB', uselist=True, lazy='noload')
-    results: Mapped[list[ItemDB]] = relationship('ItemDB', uselist=True, lazy='noload')
-    tools: Mapped[list[ItemDB]] = relationship('ItemDB', uselist=True, lazy='noload')
+    is_create: Mapped[bool] = mapped_column(default=True)
+    creator_id: Mapped[int] = mapped_column(ForeignKey('userdb.id'), default=1)
+    time: Mapped[int] = mapped_column(default=0)
+
+    def add_items(self, items: list[ItemDB]):
+        self.items = items
+        return self
+
+    @property
+    def ingredients(self) -> list[ItemDB]:
+        item_ids = {i.id:i for i in self.items}
+        item_dict = []
+        for item_id in self.ingredient_ids:
+            item = item_ids.get(item_id)
+            if item:
+                item_dict.append(item)
+        return item_dict
+    
+    @property
+    def tools(self) -> list[ItemDB]:
+        item_ids = {i.id:i for i in self.items}
+        item_dict= []
+        for item_id in self.tool_ids:
+            item = item_ids.get(item_id)
+            if item:
+                item_dict.append(item)
+        return item_dict
+    
+    @property
+    def results(self) -> list[ItemDB]:
+        item_ids = {i.id:i for i in self.items}
+        item_dict = []
+        for item_id in self.result_ids:
+            item = item_ids.get(item_id)
+            if item:
+                item_dict.append(item)
+        return item_dict
 
     def ingredients_emodzi(self, to_str: bool = False, sep: str = ''):
         emodzi_list = [i.sketch.emodzi for i in self.ingredients] if self.ingredients else []
+        if len(emodzi_list) == 0:
+            return '💮'
         return sep.join(emodzi_list) if to_str else emodzi_list
     
     def results_emodzi(self, to_str: bool = False, sep: str = ''):
         emodzi_list = [i.sketch.emodzi for i in self.results] if self.results else []
+        if len(emodzi_list) == 0:
+            return '⚗️'
         return sep.join(emodzi_list) if to_str else emodzi_list
     
     def tools_emodzi(self, to_str: bool = False, sep: str = ''):
         emodzi_list = [i.sketch.emodzi for i in self.tools] if self.tools else []
+        if len(emodzi_list) == 0:
+            return '🛠️'
         return sep.join(emodzi_list) if to_str else emodzi_list  
+    
+    def to_mini_text(self, text: str, max_size: int):
+        if max_size > len(text) or len(text) - max_size < 4:
+            return text
+        return text[:max_size] + '.'
+    
+    def result_text(self, max_simvols: int = 7):
+        return self.to_mini_text(self.results[0].sketch.name, max_simvols)
+    
+    def ingredient_text(self, max_simvols: int = 7):
+        return self.to_mini_text(self.ingredients[0].sketch.name, max_simvols)

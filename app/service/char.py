@@ -133,6 +133,7 @@ class AddCharacterService(BaseService):
         user = await CreateCharacterLayer().add_char(self.tg_id, char.char)
         await self.state.clear()
         await infolog.new_char(self.tg_id, UserText(user.tg_user, user).text + '\n' + self.info_to_str)
+        await self.state.clear_this_state()
         return True
 
 class InfoCharacterService(BaseService):
