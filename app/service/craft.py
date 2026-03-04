@@ -9,7 +9,7 @@ from app.aio.inline_buttons.craft import CraftIKB, AddCraftIKB
 from app.aio.msg.craft import CraftText
 from app.aio.cls.fsm.craft import CraftState, AddCraftState
 from app.aio.msg.item import ItemSketchText, ItemDB
-from app.exeption.craft import CraftQuantityNoIntError
+from app.exeption.craft import CraftQuantityNoIntError, CraftNoHaveIngredientsError, CraftNoHaveResultsError
 from app.aio.cls.fsm.utils import CraftFSM
 from app.validate.craft import CraftValide
 
@@ -26,10 +26,14 @@ class AddCraftService(BaseService):
         tools: dict = await self.state.get_value('tools') or {}
         results: dict = await self.state.get_value('results') or {}
         time: int = await self.state.get_value('time') or 0
+        is_hide: int = await self.state.get_value('is_hide')
+        if is_hide == None:
+            is_hide = True
         return self.text(CraftValide(ingredients=[v for v in ingredients.values()], 
                                      tools=[v for v in tools.values()], 
                                      results=[v for v in results.values()], 
-                                     time=time)).text, self.IKB.new_craft(True if self.tg_id in admins else False)
+                                     time=time,
+                                     is_hide=is_hide)).text(is_create=True), self.IKB.new_craft(True if self.tg_id in admins else False, is_hide)
 
     async def add_item(self, action: str, item_type: str):
         if action == '+':
@@ -107,7 +111,10 @@ class AddCraftService(BaseService):
             raise CraftQuantityNoIntError(f'This user(tg_id={self.tg_id}) enter time to craft no int')
         await self.state.update_data(time=int(time))
         return await self.craft_menu()
-
+    
+    async def redact_hide(self, value: bool):
+        await self.state.update_data(is_hide=(value if value else False))
+        return await self.craft_menu()
 
     async def faq(self, faq_type: str):
         return self.text.faq(faq_type)
@@ -117,6 +124,10 @@ class AddCraftService(BaseService):
         tools: dict = await self.state.get_value('tools') or {}
         results: dict = await self.state.get_value('results') or {}
         time: int = await self.state.get_value('time') or 0
+        if ingredients == {}:
+            raise CraftNoHaveIngredientsError(f'This user(tg_id={self.tg_id}) try to create craft without ingredients')
+        if results == {}:
+            raise CraftNoHaveResultsError(f'This user(tg_id={self.tg_id}) try to create craft without results')
         craft = await self.layer.add_craft(ingredients=[v for v in ingredients.values()], tools=[v for v in tools.values()], results=[v for v in results.values()], time=time)
         await self.state.clear_this_state()
         return f'✅ Вы успешно создали рецепт, id: {craft.id}', None
@@ -126,6 +137,10 @@ class AddCraftService(BaseService):
         tools: dict = await self.state.get_value('tools') or {}
         results: dict = await self.state.get_value('results') or {}
         time: int = await self.state.get_value('time') or 0
+        if ingredients == {}:
+            raise CraftNoHaveIngredientsError(f'This user(tg_id={self.tg_id}) try to create craft without ingredients')
+        if results == {}:
+            raise CraftNoHaveResultsError(f'This user(tg_id={self.tg_id}) try to create craft without results')
         craft = await self.layer.send_craft(ingredients=[v for v in ingredients.values()], tools=[v for v in tools.values()], results=[v for v in results.values()], time=time)
         await self.state.clear_this_state()
         return '✅ Вы успешно отправили рецепт на модерацию', None
@@ -153,9 +168,32 @@ class InfoCraftService(BaseService):
         max_page = len(pages)
         return f'Известные рецепты {f'[{page + 1}/{max_page}стр.]' if max_page > 1 else ''}', self.IKB.crafts(crafts=pages[page], page=page, max_page=max_page)
 
-    async def craft(self, craft_id: int):
+    async def craft_quantity(self, quantity: str):
+        if quantity.isdigit() == False:
+            raise CraftQuantityNoIntError(f'This user(tg_id={self.tg_id}) enter quantity to craft no int')
+        if int(quantity) < 1:
+            raise CraftQuantityNoIntError(f'This user(tg_id={self.tg_id}) enter quantity to craft less than 1')
+        craft_id = await self.state.get_value('craft_id')
+        return await self.craft(craft_id=craft_id, quantity=quantity)
+
+    async def craft(self, craft_id: int, quantity: str = '1'): 
+        if quantity.isdigit() == False:
+            raise CraftQuantityNoIntError(f'This user(tg_id={self.tg_id}) enter quantity to craft no int')
         craft = await self.layer.get_craft_for_id(craft_id=craft_id)
-        return CraftText(craft=craft).text, self.IKB.craft(where='cmd')
+        return CraftText(craft=craft).text(quantity=int(quantity)), self.IKB.craft(craft_id=craft_id, quantity=int(quantity), where='cmd')
+    
+    async def to_quantity(self, craft_id: int, msg):
+        await self.state.update_data(craft_id=craft_id, msg=msg)
+        await self.state.set_state(CraftState.quantity)
+        return '✒️ Сколько раз вы хотите скрафтить по этому рецепту?', self.IKB.back(where='craft_info')
+    
+    async def craft_action(self, craft_id: int, quantity: str):
+        if quantity.isdigit() == False:
+            raise CraftQuantityNoIntError(f'This user(tg_id={self.tg_id}) enter quantity to craft no int')
+        await self.layer.use_craft(craft_id=craft_id, quantity=int(quantity))
+        await self.state.clear_this_state()
+        return '✅ Крафт прошел успешен', None
+
     
 
 

@@ -17,6 +17,14 @@ class CraftActionCall(CallbackData, prefix='craft_action'):
     to_craft: bool = False
     to_send: bool = False
     to_time: bool = False
+    to_craft_quantity: bool = False
+    craft_id: int | None = None
+    redact_hide: bool = False 
+    hide: bool | None = None
+    
+class CraftUseCall(CallbackData, prefix='craft_use'):
+    craft_id: int
+    quantity: int = 1
 
 class CraftCreateActionCall(CallbackData, prefix='craft_action_hiden'):
     item_type: str

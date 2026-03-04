@@ -268,7 +268,7 @@ class ListItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.IKB = ListItemSketchIKB()
-        self.state = ItemFSM(state)
+        self.state = ItemFSM(state, 'list')
 
     async def get_item_sketchs(self, value_in_page: int = 10):
         sketches = await self.layer.get_item_sketchs()
@@ -302,7 +302,7 @@ class ListItemService(ItemBaseService):
         searchs = LetterSearch(sketch_names).search(find)
         search_sketch = [sketches_dict.get(search) for search in searchs if search in sketch_names]
         pages = [tuple(search_sketch[i:i+value_in_page]) for i in range(0, len(search_sketch), value_in_page)]
-        await self.state.update_data(searchs=pages)
+        await self.state.update_data(searchs=pages, page=0)
         max_pages = len(pages)
         if max_pages > 0:
             return f'📦 Предметы (0/{max_pages}стр)', self.IKB.list_items(pages[0], 0, max_pages, back_where)

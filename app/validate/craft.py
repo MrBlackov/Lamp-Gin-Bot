@@ -6,6 +6,7 @@ class CraftValide(BaseModel):
     tools: list
     results: list
     time: int = 0
+    is_hide: bool
 
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 

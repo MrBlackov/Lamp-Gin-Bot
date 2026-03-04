@@ -6,7 +6,8 @@ from app.aio.cls.callback.craft import (CraftBackCall,
                                         CraftActionCall, 
                                         CraftCreateActionCall,
                                         CraftItemIdCall,
-                                        CraftItemPagesCall)
+                                        CraftItemPagesCall,
+                                        CraftUseCall)
 from app.db.models.item import CraftDB, ItemSketchDB
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -16,7 +17,7 @@ class AddCraftIKB(BotIKB):
         self.builder.button(text='↩️ Назад', callback_data=CraftBackCall(where=where))
         return self.builder.adjust(1).as_markup()
 
-    def new_craft(self, is_admin: bool):
+    def new_craft(self, is_admin: bool, is_hide: bool):
         self.builder.button(text=f'💮 Ингредиенты', callback_data=CraftActionCall(to_faq=True, faq='ingredients'))
         self.builder.button(text='➕', callback_data=CraftCreateActionCall(action='+', item_type='ingredients')) 
         self.builder.button(text='➖', callback_data=CraftCreateActionCall(action='-', item_type='ingredients'))
@@ -26,7 +27,11 @@ class AddCraftIKB(BotIKB):
         self.builder.button(text=f'⚗️ Результат', callback_data=CraftActionCall(to_faq=True, faq='results'))        
         self.builder.button(text='➕', callback_data=CraftCreateActionCall(action='+', item_type='results')) 
         self.builder.button(text='➖', callback_data=CraftCreateActionCall(action='-', item_type='results'))  
-        self.builder.button(text='⏱️ Время крафта', callback_data=CraftActionCall(to_time=True)) 
+        #self.builder.button(text='⏱️ Время крафта', callback_data=CraftActionCall(to_time=True))  
+        if is_hide:
+            self.builder.button(text='📰 Сделать известным', callback_data=CraftActionCall(redact_hide=True, hide=False)) 
+        else:
+            self.builder.button(text='📰 Сделать скрытым', callback_data=CraftActionCall(redact_hide=True, hide=True)) 
         self.builder.button(text='📨 Отправить крафт', callback_data=CraftActionCall(to_send=True))  
         if is_admin:    
             self.builder.button(text='✅ Создать крафт', callback_data=CraftActionCall(to_craft=True))       
@@ -74,8 +79,9 @@ class CraftIKB(BotIKB):
         #self.builder.row(InlineKeyboardButton(text='🧪 Попробовать самому', callback_data=CraftActionCall(to_craft_hiden=True).pack()))
         return self.builder.as_markup()
 
-    def craft(self, where: str):
-        self.builder.button(text='🛠️ Скрафтить', callback_data=CraftActionCall(to_craft=True))
+    def craft(self, craft_id: int, quantity: int, where: str):
+        self.builder.button(text='🛠️ Скрафтить', callback_data=CraftUseCall(craft_id=craft_id, quantity=quantity))
+        self.builder.button(text='✒️ Указать другое количество', callback_data=CraftActionCall(to_craft_quantity=True, craft_id=craft_id))
         self.builder.button(text='↩️ Назад', callback_data=CraftBackCall(where=where))
         return self.builder.adjust(1).as_markup()
-    
+

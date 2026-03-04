@@ -296,7 +296,6 @@ class InfoTransferService(BaseService):
         transfer = mytransfers.all_for_id.get(transfer_id)
         if transfer.status == 'created':
             await self.to_delete(transfer_id)
-        await self.state.clear()
         await self.state.update_data(items1=transfer.seller_items, items2=transfer.buyer_items, redact_transfer=transfer)
         await self.new_status(transfer_id, 'rejected')
         return await NewItemTransferService(self.tg_id, self.state).trade_menu(char1=transfer.seller, char2=transfer.buyer)

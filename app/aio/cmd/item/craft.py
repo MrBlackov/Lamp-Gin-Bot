@@ -12,7 +12,8 @@ from app.aio.cls.callback.craft import (CraftBackCall,
                                         CraftActionCall, 
                                         CraftCreateActionCall,
                                         CraftItemIdCall,
-                                        CraftItemPagesCall)
+                                        CraftItemPagesCall,
+                                        CraftUseCall)
 from app.aio.cls.fsm.craft import CraftState, AddCraftState
 from app.aio.cls.fsm.utils import CraftFSM
 
@@ -81,11 +82,18 @@ async def cmd_inventory(message: Message, state: FSMContext):
     await state.set_state()
     await msg0.delete()
 
-@craft_router.callback_query(CraftActionCall.filter(F.to_time==True))     
+@craft_router.callback_query(CraftActionCall.filter(F.to_time == True))     
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftActionCall, state: FSMContext):
     msg, markup = await CraftService(callback.from_user.id, state).add.to_add_time(callback.message)
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@craft_router.callback_query(CraftActionCall.filter(F.redact_hide == True))     
+@log.decor(arg=True)
+@call_exept
+async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftActionCall, state: FSMContext):
+    msg, markup = await CraftService(callback.from_user.id, state).add.redact_hide(callback_data.hide)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @craft_router.message(AddCraftState.time)
@@ -145,10 +153,45 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftI
     msg, markup = await CraftService(callback.from_user.id, state).info.craft(craft_id=callback_data.craft_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
+@craft_router.callback_query(CraftBackCall.filter(F.where == 'сraft_info'))     
+@log.decor(arg=True)
+@call_exept
+async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftBackCall, state: FSMContext):
+    craft_id = await CraftFSM(state).get_value('craft_id')
+    msg, markup = await CraftService(callback.from_user.id, state).info.craft(craft_id)
+    await callback.message.edit_text(msg, reply_markup=markup)
+
 @craft_router.callback_query(CraftPageCall.filter())     
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftPageCall, state: FSMContext):
     msg, markup = await CraftService(callback.from_user.id, state).info.crafts_page(page=callback_data.page)
     await callback.message.edit_text(msg, reply_markup=markup)
+
+
+@craft_router.callback_query(CraftActionCall.filter(F.to_craft_quantity == True))     
+@log.decor(arg=True)
+@call_exept
+async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftActionCall, state: FSMContext):
+    msg, markup = await CraftService(callback.from_user.id, state).info.to_quantity(callback_data.craft_id, callback.message)
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@craft_router.message(CraftState.quantity)
+@log.decor(arg=True)
+@exept
+async def cmd_inventory(message: Message, state: FSMContext):
+    msg0 = await CraftFSM(state).get_value('msg')
+    msg, markup = await CraftService(message.from_user.id, state).info.craft_quantity(message.text)
+    msg2 = await message.answer(msg, reply_markup=markup)
+    await state.update_data(msg=msg2)
+    await state.set_state()
+    await msg0.delete()
+
+@craft_router.callback_query(CraftUseCall.filter())     
+@log.decor(arg=True)
+@call_exept
+async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftUseCall, state: FSMContext):
+    msg, markup = await CraftService(callback.from_user.id, state).info.craft_action(callback_data.craft_id, str(callback_data.quantity))
+    await callback.message.edit_text(msg, reply_markup=markup)
+
 

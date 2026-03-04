@@ -21,3 +21,4 @@ class CraftState(StatesGroup):
     page: int = 0
     back_where: str
     pages: list
+    quantity: int = State()

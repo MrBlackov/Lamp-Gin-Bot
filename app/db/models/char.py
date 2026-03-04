@@ -30,6 +30,7 @@ class AttributePointDB(Base):
 
 class ExistenceDB(Base): 
     people_id: Mapped[int | None] = mapped_column(ForeignKey('characterdb.id', ondelete='CASCADE'), default=None)
+    cage_id: Mapped[int | None] = mapped_column(ForeignKey('cagedb.id', ondelete='CASCADE'), default=0, nullable=True)
     char: Mapped['CharacterDB'] = relationship('CharacterDB', uselist=False, lazy='select', cascade='all', back_populates='exist')
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50), default='')

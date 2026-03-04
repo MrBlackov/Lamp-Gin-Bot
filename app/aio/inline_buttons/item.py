@@ -89,14 +89,17 @@ class ChangeItemSketchIKB(BotIKB):
 
     def charnge_item(self):
         self.builder.button(text='🪪 Имя', callback_data=ChangeItemSketchCall(what='name'))
-        self.builder.button(text='⏲️ Вес', callback_data=ChangeItemSketchCall(what='size'))
         self.builder.button(text='💠 Эмодзи', callback_data=ChangeItemSketchCall(what='emodzi'))
+        self.builder.button(text='⏲️ Вес', callback_data=ChangeItemSketchCall(what='size'))
+        self.builder.button(text='🎯 Редкость', callback_data=ChangeItemSketchCall(what='rarity'))
+        self.builder.button(text='📉 Мин. выпадения', callback_data=ChangeItemSketchCall(what='min_drop'))
+        self.builder.button(text='📈 Макс. выпадения', callback_data=ChangeItemSketchCall(what='max_drop'))
         self.builder.button(text='📜 Описание', callback_data=ChangeItemSketchCall(what='description'))
         self.builder.button(text='🗃️ Обладатели предмета', callback_data=ChangeItemSketchCall(to_items=True))
         self.builder.button(text='✂️ Удалить предметы', callback_data=ChangeItemSketchDeleteItemsCall())
         self.builder.button(text='🗑️ Удалить эскиз', callback_data=ChangeItemSketchDeleteSketchCall())
 
-        return self.builder.adjust(2, 2, 1).as_markup()
+        return self.builder.adjust(2, 2, 2, 1).as_markup()
 
     def to_items(self, datas: tuple[tuple[CharacterDB, ItemDB]], page: int, max_page: int, where: str):
         for data in datas:

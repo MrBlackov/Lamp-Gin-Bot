@@ -6,14 +6,14 @@ class CraftText(TextHTML):
     def __init__(self, craft: CraftDB | CraftValide):
         self.craft = craft
 
-    @property
-    def text(self) -> str:
+    def text(self, quantity: int = 1, is_create: bool = False) -> str:
         return (
             '📜 Рецепт \n\n' 
             f'⏱️ Время крафта: {self.craft.time} секунд\n'
-            f'\n💮 Ингредиенты: {TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity}шт.)' for item in self.craft.ingredients] if len(self.craft.ingredients) > 0 else '❌')).blockquote()}' 
-            f'\n🛠️ Инструменты: {TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity}шт.)' for item in self.craft.tools] if len(self.craft.tools) > 0 else '❌')).blockquote()}' 
-            f'\n⚗️ Результат: {TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity}шт.)' for item in self.craft.results] if len(self.craft.results) > 0 else '❌')).blockquote()}' 
+            f'{f'📰 Скрытый: {'✅' if self.craft.is_hide else '❌'}\n' if is_create else ''}'
+            f'\n💮 Ингредиенты: {TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity*quantity}шт. {f"x{quantity}" if quantity > 10000 else ""})' for item in self.craft.ingredients] if len(self.craft.ingredients) > 0 else "❌")).blockquote()}' 
+            f'\n🛠️ Инструменты: {TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity}шт.)' for item in self.craft.tools] if len(self.craft.tools) > 0 else "❌")).blockquote()}' 
+            f'\n⚗️ Результат: {TextHTML('\n'.join([f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity*quantity}шт. {f"x{quantity}" if quantity > 100000 else ""})' for item in self.craft.results] if len(self.craft.results) > 0 else "❌")).blockquote()}' 
             )
 
     def faq(faq_type: str):
