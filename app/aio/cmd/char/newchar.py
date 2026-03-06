@@ -59,7 +59,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: AddCha
     
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_sketchs(callback_data.first_name)
     await callback.message.edit_text(f'❔ Как выберем {'имя' if callback_data.first_name else 'фамилию'}?', reply_markup=markup)
-    await state.set_state(CreateCharState.to_create)
+    await CharFSM(state, 'add').set_state(CreateCharState.to_create)
     
 
 
@@ -70,8 +70,8 @@ async def callback_add_char_name_query(callback: CallbackQuery, callback_data: A
     await callback.answer('Query')
     markup = Character(tg_id=callback.from_user.id).to_create.IKB.query_back(callback_data.first_name)
     await callback.message.edit_text('✒️ Введите', reply_markup=markup)
-    await state.update_data(is_first_name=callback_data.first_name, msg=callback.message)
-    await state.set_state(CreateCharState.query_value)
+    await CharFSM(state, 'add').update_data(is_first_name=callback_data.first_name, msg=callback.message)
+    await CharFSM(state, 'add').set_state(CreateCharState.query_value)
 
 @add_char_router.message(CreateCharState.query_value)
 @log.decor(arg=True)
@@ -82,7 +82,7 @@ async def msg_query_for_names(message: Message, state: FSMContext):
     await msg.delete()
     markup, msg_text = await Character(tg_id=message.from_user.id, state=state).to_create.to_query_names_to_pages(None if msg_text == '!all' else msg_text)
     await message.answer(msg_text, reply_markup=markup)
-    await state.set_state(CreateCharState.to_create)
+    await CharFSM(state, 'add').set_state(CreateCharState.to_create)
 
 @add_char_router.callback_query(AddCharQueryNameCall.filter(F.next_page == True))
 @log.decor(arg=True)
@@ -100,7 +100,6 @@ async def msg_query_for_names(callback: CallbackQuery, callback_data: AddCharQue
 @log.decor(arg=True)      
 @call_exept  
 async def callback_add_char_name_rnd(callback: CallbackQuery, callback_data: AddCharNameCall | AddCharRandomNameCall, state: FSMContext):
-    await callback.answer('Random')
     markup, name = await Character(callback.from_user.id, state).to_create.to_random_name(callback_data.first_name)
     await callback.message.edit_text(f'{name}?', reply_markup=markup)
 
@@ -113,7 +112,7 @@ async def callback_add_char_name_rnd(callback: CallbackQuery, callback_data: Add
 @call_exept   
 async def callback_add_char_name(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext):
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_sketchs(False)
-    await state.update_data(first_name = callback_data.name)
+    await CharFSM(state, 'add').update_data(first_name = callback_data.name)
     await callback.message.edit_text(f'🎴 Имя: {callback_data.name} \n Как выберем фамилию?', reply_markup=markup)
 
 @add_char_router.callback_query(AddCharSketchCall.filter(F.back == True))
@@ -129,7 +128,7 @@ async def callback_add_char_name(callback: CallbackQuery, callback_data: AddChar
 @call_exept        
 async def callback_add_char_last_name(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext):
     first_name = await CharFSM(state, 'add').get_value('first_name')
-    await state.update_data(lats_name='')
+    await CharFSM(state, 'add').update_data(last_name='')
     markup, text = await Character(callback.from_user.id, state).to_create.to_chouse_sketchs()
 
     await callback.message.edit_text(f'🎴 Имя: {first_name}' + text, reply_markup=markup)    
@@ -154,7 +153,7 @@ async def callback_add_char_last_name(callback: CallbackQuery, callback_data: Ad
 @call_exept 
 async def callback_add_char_last_name(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext):
     first_name = await CharFSM(state, 'add').get_value('first_name')
-    await state.update_data(last_name=callback_data.name)
+    await CharFSM(state, 'add').update_data(last_name=callback_data.name)
     markup, text = await Character(callback.from_user.id, state).to_create.to_chouse_sketchs()
 
     await callback.message.edit_text(f'🪪 {first_name} {callback_data.name}' + text, reply_markup=markup)    
@@ -178,8 +177,8 @@ async def callback_add_char_last_name(callback: CallbackQuery, callback_data: Ad
 async def callback_add_char_last_name(callback: CallbackQuery, callback_data: AddCharSketchCall, state: FSMContext):
     markup, text = await Character(callback.from_user.id, state).to_create.to_descript(callback_data.id)
     await callback.message.edit_text(text, reply_markup=markup)    
-    await state.set_state(CreateCharState.description)
-    await state.update_data(msg=callback.message)
+    await CharFSM(state, 'add').set_state(CreateCharState.description)
+    await CharFSM(state, 'add').update_data(msg=callback.message)
 
 
 
@@ -196,7 +195,7 @@ async def callback_add_char_last_name(callback: CallbackQuery, callback_data: Ad
 async def msg_query_for_names(message: Message, state: FSMContext):
     if len(message.text) > 1000:
         await message.answer(f'❌ Макс. количесто симловов для описания - 1000, у вас {len(message.text)}') 
-        await state.set_state(CreateCharState.description)
+        await CharFSM(state, 'add').set_state(CreateCharState.description)
         return 
     msg = await CharFSM(state, 'add').get_value('msg')
     await msg.delete()

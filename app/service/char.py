@@ -97,17 +97,15 @@ class AddCharacterService(BaseService):
         return self.IKB.get_sketchs(sketch_id, len(sketchs)), SketchInfoText(sketchs[sketch_id]).text
      
     async def to_descript(self, sketch_id: int):
-        last_name: str = await self.state.get_value('last_name')
-        first_name: str = await self.state.get_value('first_name')
         sketchs: list[CharSketchInfo] = await self.state.get_value('sketchs')
         await self.state.update_data(sketch=sketchs[sketch_id])
         return  self.IKB.descript(), 'Описание?'
 
     async def get_info(self, descript: str | None = None):
         datas: dict = await self.state.get_data()
-        first_name = datas['first_name']
+        first_name = datas.get('first_name')
         last_name = datas.get('last_name')
-        sketch = datas['sketch']
+        sketch = datas.get('sketch')
         description = descript if descript else datas.get('description')
 
         self.char = CreateCharSkecth(

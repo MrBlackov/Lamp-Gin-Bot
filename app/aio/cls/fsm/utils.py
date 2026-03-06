@@ -21,8 +21,9 @@ class FSMUtils:
     def set_state(self, new_state = None):
         return self.state.set_state(new_state)
  
-    def get_data(self):
-        return self.state.get_data()
+    async def get_data(self):
+        data = await self.state.get_data()
+        return {k.replace(self.prefix, ''):v for k,v in data.items()}
 
     def clear(self):
         return self.state.clear()
