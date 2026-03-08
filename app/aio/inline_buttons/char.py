@@ -6,11 +6,12 @@ from app.aio.cls.callback.char import (
                                        AddCharSketchCall,
                                        AddCharDescriptCall,
                                        AddCharFinishCall,
-                                       InfoCharList,
-                                       InfoCharChouse,
-                                       InventoryItems,
-                                       InventoryItemsGo, 
-                                       InventoryItemsThrow,
+                                       InfoCharListCall,
+                                       InfoCharChooseCall,
+                                       InventoryItemsCall,
+                                       InventoryItemsGoCall, 
+                                       InventoryItemsActionCall,
+                                       InventoryItemsPickUpCall
                                        )
 from app.db.models.item import ItemDB
 from app.aio.inline_buttons.base import BotIKB
@@ -88,15 +89,15 @@ class InfoCharIKB(BotIKB):
     def get_list(self, main_char_id: int | None, char_dict: dict[int, str]):
         if main_char_id in char_dict:
             main_char = char_dict.pop(main_char_id)
-            self.builder.button(text=f'👑 {main_char}', callback_data=InfoCharList(char_id=main_char_id, main=True))
+            self.builder.button(text=f'👑 {main_char}', callback_data=InfoCharListCall(char_id=main_char_id, main=True))
         for char_id, char_name in char_dict.items():
-            self.builder.button(text=f'♟️ {char_name}', callback_data=InfoCharList(char_id=char_id))
+            self.builder.button(text=f'♟️ {char_name}', callback_data=InfoCharListCall(char_id=char_id))
         return self.builder.adjust(1).as_markup()
             
     def chouse_main_char(self, char_id: int, main: bool = False): 
-        self.builder.button(text='↩️ Назад', callback_data=InfoCharChouse(back=True))
+        self.builder.button(text='↩️ Назад', callback_data=InfoCharChooseCall(back=True))
         if main == False:
-            self.builder.button(text='🕹️ Выбрать', callback_data=InfoCharChouse(char_id=char_id))   
+            self.builder.button(text='🕹️ Выбрать', callback_data=InfoCharChooseCall(char_id=char_id))   
         return self.builder.adjust(2).as_markup()
 
     @property
@@ -104,16 +105,34 @@ class InfoCharIKB(BotIKB):
         return AddCharIKB()
 
 class InventoryIKB(BotIKB):
-    def items(self, items: dict[int, ItemDB]):
-        for id, item in items.items():
-            self.builder.button(text=f'{item.sketch.emodzi} {item.sketch.name} ({item.quantity})', callback_data=InventoryItems(item=id))
+    def back(self, where: str, item_id: int | None = None):
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id))
         return self.builder.adjust(1).as_markup()
     
-    def back(self, where: str):
-        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGo(where=where))
-        return self.builder.adjust(2).as_markup()
-
-    def throw(self, where: str):
-        self.builder.button(text='🚮 Выбросить', callback_data=InventoryItemsThrow(where=where))
-        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGo(where=where))
+    def items(self, items: dict[int, ItemDB]):
+        for id, item in items.items():
+            self.builder.button(text=f'{item.sketch.emodzi} {item.sketch.name} {f'({item.quantity}шт.)' if item.quantity > 1 else ''}', callback_data=InventoryItemsCall(item=id))
+        self.builder.button(text='🕵️ Осмотреться', callback_data=InventoryItemsActionCall(to_pick_up=True))
         return self.builder.adjust(1).as_markup()
+    
+    def throw(self, where: str):
+        self.builder.button(text='🚮 Выбросить', callback_data=InventoryItemsActionCall(to_throw=True))
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where))
+        return self.builder.adjust(1).as_markup()
+    
+    def look(self):
+        self.builder.button(text='🕵️ Осмотреться', callback_data=InventoryItemsActionCall(to_pick_up=True))
+        return self.builder.adjust(2).as_markup()
+    
+    def location_items(self, items: list[ItemDB], where: str, back_where: str):
+        for item in items:
+            self.builder.button(text=f'{item.sketch.emodzi} {item.sketch.name} {f'({item.quantity}шт.)' if item.quantity > 1 else ''}', callback_data=InventoryItemsPickUpCall(item_id=item.id))
+        self.builder.button(text='🕵️ Осмотреться', callback_data=InventoryItemsGoCall(where=where))
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=back_where))
+        return self.builder.adjust(1).as_markup() 
+
+    def pick_up(self, item_id: int, where: str):
+        self.builder.button(text='🫳 Поднять', callback_data=InventoryItemsPickUpCall(item_id=item_id, to_pick_up=True))
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(item_id=item_id, where=where))
+        return self.builder.adjust(1).as_markup()            
+    

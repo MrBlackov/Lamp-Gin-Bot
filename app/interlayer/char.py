@@ -5,7 +5,7 @@ from app.enum_type.char import Gender
 from app.validate.api.characters import GetSketchsInfo
 from app.validate.api.query import CreateCharSkecth
 from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory, get_item_sketchs
-from app.db.metods.updates import update_main_char, update_char, update_exist
+from app.db.metods.updates import update_main_char, update_char, update_exist, update_char_location_default
 from app.db.metods.adds import add_char, add_db_obj
 from app.logic.char import CharLogic
 from app.validate.add.characters import Character_add
@@ -15,7 +15,7 @@ from app.logged.infolog import infolog
 from app.aio.config import admins, bot, newspaper_id
 from aiogram.types.chat_member_banned import ChatMemberStatus
 from app.exeption.char import NoHaveMainChar
-
+from app.exeption.item import PickUpQuantityMoreItemQuantity
 
 class CreateCharacterLayer:
     async def get_sketchs(gender: Gender = 'M', quantity: int = 5):
@@ -108,6 +108,7 @@ class InfoCharacterLayer:
 class InventoryCharacterLayer:
     def __init__(self, tg_id: int):
         self.tg_id = tg_id
+        self.item_logic = ItemsLogic()
 
     async def get_char_info(self):
         self.user_id = await get_user_for_tg_id(self.tg_id)
@@ -129,4 +130,26 @@ class InventoryCharacterLayer:
         return self
 
     async def throw_away(self, item_id: int, quantity: int = 1):
-        return await ItemsLogic().throw_away(item_id, quantity)
+        return await self.item_logic.throw_away(item_id, quantity)
+
+    async def look_location_items(self):
+        await self.get_char_info()
+        await update_char_location_default(self.char_id)
+        return await self.item_logic.look_location_items(self.char.exist.location_id, self.char.exist.inventory.id)
+    
+    async def look_location_item(self, item_id: int):
+        await self.get_char_info()
+        return await self.item_logic.look_location_item(item_id, self.char.exist.inventory.id)
+    
+    async def throw_back(self, item_id: int):
+        await self.get_char_info()
+        return await self.item_logic.throw_back(item_id, self.char.exist.inventory.id)
+     
+    async def pick_up(self, item_id: int, quantity: int):
+        await self.get_char_info()
+        item = await self.item_logic.get_item_id(item_id)
+        if item.quantity < quantity:
+            raise PickUpQuantityMoreItemQuantity(f'This user(user_id:{self.user_id}) enter quantity, but quantity({quantity}) > item.quantity({item.quantity})')
+        await self.item_logic.action_for_items([item], self.char, '+', quantity, True)
+        return True
+        

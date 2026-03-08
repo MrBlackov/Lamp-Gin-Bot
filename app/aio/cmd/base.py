@@ -40,3 +40,9 @@ async def cmd_start(message: Message):
     if message.is_topic_message:
         await message.answer(f'Topic id: {message.message_thread_id}')    
 
+@base_router.message(Command('cancel'))
+@log.decor(arg=True)
+@exept
+async def cmd_start(message: Message, state: FSMContext):
+    await state.set_state()
+    await message.answer('Отмена произошла успешно')

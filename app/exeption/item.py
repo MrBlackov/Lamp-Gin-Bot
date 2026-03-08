@@ -95,6 +95,10 @@ class ThrowAwayQuantityFloat(ItemError):
     code = '402.14'  
     faq = ''  
 
+class PickUpQuantityMoreItemQuantity(ItemError):
+    msg = '❌ Вы отправили слишком большое количество предмета, укажите меньшее количество'
+    code = '402.2'
+    faq = ''
 
 class GiveItemQuantityLessOne(ItemError):
     msg = '❌ Вы отправили число меньше или равное нулю. Нужно целое число, которое больше нуля'

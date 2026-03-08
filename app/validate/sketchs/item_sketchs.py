@@ -92,5 +92,5 @@ class ItemValide(SketchsBasevalidate):
     sketch_id: int
     quantity: int = 1
     transfer_id: int | None = None
-    from_char_transfers: bool | None = None
+    nbt: dict = {}
 

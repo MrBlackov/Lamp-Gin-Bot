@@ -1,6 +1,8 @@
 from sqlalchemy import String, ARRAY, BigInteger, ForeignKey, JSON, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
+from app.db.models.map import LocationDB  # noqa: F401
+from datetime import datetime
 
 class ItemSketchDB(Base):
     name: Mapped[str] = mapped_column(String(30))
@@ -22,12 +24,21 @@ class ItemDB(Base):
     transfer_id: Mapped[int | None] = mapped_column(ForeignKey('transferdb.id'), nullable=True)
     kitsketch_id: Mapped[int] = mapped_column(ForeignKey('kitsketchdb.id'), nullable=True)
     craft_id: Mapped[int] = mapped_column(ForeignKey('craftdb.id'), nullable=True)
-    from_char_transfers: Mapped[bool | None] = mapped_column(default=None)
+    location_id: Mapped[int] = mapped_column(ForeignKey('locationdb.id'), nullable=True)
+    #from_char_transfers: Mapped[bool | None] = mapped_column(default=None)
     sketch_id: Mapped[int] = mapped_column(ForeignKey('itemsketchdb.id'))
     quantity: Mapped[int] = mapped_column(default=1)
     sketch: Mapped[ItemSketchDB] = relationship(ItemSketchDB, uselist=False, lazy='joined', back_populates='items')
     inventory: Mapped[Base] = relationship('InventoryDB', uselist=False, lazy='joined', back_populates='items')
     nbt: Mapped[dict] = mapped_column(JSON, default={})
+
+    @property
+    def from_char_transfers(self) -> bool | None:
+        return self.nbt.get('from_char_transfers')
+
+    @property
+    def is_pick_up(self) -> bool | None:
+        return self.nbt.get('is_pick_up')
     
     @property
     def to_char_transfer(self):

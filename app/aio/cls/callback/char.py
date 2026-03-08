@@ -38,22 +38,26 @@ class AddCharFinishCall(CallbackData, prefix='add_char_finish'):
     go: bool | None = None
 
 
-class InfoCharList(CallbackData, prefix='info_char_list'):
+class InfoCharListCall(CallbackData, prefix='info_char_list'):
     char_id: int
     main: bool = False
 
-class InfoCharChouse(CallbackData, prefix='info_char_chouse'):
+class InfoCharChooseCall(CallbackData, prefix='info_char_chouse'):
     char_id: int | None = None
     back: bool = False
 
 
-class InventoryItems(CallbackData, prefix='inventory_items'):
+class InventoryItemsCall(CallbackData, prefix='inventory_items'):
     item: int
 
-class InventoryItemsGo(CallbackData, prefix='inventory_items_go'):
+class InventoryItemsPickUpCall(CallbackData, prefix='inventory_items'):
+    item_id: int
+    to_pick_up: bool = False
+
+class InventoryItemsGoCall(CallbackData, prefix='inventory_items_go'):
     where: str
+    item_id: int | None = None
 
-class InventoryItemsThrow(CallbackData, prefix='inventory_items_throw'):
-    throw: bool = True
-
-
+class InventoryItemsActionCall(CallbackData, prefix='inventory_items_action'):
+    to_throw: bool = False
+    to_pick_up: bool = False

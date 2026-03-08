@@ -7,6 +7,7 @@ from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.db.dao.transfer import TransferDAO, TransferDB
 from app.logic.cls import MyTransfers, Craft
+from datetime import datetime
 
 add_or_update_user = add_or_update_obj(UserDAO)
 add_or_update_donate = add_or_update_obj(DonateDAO)
@@ -14,9 +15,6 @@ add_or_update_donate = add_or_update_obj(DonateDAO)
 
 select_user = select_obj(Users_add, UserDAO)
 select_users = select_objs(Users_add, UserDAO)
-select_char = select_obj(Character_add, CharacterDAO)
-select_chars = select_objs(Character_add, CharacterDAO)
-select_exist = select_obj(Existence_add, ExistenceDAO)
 
 async def get_user_for_tg_id(tg_id: int, to_user: bool = False) -> int | UserDB:
     user = await add_or_update_user(data={'tg_id':tg_id}, tg_id=tg_id)
@@ -29,6 +27,9 @@ async def get_user_for_id(user_id: int) -> UserDB:
 async def get_users() -> list[UserDB]:
     return await select_users()
 
+select_char = select_obj(Character_add, CharacterDAO)
+select_chars = select_objs(Character_add, CharacterDAO)
+select_exist = select_obj(Existence_add, ExistenceDAO)
 
 async def get_main_char_for_user_id(user_id: int) -> int | None:
     user: UserDB = await get_user_for_id(user_id)
@@ -67,7 +68,11 @@ async def get_items() -> list[ItemDB]:
 
 async def get_items_for_inventory(inventory_id: int) -> list[ItemDB]:
     result = await select_items(filters={'inventory_id':inventory_id})
-    return result if result else []
+    return [r for r in result if r.is_pick_up == None] if result else []
+
+async def get_items_for_location(location_id: int) -> tuple[list[ItemDB], list[ItemDB]]:
+    result: list[ItemDB] = await select_items(filters={'location_id':location_id})
+    return ([r for r in result if r.is_pick_up == False], [r for r in result if r.is_pick_up]) if result else ([], [])
 
 async def get_items_for_ids(ids: list[int]) -> list[ItemDB] | None:
     return await select_items_for_ids(ids=ids)
@@ -79,7 +84,9 @@ select_transfer = select_obj_no_valide(TransferDAO)
 select_transfers = select_objs_no_valide(TransferDAO)
 
 async def get_items_for_transfer(transfer_id: int, from_char: bool) -> list[ItemDB] | None:
-    return await select_items(filters={'transfer_id':transfer_id, 'from_char_transfers':from_char})
+    transfers: list[ItemDB] =  await select_items(filters={'transfer_id':transfer_id})
+    transfers = [t for t in transfers if t.from_char_transfers == from_char] if transfers else []
+    return transfers if len(transfers) > 0 else None
 
 async def get_items_for_craft(craft_id: int) -> list[ItemDB] | None:
     return await select_items(filters={'craft_id':craft_id})

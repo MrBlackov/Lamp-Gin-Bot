@@ -172,33 +172,70 @@ class InventoryService(BaseService):
         super().__init__(tg_id, state)
         self.state = CharFSM(state, 'inventory')
         self.IKB = InventoryIKB()
+        self.text = InventoryItemsText
+        self.layer = InventoryCharacterLayer(tg_id)
 
     async def inventory(self):
-        inventory = await InventoryCharacterLayer(self.tg_id).inventory()
+        inventory = await self.layer.inventory()
         items = {}
         if inventory.items:
             for item in inventory.items:
                 items |= {item.id: item}
             await self.state.update_data(items=items)
-            return InventoryItemsText.inventory(inventory.size/1000, inventory.max_size), self.IKB.items(items)
-        return InventoryItemsText.no_items(), None
+            return self.text.inventory(inventory.size/1000, inventory.max_size), self.IKB.items(items)
+        return self.text.no_items(), None
         
-
     async def get_item_info(self, item_id: int):
         items = await self.state.get_value('items')
         await self.state.update_data(item=item_id)
         if items:
-            return InventoryItemsText.item(items[item_id]), self.IKB.throw('inventory')
+            return self.text.item(items[item_id]), self.IKB.throw('inventory')
+        raise
 
     async def to_throw(self, msg):
         await self.state.update_data(msg=msg)
         await self.state.set_state(InventoryState.throw_quantity)
-        return InventoryItemsText.throw(), self.IKB.back('item')
+        return self.text.throw(), self.IKB.back('item')
 
     async def throw_away(self, item_id: int, quantity: int):
-        throw = await InventoryCharacterLayer(self.tg_id).throw_away(item_id, quantity)
+        throw = await self.layer.throw_away(item_id, quantity)
         if throw: return await self.inventory()
         raise ItemError('Dont throw away')
+
+
+
+
+    async def cmd_pick_up(self, item_id: int | None = None):
+        if item_id:
+            await self.layer.throw_back(item_id)
+        items = await self.layer.look_location_items()    
+        await self.state.update_data(location_items=items)
+        return await self.location_items()
+
+    async def location_items(self):
+        items = await self.state.get_value('location_items') 
+        if items: 
+            random.shuffle(items)
+            return self.text.location_items(), self.IKB.location_items(items[:5], 'location_items', 'inventory')
+        return '🕵️ Вокруг нет ничего интересного', None
+
+    async def look_location_item(self, item_id: int):
+        item = await self.layer.look_location_item(item_id)
+        if item: 
+            await self.state.update_data(item_id=item_id)
+            return self.text.item(item), self.IKB.pick_up(item.id, 'location_items')
+        return '🙁 Уже подобрали', self.IKB.back('location_items', item_id)
+
+    async def to_pick_up(self, item_id: int, msg):
+        await self.state.update_data(msg=msg, item_id=item_id)
+        await self.state.set_state(InventoryState.pick_up_quantity)
+        return self.text.pick_up_quantity(), self.IKB.back('location_item', item_id)
+    
+    async def pick_up(self, quantity: int):
+        item_id = await self.state.get_value('item_id')
+        await self.layer.pick_up(item_id, quantity)
+        return await self.inventory()
+    
 
 class Character:
     def __init__(self, tg_id: int, state: FSMContext | None = None):
