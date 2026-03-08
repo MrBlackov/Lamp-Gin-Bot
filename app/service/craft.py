@@ -13,6 +13,7 @@ from app.exeption.craft import CraftQuantityNoIntError, CraftNoHaveIngredientsEr
 from app.aio.cls.fsm.utils import CraftFSM
 from app.validate.craft import CraftValide
 from app.logged.infolog import infolog
+from app.aio.msg.base import UserText
 
 class AddCraftService(BaseService):
     def __init__(self, tg_id, state = None):
@@ -130,9 +131,9 @@ class AddCraftService(BaseService):
             raise CraftNoHaveIngredientsError(f'This user(tg_id={self.tg_id}) try to create craft without ingredients')
         if results == {}:
             raise CraftNoHaveResultsError(f'This user(tg_id={self.tg_id}) try to create craft without results')
-        craft, user_id = await self.layer.add_craft(ingredients=[v for v in ingredients.values()], tools=[v for v in tools.values()], results=[v for v in results.values()], time=time)
+        craft, user = await self.layer.add_craft(ingredients=[v for v in ingredients.values()], tools=[v for v in tools.values()], results=[v for v in results.values()], time=time)
         await self.state.clear_this_state()        
-        await infolog.new_craft(user_id, self.text(craft).text(is_create=True))
+        await infolog.new_craft(user.id, UserText(user.tg_user, user).text + '\n' + self.text(craft).text(is_create=True))
         return f'✅ Вы успешно создали рецепт, id: {craft.id}', None
 
     async def send_craft(self):
@@ -144,15 +145,15 @@ class AddCraftService(BaseService):
             raise CraftNoHaveIngredientsError(f'This user(tg_id={self.tg_id}) try to create craft without ingredients')
         if results == {}:
             raise CraftNoHaveResultsError(f'This user(tg_id={self.tg_id}) try to create craft without results')
-        craft, user_id = await self.layer.send_craft(ingredients=[v for v in ingredients.values()], tools=[v for v in tools.values()], results=[v for v in results.values()], time=time)
-        await infolog.new_craft_no_moderate(user_id, self.text(craft).text(is_create=True), self.IKB.moderator_menu(craft.id))
+        craft, user = await self.layer.send_craft(ingredients=[v for v in ingredients.values()], tools=[v for v in tools.values()], results=[v for v in results.values()], time=time)
+        await infolog.new_craft_no_moderate(user.id, UserText(user.tg_user, user).text + ' \n' + self.text(craft).text(is_create=True), self.IKB.moderator_menu(craft.id))
         await self.state.clear_this_state()
         return '✅ Вы успешно отправили рецепт на модерацию', None
 
     async def accert_new_craft(self, craft_id: int, to_create: bool):
         is_create, craft, user = await self.layer.accert_new_craft(craft_id, to_create)
         if is_create and craft:
-            await infolog.new_craft(user.id, self.text(craft).text(is_create=True))
+            await infolog.new_craft(user.id, UserText(user.tg_user, user).text + ' \n' + self.text(craft).text(is_create=True))
             await to_msg(user.tg_id, '✅ Ваш крафт успешно прошел модерацию и добавлен в бота.')
             return f'✅ Крафт создан, id:{craft.id}', None
         await to_msg(user.tg_id, '❌ Ваш крафт не прошел модерацию.')

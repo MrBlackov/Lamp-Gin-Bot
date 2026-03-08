@@ -24,7 +24,7 @@ class CraftLayer(BaseLayer):
                         results: list[ItemDB] | None = None, 
                         time: int = 0):
         await self.get_char_info()
-        return await self.logic.new_craft(user_id=self.user.id, ingredients=ingredients, tools=tools, results=results, time=time), self.user.id
+        return await self.logic.new_craft(user_id=self.user.id, ingredients=ingredients, tools=tools, results=results, time=time), self.user
     
     async def send_craft(self, 
                         ingredients: list[ItemDB] | None = None, 
@@ -33,7 +33,7 @@ class CraftLayer(BaseLayer):
                         is_hide: bool = False,
                         time: int = 0):
         await self.get_char_info()
-        return await self.logic.new_craft(user_id=self.user.id, ingredients=ingredients, tools=tools, results=results, time=time, is_hide=is_hide, is_create=False), self.user.id
+        return await self.logic.new_craft(user_id=self.user.id, ingredients=ingredients, tools=tools, results=results, time=time, is_hide=is_hide, is_create=False), self.user
 
     async def accert_new_craft(self, craft_id: int, to_create: bool):
         await self.get_char_info()
