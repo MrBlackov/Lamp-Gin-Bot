@@ -1,8 +1,8 @@
 from app.db.metods.adds import add_db_obj
-from app.db.metods.gets import get_craft_for_id, get_crafts, get_items_for_inventory
+from app.db.metods.gets import get_craft_for_id, get_crafts, get_items_for_inventory, get_items_for_craft
 from app.db.metods.unique import get_crafts_for_item_id
-from app.db.metods.updates import update_craft_items, update_item_on_craft_id, CharacterDB, update_quantity_items
-from app.db.metods.deletes import delete_items
+from app.db.metods.updates import update_craft_items, update_item_on_craft_id, CharacterDB, update_quantity_items, update_craft_to_create
+from app.db.metods.deletes import delete_items, delete_craft_for_id
 from app.logged.botlog import log
 from app.db.models.item import CraftDB, ItemDB
 from app.logic.item import ItemsLogic
@@ -18,7 +18,8 @@ class CraftLogic:
                         tools: list[ItemDB] | None = None, 
                         results: list[ItemDB] | None = None, 
                         time: int = 0,
-                        is_hide: bool = False) -> CraftDB:
+                        is_hide: bool = False,
+                        is_create: bool = True) -> CraftDB:
         await add_db_obj(data=ingredients + tools + results)
         ingredients = ingredients or []
         tools = tools or []
@@ -28,12 +29,19 @@ class CraftLogic:
                         ingredient_ids=[i.id for i in ingredients], 
                         result_ids=[i.id for i in results], 
                         tool_ids=[i.id for i in tools], time=time, 
-                        is_hide=is_hide)
+                        is_hide=is_hide,
+                        is_create=is_create)
         await add_db_obj(data=[craft])
         await update_item_on_craft_id(craft.id, [i.id for i in items])
-        return craft
+        return craft.add_items(items)
 
-
+    async def accert_new_craft(self, craft_id: int, to_create: bool):
+        if to_create:
+            update = await update_craft_to_create(craft_id)
+            items = await get_items_for_craft(craft_id)
+            return (True, update.add_items(items))
+        delete = await delete_craft_for_id(craft_id)
+        return (delete, None)
     async def get_craft(self, craft_id: int):
         return await get_craft_for_id(craft_id=craft_id)
     

@@ -1,4 +1,4 @@
-from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB
+from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB
 from app.db.dao.chars import CharacterDAO, CharacterDB
 from app.db.dao.transfer import TransferDAO
 from app.db.metods.base import delete_obj, delete_objs
@@ -25,3 +25,8 @@ delete_transfer = delete_obj(TransferDAO)
 
 async def delete_transfer_for_id(transfer_id: int):
     return await delete_transfer(id=transfer_id)
+
+delete_craft = delete_obj(CraftDAO)
+
+async def delete_craft_for_id(craft_id: int):
+    return await delete_craft(id=craft_id)

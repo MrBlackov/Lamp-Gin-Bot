@@ -50,3 +50,7 @@ async def update_craft_items(craft_id: int, new_data: list[int], type: Literal['
 
 async def update_item_on_craft_id(craft_id: int, item_ids: list[int]):
     return await update_item_for_ids(ids=item_ids, new_data={'craft_id':craft_id})
+
+async def update_craft_to_create(craft_id: int) -> CraftDB:
+    return await update_craft(filters={'id':craft_id}, new_data={'is_create':True})
+

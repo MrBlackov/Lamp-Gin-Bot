@@ -13,7 +13,8 @@ from app.aio.cls.callback.craft import (CraftBackCall,
                                         CraftCreateActionCall,
                                         CraftItemIdCall,
                                         CraftItemPagesCall,
-                                        CraftUseCall)
+                                        CraftUseCall,
+                                        CraftAdminACtionCall)
 from app.aio.cls.fsm.craft import CraftState, AddCraftState
 from app.aio.cls.fsm.utils import CraftFSM
 
@@ -128,6 +129,13 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftA
     msg, markup = await CraftService(callback.from_user.id, state).add.create_craft()
     await callback.message.edit_text(msg, reply_markup=markup)
 
+@craft_router.callback_query(CraftAdminACtionCall.filter(F.to_create == True))     
+@craft_router.callback_query(CraftAdminACtionCall.filter(F.to_create == False))   
+@log.decor(arg=True)
+@call_exept
+async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftAdminACtionCall, state: FSMContext):
+    msg, markup = await CraftService(callback.from_user.id, state).add.accert_new_craft(callback_data.craft_id, callback_data.to_create)
+    await callback.message.edit_text(msg, reply_markup=markup)
 
 
 
@@ -153,7 +161,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftI
     msg, markup = await CraftService(callback.from_user.id, state).info.craft(craft_id=callback_data.craft_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@craft_router.callback_query(CraftBackCall.filter(F.where == 'сraft_info'))     
+@craft_router.callback_query(CraftBackCall.filter(F.where == 'craft_info'))     
 @log.decor(arg=True)
 @call_exept
 async def callback_add_char_names(callback: CallbackQuery, callback_data: CraftBackCall, state: FSMContext):

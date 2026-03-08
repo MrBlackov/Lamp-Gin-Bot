@@ -169,6 +169,7 @@ class ItemsLogic:
                         delete_item.append(inventory_item.id)
                     else:
                         update_item[inventory_item.id] = inventory_item.quantity - item_quantity
+                print(item.sketch.name, char.exist.full_name)
                 raise TransferNoHaventItemError(f'This char(id={char.id}) has not enough item for transfers')
             
             if is_pick_up:

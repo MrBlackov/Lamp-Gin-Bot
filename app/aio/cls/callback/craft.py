@@ -36,3 +36,8 @@ class CraftItemPagesCall(CallbackData, prefix='craft_item_pages'):
 
 class CraftItemIdCall(CallbackData, prefix='craft_item_id'):
     item_id: int
+
+class CraftAdminACtionCall(CallbackData, prefix='craft_admin_action'):
+    craft_id: int
+    to_redact: bool = False
+    to_create: bool | None = None  
