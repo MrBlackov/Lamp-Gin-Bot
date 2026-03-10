@@ -13,7 +13,7 @@ def add_obj(clsDAO: BaseDAO):
                           session: AsyncSession,
                           data: BaseModel,
                           logger: bool = True
-                         ):
+                         ) -> Base:
         new_data = await clsDAO.add(session, data)
         if logger: log.info(f"New data in {new_data.__tablename__}, id: {new_data.id}, data:{data.model_dump()}")
         else: log.trace(f"New data in {new_data.__tablename__}, id: {new_data.id}, data:{data.model_dump()}")

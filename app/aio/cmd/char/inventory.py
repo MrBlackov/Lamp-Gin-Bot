@@ -9,6 +9,7 @@ from app.aio.cls.callback.char import InventoryItemsCall, InventoryItemsGoCall, 
 from app.aio.cls.fsm.char import InventoryState
 from app.service.utils import is_natural_int
 from app.aio.cls.fsm.utils import CharFSM
+from app.exeption.item import PickUpQuantityFloat, PickUpQuantityLessOne, PickUpQuantityNoInt
 
 inventory_router = Router()
 
@@ -112,7 +113,11 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: Invent
 async def cmd_inventory(message: Message, state: FSMContext):
     fsm = CharFSM(state, 'inventory')
     msg0 = await fsm.get_value('msg')
-    quan = is_natural_int(message.text, message.from_user.id)
+    quan = is_natural_int(message.text, 
+                          message.from_user.id,
+                          PickUpQuantityLessOne,
+                          PickUpQuantityFloat,
+                          PickUpQuantityNoInt)
     msg, markup = await Character(message.from_user.id, state).inventory.pick_up(quan)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)

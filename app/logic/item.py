@@ -114,7 +114,7 @@ class ItemsLogic:
         for inv_item in inventory_items:
             max_size -= inv_item.quantity*inv_item.sketch.size
   
-        if action == '+':
+        if action == '+':   
             size = 0
             for item in new_items:
                size += item.quantity*item.sketch.size
@@ -169,8 +169,6 @@ class ItemsLogic:
                         delete_item.append(inventory_item.id)
                     else:
                         update_item[inventory_item.id] = inventory_item.quantity - item_quantity
-                print(item.sketch.name, char.exist.full_name)
-                raise TransferNoHaventItemError(f'This char(id={char.id}) has not enough item for transfers')
             
             if is_pick_up:
                 if item.quantity - quantity > 0:

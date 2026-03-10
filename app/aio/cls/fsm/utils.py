@@ -48,9 +48,12 @@ class FaqFSM(FSMUtils):
 class KitFSM(FSMUtils):
     prefixs = ['kit']
     
-class MainFSM(FSMUtils):
-    prefixs = ['main']
+class UserFSM(FSMUtils):
+    prefixs = ['user']
     
+class ChatFSM(FSMUtils):
+    prefixs = ['chat']
+
 class StatsFSM(FSMUtils):
     prefixs = ['stats']
     

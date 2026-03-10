@@ -1,5 +1,5 @@
 from app.db.metods.base import update_obj, update_obj_for_ids
-from app.db.dao.main import UserDAO, UserDB
+from app.db.dao.main import UserDAO, UserDB, ChatDAO, ChatDB, ChatSettingDAO, ChatSettingDB
 from app.db.dao.chars import ExistenceDB, CharacterDB, CharacterDAO, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
@@ -10,6 +10,30 @@ from datetime import datetime
 update_user = update_obj(UserDAO)
 update_char = update_obj(CharacterDAO)
 update_exist = update_obj(ExistenceDAO)
+update_chat = update_obj(ChatDAO)
+update_chat_setting = update_obj(ChatSettingDAO)
+
+async def update_chat_by_setting(chat_id: int, setting_id: int) -> ChatDB:
+    return await update_chat(filters={'id':chat_id}, new_data={'setting_id':setting_id})
+
+async def update_chat_setting_by_id(setting_id: int, msg_delete_time: int | None = None, is_msg_delete: bool | None = None) -> ChatSettingDB:
+    new_data = {}
+    if msg_delete_time is not None:
+        new_data['msg_delete_time'] = msg_delete_time
+    if is_msg_delete is not None:
+        new_data['is_msg_delete'] = is_msg_delete
+    print(new_data)
+    print(setting_id)
+    return await update_chat_setting(filters={'id':setting_id}, new_data=new_data)
+
+async def update_chat_setting_by_chat_id(chat_id: int, msg_delete_time: int | None = None, is_msg_delete: bool | None = None) -> ChatSettingDB:
+    new_data = {}
+    if msg_delete_time is not None:
+        new_data['msg_delete_time'] = msg_delete_time
+    if is_msg_delete is not None:
+        new_data['is_msg_delete'] = is_msg_delete
+    print(new_data)
+    return await update_chat_setting(filters={'chat_id':chat_id}, new_data=new_data)
 
 async def update_main_char(user_id: int, char_id: int) -> bool:
     return await update_user(filters={'id':user_id}, new_data={'main_char':char_id})

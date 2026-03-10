@@ -11,7 +11,7 @@ def exept(func):
     async def wrapped(message: Message, **kwargs): 
         dowload = await message.answer('⏳')
         try:
-            result = await func(message=message, **kwargs)
+            result = await func(message, **kwargs)
             await message.delete()
             return result
         except BotError as bote:
@@ -19,10 +19,10 @@ def exept(func):
             markup = FaqIKB().to_error_faq(bote.code) if len(bote.faq) > 0 else None
             await message.answer((TextHTML(bote.to_msg).escape)[:4000], reply_markup=markup)
         except Exception as e:
-            e = str(e)
+            str_e = str(e)
             log.error(f'AioPartPath: {e}')
             if message.from_user.id == owner:
-                await message.answer(f'⚠️ Непредвиденная ошибка: {(TextHTML(e).escape)[:4000]} (500.0)')
+                await message.answer(f'⚠️ Непредвиденная ошибка: {(TextHTML(str_e).escape)[:4000]} (500.0)')
             else:
                 await message.answer(f'⚠️ Непредвиденная ошибка (500.0)')
             raise e
@@ -36,18 +36,18 @@ def call_exept(func):
         answer_text = '⌛'
         show_alert=None
         try:
-            result = await func(callback=callback, **kwargs)
+            result = await func(callback, **kwargs)
             return result, callback
         except BotError as bote:
             log.warning(f'AioPartPath: {bote}')
             show_alert=True
             answer_text = (TextHTML(bote.to_msg).escape)[:4000]
         except Exception as e:
-            e = str(e)
+            str_e = str(e)
             log.error(f'AioPartPath: {e}')
             show_alert=True
             if callback.from_user.id == owner:
-                answer_text = f'⚠️ Непредвиденная ошибка: {(TextHTML(e).escape)[:4000]} (500.0)'
+                answer_text = f'⚠️ Непредвиденная ошибка: {(TextHTML(str_e).escape)[:4000]} (500.0)'
             else:
                 answer_text = f'⚠️ Непредвиденная ошибка (500.0)'
             raise e
