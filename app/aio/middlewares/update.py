@@ -35,7 +35,6 @@ class UpdateDataMiddleware(BaseMiddleware):
         result = await handler(event, data)    
         
         return result
-    
 
 
     

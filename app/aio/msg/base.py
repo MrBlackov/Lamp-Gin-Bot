@@ -1,4 +1,4 @@
-from app.db.models.base import UserDB, TgUserDB, ChatDB, TgChatDB
+from app.db.models.main import UserDB, TgUserDB, ChatDB, TgChatDB
 from app.aio.msg.utils import TextHTML
 
 class UserText:

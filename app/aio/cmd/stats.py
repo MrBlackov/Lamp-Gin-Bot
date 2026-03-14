@@ -12,7 +12,7 @@ stats_router = Router()
 @stats_router.message(Command('stats'))
 @log.decor(arg=True)
 @exept
-async def cmd_add_item_name(message: Message, command: CommandObject, state: FSMContext):
+async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
     if message.from_user.id == owner:
         msg = await StatsService(message.from_user.id, state).all_coins()
         await message.answer(msg)

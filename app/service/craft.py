@@ -20,7 +20,7 @@ class AddCraftService(BaseService):
         super().__init__(tg_id, state)
         self.state = CraftFSM(state, 'add')
         self.layer = CraftLayer(tg_id)
-        self.IKB = AddCraftIKB()
+        self.IKB = AddCraftIKB(tg_id)
         self.text = CraftText
 
     async def craft_menu(self):
@@ -166,7 +166,7 @@ class InfoCraftService(BaseService):
         super().__init__(tg_id, state)
         self.state = CraftFSM(state)
         self.layer = CraftLayer(tg_id)
-        self.IKB = CraftIKB()
+        self.IKB = CraftIKB(tg_id)
 
     async def get_no_hide_craft(self, values_in_page=5):
         crafts = await self.layer.get_crafts_for_no_hide()

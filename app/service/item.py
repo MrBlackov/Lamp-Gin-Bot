@@ -27,7 +27,7 @@ class AddItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.state = ItemFSM(state, 'add')
-        self.IKB = NewItemIKB()
+        self.IKB = NewItemIKB(tg_id)
         self.text = NewItemText
 
     async def add_data_item(self, string: str | None = None, document: Document | None = None):
@@ -129,7 +129,7 @@ class ChangeItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.state = ItemFSM(state, 'change')
-        self.IKB = ChangeItemSketchIKB()
+        self.IKB = ChangeItemSketchIKB(tg_id)
 
     async def start(self, string: str):
         data = str_to_json(string)
@@ -267,7 +267,7 @@ class GiveItemService(ItemBaseService):
 class ListItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.IKB = ListItemSketchIKB()
+        self.IKB = ListItemSketchIKB(tg_id)
         self.state = ItemFSM(state, 'list')
 
     async def get_item_sketchs(self, value_in_page: int = 10):

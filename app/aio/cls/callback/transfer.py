@@ -1,65 +1,65 @@
-from aiogram.filters.callback_data import CallbackData
+from app.aio.cls.callback.base import BaseCall
 from typing import Any, Literal
 from app.enum_type.transfer import ItemTransferStatusEnum
 
-class ItemTransferStartCall(CallbackData, prefix='item_transfer_start'):
+class ItemTransferStartCall(BaseCall, prefix='item_transfer_start'):
     to_trade: bool = False
 
-class ItemTransferChoiseCharCall(CallbackData, prefix='item_transfer_choise_char'):
+class ItemTransferChoiseCharCall(BaseCall, prefix='item_transfer_choise_char'):
     to_search: bool = False
     to_list: bool = False
     to_my_char: bool = False
 
-class ItemTransferBackCall(CallbackData, prefix='item_transfer_back'):
+class ItemTransferBackCall(BaseCall, prefix='item_transfer_back'):
     where: str
 
-class ItemTransferCharIdCall(CallbackData, prefix='item_transfer_char_id'):
+class ItemTransferCharIdCall(BaseCall, prefix='item_transfer_char_id'):
     char_id: int
 
-class ItemTransferCharPageCall(CallbackData, prefix='item_transfer_page'):
+class ItemTransferCharPageCall(BaseCall, prefix='item_transfer_page'):
     page: int
 
-class ItemTransferActionCall(CallbackData, prefix='item_transfer_action'):
+class ItemTransferActionCall(BaseCall, prefix='item_transfer_action'):
     action: Literal['+', '-']
     side: int
 
-class ItemTransferTradeStatusCall(CallbackData, prefix='item_transfer_trade_status'):
+class ItemTransferTradeStatusCall(BaseCall, prefix='item_transfer_trade_status'):
     status: ItemTransferStatusEnum
 
-class ItemTransferItemIdCall(CallbackData, prefix='item_transfer_item_id'):
+class ItemTransferItemIdCall(BaseCall, prefix='item_transfer_item_id'):
     item_id: int
     side: int
 
-class ItemTransferItemPageCall(CallbackData, prefix='item_transfer_item_page'):
+class ItemTransferItemPageCall(BaseCall, prefix='item_transfer_item_page'):
     page: int
     side: int
 
 
 
-class InfoTransferStartCall(CallbackData, prefix='info_transfer_start'):
+class InfoTransferStartCall(BaseCall, prefix='info_transfer_start'):
     to_create: bool = False
     to_faq: bool = False
     to_reload: bool = False
 
-class InfoTransferBackCall(CallbackData, prefix='info_transfer_back'):
+class InfoTransferBackCall(BaseCall, prefix='info_transfer_back'):
     where: str
 
-class InfoTransferPageCall(CallbackData, prefix='info_transfer_page'):
+class InfoTransferPageCall(BaseCall, prefix='info_transfer_page'):
     page: int
 
-class InfoTransferInfoCall(CallbackData, prefix='info_transfer_info'):
+class InfoTransferInfoCall(BaseCall, prefix='info_transfer_info'):
     transfer_id: int
 
-class InfoTransferStatusCall(CallbackData, prefix='info_transfer_status'):
+class InfoTransferStatusCall(BaseCall, prefix='info_transfer_status'):
     status: ItemTransferStatusEnum
 
-class InfoTransferSortedCall(CallbackData, prefix='info_transfer_sorted'):
+class InfoTransferSortedCall(BaseCall, prefix='info_transfer_sorted'):
     status: str
 
-class InfoTransferSearchCall(CallbackData, prefix='info_transfer_search'):
+class InfoTransferSearchCall(BaseCall, prefix='info_transfer_search'):
     search_type: str
     
-class InfoTransferActionCall(CallbackData, prefix='info_transfer_action'):
+class InfoTransferActionCall(BaseCall, prefix='info_transfer_action'):
     transfer_id: int
     to_new_status: bool = False
     to_redact: bool = False

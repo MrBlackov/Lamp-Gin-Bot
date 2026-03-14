@@ -19,7 +19,7 @@ chat_router = Router()
 @log.decor(arg=True)
 @exept
 @permisiion_check(False)
-async def cmd_add_item_name(message: Message, command: CommandObject, state: FSMContext):
+async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
     msg, markup = await ChatService(message.from_user.id, state).menu(message.chat.id)
     await message.answer(msg, reply_markup=markup)
 
@@ -27,7 +27,7 @@ async def cmd_add_item_name(message: Message, command: CommandObject, state: FSM
 @log.decor(arg=True)
 @exept
 @permisiion_check(False)
-async def cmd_add_item_name(message: Message, command: CommandObject, state: FSMContext):
+async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
     msg, markup = await ChatService(message.from_user.id, state).menu(message.chat.id)
     await message.answer(msg, reply_markup=markup)
 
@@ -35,7 +35,7 @@ async def cmd_add_item_name(message: Message, command: CommandObject, state: FSM
 @log.decor(arg=True)
 @call_exept
 @permisiion_check(True, True)
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ChatBackCall, state: FSMContext):
+async def callback_handler(callback: CallbackQuery, callback_data: ChatBackCall, state: FSMContext, **kwargs):
     msg, markup = await ChatService(callback.from_user.id, state).menu(callback.message.chat.id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -43,7 +43,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: ChatBa
 @log.decor(arg=True)
 @call_exept
 @permisiion_check(True, True)
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ChatSettingActionCall, state: FSMContext):
+async def callback_handler(callback: CallbackQuery, callback_data: ChatSettingActionCall, state: FSMContext, **kwargs):
     msg, markup = await ChatService(callback.from_user.id, state).redact_msg_delete_time(callback_data.chat_id, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -51,7 +51,7 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: ChatSe
 @log.decor(arg=True)
 @exept
 @permisiion_check(False)
-async def cmd_inventory(message: Message, state: FSMContext):
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     fsm = ChatFSM(state)
     msg0 = await fsm.get_value('msg')
     quan = is_natural_int(message.text, 
@@ -70,7 +70,7 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @log.decor(arg=True)
 @call_exept
 @permisiion_check(True, True)
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ChatSettingActionCall, state: FSMContext):
+async def callback_handler(callback: CallbackQuery, callback_data: ChatSettingActionCall, state: FSMContext, **kwargs):
     msg, markup = await ChatService(callback.from_user.id, state).redact_is_msg_delete(callback_data.chat_id, callback_data.is_msg_delete)
     await callback.message.edit_text(msg, reply_markup=markup)
 

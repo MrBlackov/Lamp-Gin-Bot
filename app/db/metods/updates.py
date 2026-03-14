@@ -1,5 +1,5 @@
 from app.db.metods.base import update_obj, update_obj_for_ids
-from app.db.dao.main import UserDAO, UserDB, ChatDAO, ChatDB, ChatSettingDAO, ChatSettingDB
+from app.db.dao.main import UserDAO, UserDB, ChatDAO, ChatDB, ChatSettingDAO, ChatSettingDB, MessageDAO, MessageDB
 from app.db.dao.chars import ExistenceDB, CharacterDB, CharacterDAO, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
@@ -12,6 +12,7 @@ update_char = update_obj(CharacterDAO)
 update_exist = update_obj(ExistenceDAO)
 update_chat = update_obj(ChatDAO)
 update_chat_setting = update_obj(ChatSettingDAO)
+update_message = update_obj(MessageDAO)
 
 async def update_chat_by_setting(chat_id: int, setting_id: int) -> ChatDB:
     return await update_chat(filters={'id':chat_id}, new_data={'setting_id':setting_id})
@@ -40,6 +41,8 @@ async def update_main_char(user_id: int, char_id: int) -> bool:
 
 async def update_char_location_default(char_id: int) -> bool:
     return await update_char(filters={'id':char_id}, new_data={'location_id':1})
+
+
 
 update_item = update_obj(ItemDAO)
 update_item_for_ids = update_obj_for_ids(ItemDAO)

@@ -7,7 +7,7 @@ class MainError(BotError):
     faq = 'Эта ошибка в системе возникает, если разработчик не предусмотрел все ситуации. Пожалуйста, сообщите ему об ошибки и когда она возникла.'
 
 class MainQuantityLessSixTeen(MainError):
-    msg = '❌ Вы отправили число меньше 60. Нужно целое число, которое больше 60'
+    msg = '❌ Вы отправили число меньше 120. Нужно целое число, которое больше 120'
     code = '402.17'
     faq = ''
 
@@ -25,3 +25,6 @@ class MainQuantityFloat(MainError):
     msg = '❌ Вы отправили не целое число. Нужно целое число'
     code = '402.19'  
     faq = ''  
+
+class NoDeleteMessageError(MainError):
+    pass

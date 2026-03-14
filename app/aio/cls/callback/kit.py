@@ -1,14 +1,14 @@
-from aiogram.filters.callback_data import CallbackData
+from app.aio.cls.callback.base import BaseCall
 from typing import Literal
 
-class KitIdCall(CallbackData, prefix='kit_id'):
+class KitIdCall(BaseCall, prefix='kit_id'):
     kit_id: int
     is_new: bool = False
 
-class KitBackCall(CallbackData, prefix='kit_back'):
+class KitBackCall(BaseCall, prefix='kit_back'):
     where: str
 
-class KitActionCall(CallbackData, prefix='kit_action'):
+class KitActionCall(BaseCall, prefix='kit_action'):
     kit_id: int | None = None
     to_enter_code: bool = False
     to_get_kit: bool = False

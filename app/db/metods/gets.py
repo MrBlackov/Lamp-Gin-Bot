@@ -1,5 +1,5 @@
 from app.db.metods.base import add_or_update_obj, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide, get_for_ids
-from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB, ChatDAO, ChatSettingDAO, ChatDB, ChatSettingDB
+from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB, ChatDAO, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB, CraftDB, CraftDAO
 from app.validate.add.characters import Character_add, Existence_add
@@ -17,6 +17,7 @@ select_users = select_objs(Users_add, UserDAO)
 
 select_chat = select_obj_no_valide(ChatDAO)
 select_chat_setting = select_obj_no_valide(ChatSettingDAO)
+select_message = select_obj_no_valide(MessageDAO)
 
 async def get_user_for_tg_id(tg_id: int, to_user: bool = False) -> int | UserDB:
     user = await add_or_update_user(data={'tg_id':tg_id}, tg_id=tg_id)
@@ -30,9 +31,9 @@ async def get_users() -> list[UserDB]:
     return await select_users()
 
 async def get_chat_for_tg_id(tg_id: int) -> ChatDB | None:
-    chat: ChatDB = await select_chat(filters={'tg_id':tg_id})
+    chat: ChatDB = await select_chat(filters={'tg_id':tg_id}, logger=False)
     if chat and chat.setting_id:
-        setting = await select_chat_setting(filters={'chat_id':chat.id})
+        setting = await select_chat_setting(filters={'chat_id':chat.id}, logger=False)
         return chat.add_setting(setting)
     return chat
 
@@ -46,6 +47,8 @@ async def get_chat_for_id(chat_id: int) -> ChatDB | None:
         return chat.add_setting(setting)
     return chat
 
+async def get_message(tg_chat_id: int, message_id: int):
+    return await select_message(filters={'chat_tg_id':tg_chat_id, 'msg_id':message_id})
 
 select_char = select_obj(Character_add, CharacterDAO)
 select_chars = select_objs(Character_add, CharacterDAO)

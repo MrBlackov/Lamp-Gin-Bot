@@ -8,7 +8,7 @@ class BaseService:
     def __init__(self, tg_id: int, state: FSMContext | None = None):
         self.tg_id = tg_id
         self.state: FSMUtils = FSMUtils(state)
-        self.IKB = BotIKB()
+        self.IKB = BotIKB(tg_id)
         self.newspaper_id = newspaper_id
         self.admins = admins
         self.bot = bot

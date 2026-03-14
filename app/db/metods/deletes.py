@@ -1,12 +1,14 @@
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB
 from app.db.dao.chars import CharacterDAO, CharacterDB
 from app.db.dao.transfer import TransferDAO
-from app.db.metods.base import delete_obj, delete_objs
+from app.db.dao.main import MessageDAO
+from app.db.metods.base import delete_obj, delete_objs, delete_objs_for_ids
 
 delete_char = delete_obj(CharacterDAO)
 delete_chars = delete_objs(CharacterDAO)
 delete_item = delete_obj(ItemDAO)
 delete_items = delete_objs(ItemDAO)
+delete_messages = delete_objs_for_ids(MessageDAO)
 delete_item_sketch = delete_obj(ItemSketchDAO)
 
 async def delete_item_for_id(item_id: int):

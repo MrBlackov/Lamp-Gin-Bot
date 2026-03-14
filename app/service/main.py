@@ -28,7 +28,7 @@ class ChatService(BaseService):
         self.layer = ChatLayer(tg_id)
         self.state = ChatFSM(state)
         self.text = ChatText
-        self.IKB = ChatIKB()
+        self.IKB = ChatIKB(tg_id)
 
     async def menu(self, tg_id: int):
         chat = await self.layer.setting(tg_id)
@@ -40,7 +40,7 @@ class ChatService(BaseService):
         return '✒️ Укажите новое время удаления сообщения', self.IKB.back('menu')
 
     async def new_msg_delete_time(self, new_time: int):
-        if new_time < 60:
+        if new_time < 120:
             raise MainQuantityLessSixTeen(f'This user(tg_id={self.tg_id}) try set msg delete time less than 60 second')
         if new_time > 170_000:
             raise MainQuantityMaxTime(f'This user(tg_id={self.tg_id}) try set msg delete time more than 170.000 second')

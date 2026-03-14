@@ -15,14 +15,14 @@ faq_router = Router()
 @faq_router.callback_query(ToErrorFAQCall.filter())     
 @log.decor(arg=True)
 @call_exept
-async def callback_to_error_faq(callback: CallbackQuery, callback_data: ToErrorFAQCall, state: FSMContext):
+async def callback_to_error_faq(callback: CallbackQuery, callback_data: ToErrorFAQCall, state: FSMContext, **kwargs):
     msg, markup = FaqService(callback.from_user.id, state).to_error_faq(callback.message.text, callback_data.code)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @faq_router.callback_query(NewItemACtionCall.filter(F.to_read_rules == True))     
 @log.decor(arg=True)
 @call_exept
-async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext):
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
     msg, markup = FaqService(callback.from_user.id, state).to_item_rules()
     await callback.message.answer(msg, reply_markup=markup)
 
@@ -30,7 +30,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewIt
 @faq_router.message(Command('help'), F.text.contains('error'))
 @log.decor(arg=True)
 @exept
-async def cmd_help(message: Message, command: CommandObject, state: FSMContext):
+async def cmd_help(message: Message, command: CommandObject, state: FSMContext, **kwargs):
     code = command.args.replace('error ', '')
     print(command.args)
     if code == None:
@@ -42,7 +42,7 @@ async def cmd_help(message: Message, command: CommandObject, state: FSMContext):
 @faq_router.message(Command('helperror'))
 @log.decor(arg=True)
 @exept
-async def cmd_help(message: Message, command: CommandObject, state: FSMContext):
+async def cmd_help(message: Message, command: CommandObject, state: FSMContext, **kwargs):
     code = command.args
     if code == None:
         raise FaqErrorNoEnterError(f'This user(tg_id:{message.from_user.id}) dont enter code for error')
@@ -54,7 +54,7 @@ async def cmd_help(message: Message, command: CommandObject, state: FSMContext):
 @faq_router.message(Command('help'), F.text.contains('char'))
 @log.decor(arg=True)
 @exept
-async def cmd_help(message: Message, state: FSMContext):
+async def cmd_help(message: Message, state: FSMContext, **kwargs):
     msg, markup = FaqService(message.from_user.id, state).help_chars()
     await message.answer(msg, reply_markup=markup)
 
@@ -62,14 +62,14 @@ async def cmd_help(message: Message, state: FSMContext):
 @faq_router.message(Command('helpitem'))
 @log.decor(arg=True)
 @exept
-async def cmd_help(message: Message, state: FSMContext):
+async def cmd_help(message: Message, state: FSMContext, **kwargs):
     msg, markup = FaqService(message.from_user.id, state).help_items()
     await message.answer(msg, reply_markup=markup)
 
 @faq_router.callback_query(NewItemACtionCall.filter(F.to_faq == True))     
 @log.decor(arg=True)
 @call_exept
-async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext):
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
     msg, markup = FaqService(callback.from_user.id, state).help_items()
     await callback.message.answer(msg, reply_markup=markup)
 
@@ -77,20 +77,20 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewIt
 @faq_router.message(Command('help'), F.text.contains('cmd'))
 @log.decor(arg=True)
 @exept
-async def cmd_help(message: Message, state: FSMContext):
+async def cmd_help(message: Message, state: FSMContext, **kwargs):
     msg, markup = FaqService(message.from_user.id, state).help_cmd()
     await message.answer(msg, reply_markup=markup)
 
 @faq_router.message(Command('help'))
 @log.decor(arg=True)
 @exept
-async def cmd_help(message: Message, state: FSMContext):
+async def cmd_help(message: Message, state: FSMContext, **kwargs):
     msg, markup = FaqService(message.from_user.id, state).help()
     await message.answer(msg, reply_markup=markup)
 
 @faq_router.message(Command('start'))
 @log.decor(arg=True)
 @exept
-async def cmd_help(message: Message, state: FSMContext):
+async def cmd_help(message: Message, state: FSMContext, **kwargs):
     msg, markup = FaqService(message.from_user.id, state).to_start(message.from_user.full_name)
     await message.answer(msg, reply_markup=markup)

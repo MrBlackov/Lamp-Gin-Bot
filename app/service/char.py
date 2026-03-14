@@ -21,7 +21,7 @@ class AddCharacterService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.state = CharFSM(state, 'add')
-        self.IKB = AddCharIKB()
+        self.IKB = AddCharIKB(tg_id)
 
     async def chouse_gender(self, to_change: bool = False):
         my_chars = await InfoCharacterLayer(self.tg_id).get_chars()
@@ -137,7 +137,7 @@ class InfoCharacterService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.state = CharFSM(state, 'info')
-        self.IKB = InfoCharIKB()
+        self.IKB = InfoCharIKB(tg_id)
 
     async def get_chars(self):
         datas = await InfoCharacterLayer(self.tg_id).get_chars()
@@ -171,7 +171,7 @@ class InventoryService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.state = CharFSM(state, 'inventory')
-        self.IKB = InventoryIKB()
+        self.IKB = InventoryIKB(tg_id)
         self.text = InventoryItemsText
         self.layer = InventoryCharacterLayer(tg_id)
 
@@ -190,7 +190,7 @@ class InventoryService(BaseService):
         await self.state.update_data(item=item_id)
         if items:
             return self.text.item(items[item_id]), self.IKB.throw('inventory')
-        raise
+        
 
     async def to_throw(self, msg):
         await self.state.update_data(msg=msg)

@@ -14,7 +14,7 @@ class FaqService(BaseService):
     def __init__(self, tg_id: int, state: FSMContext | None = None):
         super().__init__(tg_id, state)
         self.state = FaqFSM(state)
-        self.IKB = FaqIKB()
+        self.IKB = FaqIKB(tg_id)
         self.text = FaqText
 
     def to_error_faq(self, text: str, code: str):

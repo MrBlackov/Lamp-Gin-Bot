@@ -21,7 +21,7 @@ from app.aio.cls.fsm.utils import TransferFSM
 class NewItemTransferService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.IKB = ItemTransferIKB()
+        self.IKB = ItemTransferIKB(tg_id)
         self.layer = TransferLayer(tg_id)
         self.text = ItemTransferText
         self.state = TransferFSM(state, 'new')
@@ -185,7 +185,7 @@ class NewItemTransferService(BaseService):
 class InfoTransferService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.IKB = InfoTransferIKB()
+        self.IKB = InfoTransferIKB(tg_id)
         self.layer = TransferLayer(tg_id)
         self.text = ItemTransferText
         self.state = TransferFSM(state, 'info')

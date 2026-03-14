@@ -1,7 +1,7 @@
 from app.db.models.transfer import TransferDB
 from app.db.models.item import CraftDB, ItemDB, ItemSketchDB
 from app.db.models.char import CharacterDB
-from app.db.models.base import UserDB
+from app.db.models.main import UserDB
 from enum import Enum
 
 class TransferStatus:

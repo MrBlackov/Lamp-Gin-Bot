@@ -64,9 +64,9 @@ def add_or_update_obj(clsDAO: BaseDAO):
                           session: AsyncSession,
                           data: dict,
                           logger: bool = True,
-                          **kwargs
+                          **filters
                          ):
-        new_data = await clsDAO.add_or_update(session, data, **kwargs)
+        new_data = await clsDAO.add_or_update(session, data, **filters)
         return new_data
 
     return add_new_obj
@@ -213,6 +213,18 @@ def delete_objs(clsDAO: BaseDAO,):
                 log.trace(f"Delete data(killed) in {clsDAO.model.__tablename__}, id: {id}, kwargs:{kwargs}")
     
             return return_value
+        except SQLAlchemyError as sqle:
+            log.warning(sqle)
+            raise sqle
+        
+    return delete_obj_s
+
+def delete_objs_for_ids(clsDAO: BaseDAO,):
+    @connection()
+    @log.decor()
+    async def delete_obj_s(session: AsyncSession, ids: list[int], logger: bool = True):
+        try:
+            return await clsDAO.delete_many_for_ids(session, ids=ids)
         except SQLAlchemyError as sqle:
             log.warning(sqle)
             raise sqle

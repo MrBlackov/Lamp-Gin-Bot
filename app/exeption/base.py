@@ -31,6 +31,10 @@ class PermissionError(BotError):
     msg = '❌ У вас нет доступа'
     code = '405.1'
 
+class ALienCallbackError(BotError):
+    msg = '❌ Это не ваши кнокпа    '
+    code = '405.1'
+
 def msg_error(bot_error: BotError | list[BotError]) -> str | list[str]:
     if type(bot_error) == BotError: return bot_error.to_msg()
     elif type(bot_error) == list:

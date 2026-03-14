@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from typing import List
 from app.enum_type.bd import TgType, WorkType
+from datetime import datetime
 
 class TgUserDB(Base):
     tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
@@ -52,13 +53,15 @@ class ChatDB(Base):
 
 class ChatSettingDB(Base):
     chat_id: Mapped[int] = mapped_column(ForeignKey('chatdb.id'))
-    msg_delete_time: Mapped[int] = mapped_column(default=120)
+    msg_delete_time: Mapped[int] = mapped_column(default=360)
     is_msg_delete: Mapped[bool] = mapped_column(default=False)
 
 class UserSettingDB(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('userdb.id'))
 
-
-    
-
+class MessageDB(Base):
+    chat_tg_id: Mapped[int] = mapped_column(BigInteger)
+    msg_id: Mapped[int] = mapped_column(BigInteger)
+    is_delete: Mapped[bool] = mapped_column(default=True)
+    time_delete: Mapped[datetime] = mapped_column(index=True)
 

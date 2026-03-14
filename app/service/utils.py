@@ -86,3 +86,10 @@ def permisiion_check(is_callback: bool, to_raise: bool = False):
             return await func(message, **kwargs)       
         return wrapped
     return decorator
+
+def message_delete(chat_id: int, message_id: int):
+    return bot.delete_message(chat_id, message_id)
+
+
+
+

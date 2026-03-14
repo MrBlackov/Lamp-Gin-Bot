@@ -211,3 +211,15 @@ class BaseDAO(Generic[T]):
         except SQLAlchemyError as e:
             log.error(f"Error occurred: {e}")
             raise
+    @classmethod
+    async def delete_many_for_ids(cls, session: AsyncSession, ids: list[int]):
+        stmt = delete(cls.model).where(cls.model.id.in_(ids))
+        try:
+            result = await session.execute(stmt)
+            await session.flush()
+            return result.rowcount
+        except SQLAlchemyError as e:
+            log.error(f"Error occurred: {e}")
+            raise
+
+        

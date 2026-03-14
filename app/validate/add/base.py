@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from app.enum_type.bd import WorkType, TgType
-from app.db.models.base import DonateDB
+from app.db.models.main import DonateDB
 
 class BaseAddValid(BaseModel):
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)

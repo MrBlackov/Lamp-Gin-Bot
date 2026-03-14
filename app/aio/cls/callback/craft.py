@@ -1,15 +1,15 @@
-from aiogram.filters.callback_data import CallbackData
+from app.aio.cls.callback.base import BaseCall
 
-class CraftIdCall(CallbackData, prefix='craft_id'):
+class CraftIdCall(BaseCall, prefix='craft_id'):
     craft_id: int
 
-class CraftBackCall(CallbackData, prefix='craft_back'):
+class CraftBackCall(BaseCall, prefix='craft_back'):
     where: str
 
-class CraftPageCall(CallbackData, prefix='craft_page'):
+class CraftPageCall(BaseCall, prefix='craft_page'):
     page: int
 
-class CraftActionCall(CallbackData, prefix='craft_action'):
+class CraftActionCall(BaseCall, prefix='craft_action'):
     to_craft_hiden: bool = False
     craft_hiden: bool = False
     to_faq: bool = False
@@ -22,22 +22,22 @@ class CraftActionCall(CallbackData, prefix='craft_action'):
     redact_hide: bool = False 
     hide: bool | None = None
     
-class CraftUseCall(CallbackData, prefix='craft_use'):
+class CraftUseCall(BaseCall, prefix='craft_use'):
     craft_id: int
     quantity: int = 1
 
-class CraftCreateActionCall(CallbackData, prefix='craft_action_hiden'):
+class CraftCreateActionCall(BaseCall, prefix='craft_action_hiden'):
     item_type: str
     action: str
 
-class CraftItemPagesCall(CallbackData, prefix='craft_item_pages'):
+class CraftItemPagesCall(BaseCall, prefix='craft_item_pages'):
     page: int
     item_type: str
 
-class CraftItemIdCall(CallbackData, prefix='craft_item_id'):
+class CraftItemIdCall(BaseCall, prefix='craft_item_id'):
     item_id: int
 
-class CraftAdminACtionCall(CallbackData, prefix='craft_admin_action'):
+class CraftAdminACtionCall(BaseCall, prefix='craft_admin_action'):
     craft_id: int
     to_redact: bool = False
     to_create: bool | None = None  

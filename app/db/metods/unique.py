@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.logged.botlog import log
 from app.db.models.transfer import TransferDB
 from app.db.models.item import CraftDB, ItemDB
+from app.db.models.main import MessageDB
 from sqlalchemy import select, or_
+from datetime import datetime
 
 @connection(commit=False)
 @log.decor()
@@ -52,3 +54,19 @@ async def get_crafts_for_item_id(
             log.error(e)
             raise        
 
+@connection(commit=False)
+@log.decor()
+async def get_message_to_delete(
+                             session: AsyncSession,   
+                             time_delete: datetime = datetime.now()                       
+                            ):
+        try:
+            query = select(MessageDB).where(MessageDB.time_delete <= time_delete)
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.trace(f"Select data in {MessageDB.__tablename__} data:{[r.__dict__ for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.debug(e)
+            raise        

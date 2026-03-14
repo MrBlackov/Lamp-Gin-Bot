@@ -17,7 +17,7 @@ class KitService(BaseService):
         super().__init__(tg_id, state)
         self.state = KitFSM(state)
         self.layer = KitLayer(tg_id)
-        self.IKB = KitIKB()
+        self.IKB = KitIKB(tg_id)
 
     async def kits(self):
         kits, no_hide = await self.layer.my_kits()

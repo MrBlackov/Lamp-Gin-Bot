@@ -1,10 +1,11 @@
 from functools import wraps
 from aiogram.types import Message, CallbackQuery
-from app.exeption.base import BotError
+from app.exeption.base import BotError, ALienCallbackError
 from app.logged.botlog import log
 from app.aio.config import owner
 from app.aio.inline_buttons.faq import FaqIKB
 from app.aio.msg.utils import TextHTML
+from app.aio.cls.callback.base import BaseCall
 
 def exept(func):
     @wraps(func)
@@ -12,11 +13,14 @@ def exept(func):
         dowload = await message.answer('⏳')
         try:
             result = await func(message, **kwargs)
-            await message.delete()
+            try:
+                await message.delete()
+            except:
+                pass
             return result
         except BotError as bote:
             log.warning(f'AioPartPath: {bote}')
-            markup = FaqIKB().to_error_faq(bote.code) if len(bote.faq) > 0 else None
+            markup = FaqIKB(message.from_user.id).to_error_faq(bote.code) if len(bote.faq) > 0 else None
             await message.answer((TextHTML(bote.to_msg).escape)[:4000], reply_markup=markup)
         except Exception as e:
             str_e = str(e)
@@ -32,11 +36,13 @@ def exept(func):
 
 def call_exept(func):
     @wraps(func)
-    async def wrapped(callback: CallbackQuery, **kwargs): 
-        answer_text = '⌛'
-        show_alert=None
+    async def wrapped(callback: CallbackQuery, callback_data: BaseCall, **kwargs): 
         try:
-            result = await func(callback, **kwargs)
+            if callback.from_user.id != callback_data.tg_id:
+                raise ALienCallbackError(f'This user(tg_id={callback.from_user.id}) enter is alien callback keyboard')
+            answer_text = '⌛'
+            show_alert=None
+            result = await func(callback, callback_data, **kwargs)
             return result, callback
         except BotError as bote:
             log.warning(f'AioPartPath: {bote}')
