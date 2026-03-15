@@ -1,5 +1,5 @@
 import asyncio
-from app.aio.config import bot, dp, scheduler, cmds, admin_cmds, owner
+from app.aio.config import bot, dp, cmds, admin_cmds, owner
 from app.aio.cmd.base import base_router
 from app.aio.middlewares.update import UpdateDataMiddleware
 from app.aio.middlewares.message_clean import MessageCleanRequestMiddleware

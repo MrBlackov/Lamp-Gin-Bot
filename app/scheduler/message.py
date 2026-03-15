@@ -1,7 +1,5 @@
 from app.aio.config import bot
 from app.interlayer.message import MessageLayer, NoDeleteMessageError
-from app.scheduler.config import scheduler
-from app.service.utils import message_delete
 import asyncio
 
 class MessageUtils:
@@ -20,7 +18,8 @@ class MessageUtils:
             try:
                 delete_msg = await bot.delete_message(msg.chat_tg_id, msg.msg_id)
                 results[msg.id] = delete_msg
-            except:
+            except Exception as e:
+                print('MessageUtilsDeleter: ', e)
                 results[msg.id] = True
         result_ids = [m for m, is_delete in results.items() if is_delete]
         await self.layer.delete_message_db(result_ids)
@@ -38,7 +37,7 @@ class MessageUtils:
             try:
                 await self.delete_for_time()
             except Exception as e:
-                print(e)
+                print('MessageUtilsRunner: ', e)
                 return None
             finally:
                 await asyncio.sleep(5)

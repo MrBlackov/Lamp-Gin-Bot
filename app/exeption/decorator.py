@@ -40,7 +40,7 @@ def call_exept(func):
         try:
             if callback.from_user.id != callback_data.tg_id:
                 raise ALienCallbackError(f'This user(tg_id={callback.from_user.id}) enter is alien callback keyboard')
-            answer_text = '⌛'
+            answer_text = ''
             show_alert=None
             result = await func(callback, callback_data, **kwargs)
             return result, callback
