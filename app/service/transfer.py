@@ -16,13 +16,15 @@ from app.logic.cls import MyTransfers
 from app.db.models.transfer import TransferDB
 from app.logged.infolog import infolog
 from app.aio.msg.base import UserText
+from app.aio.cls.fsm.utils import TransferFSM
 
 class NewItemTransferService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.IKB = ItemTransferIKB()
+        self.IKB = ItemTransferIKB(tg_id)
         self.layer = TransferLayer(tg_id)
         self.text = ItemTransferText
+        self.state = TransferFSM(state, 'new')
         
     async def new_transfer(self):
         return '📲 Выберите режим сделки:', self.IKB.new_transfer()
@@ -165,6 +167,7 @@ class NewItemTransferService(BaseService):
                                 [item for item in items1.values()] if items1 else None, 
                                 [item for item in items2.values()] if items2 else None,
                                 ).text('🟢', '🔵'))
+        await self.state.clear_this_state()
         return '✅ Сделка отправлена, посмотреть свои сделки /transfer', None
 
     async def to_created(self):
@@ -175,15 +178,17 @@ class NewItemTransferService(BaseService):
         bayer_tg_id = await self.layer.newtrade(char1, char2, 
                                                 [item for item in items1.values()] if items1 else None, 
                                                 [item for item in items2.values()] if items2 else None, 'created')
+        await self.state.clear_this_state()
         return '💾 Сделка сохранена в виде черновика, посмотреть свои сделки - /transfer', None    
 
 
 class InfoTransferService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.IKB = InfoTransferIKB()
+        self.IKB = InfoTransferIKB(tg_id)
         self.layer = TransferLayer(tg_id)
         self.text = ItemTransferText
+        self.state = TransferFSM(state, 'info')
 
     async def main_menu(self):
         transfers = await self.layer.transfers()
@@ -291,7 +296,6 @@ class InfoTransferService(BaseService):
         transfer = mytransfers.all_for_id.get(transfer_id)
         if transfer.status == 'created':
             await self.to_delete(transfer_id)
-        await self.state.clear()
         await self.state.update_data(items1=transfer.seller_items, items2=transfer.buyer_items, redact_transfer=transfer)
         await self.new_status(transfer_id, 'rejected')
         return await NewItemTransferService(self.tg_id, self.state).trade_menu(char1=transfer.seller, char2=transfer.buyer)

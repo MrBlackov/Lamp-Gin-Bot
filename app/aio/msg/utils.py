@@ -3,7 +3,7 @@ import html
 
 class TextHTML:
     def __init__(self, text: str):
-        self.text = text
+        self.text = str(text)
 
     def blockquote(self, expandable: bool = False):
         """ Цитата

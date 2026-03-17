@@ -27,5 +27,6 @@ class InventoryState(StatesGroup):
     items: dict[int, ItemDB]
     item: int
     throw_quantity: int = State()
+    pick_up_quantity: int = State()
 
 

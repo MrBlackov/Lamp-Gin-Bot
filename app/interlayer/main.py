@@ -1,20 +1,19 @@
-from app.db.metods.gets import get_user_for_tg_id, get_main_char_for_user_id, get_char_for_id, get_item_for_name, get_user_for_id
+from app.interlayer.base import BaseLayer
+from app.logic.main import ChatLogic
 
+class UserLayer(BaseLayer):
+    pass
 
-class UserLayer:
+class ChatLayer(BaseLayer):
     def __init__(self, tg_id: int):
-        self.tg_id = tg_id
+        super().__init__(tg_id)
+        self.logic = ChatLogic()
 
-    async def get_char_info(self, user_id: int | None = None):
-        if user_id:
-            self.user = await get_user_for_id(user_id)
-        else:
-            self.user = await get_user_for_tg_id(self.tg_id, True)
-        self.char_id = await get_main_char_for_user_id(self.user.id)
-        self.char = await get_char_for_id(self.char_id)
-        return self
+    async def setting(self, tg_id: int):
+        return await self.logic.setting(tg_id)
 
-
-
-
-
+    async def redact_is_msg_delete(self, chat_id: int, is_msg_delete: bool):
+        return await self.logic.redact_is_msg_delete(chat_id, is_msg_delete)
+ 
+    async def redact_msg_delete_time(self, chat_id: int, msg_delete_time: int):
+        return await self.logic.redact_msg_delete_time(chat_id, msg_delete_time)

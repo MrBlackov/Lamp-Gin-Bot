@@ -1,6 +1,7 @@
-from app.db.models.transfer import TransferDB, ItemDB, ItemSketchDB
+from app.db.models.transfer import TransferDB
+from app.db.models.item import CraftDB, ItemDB, ItemSketchDB
 from app.db.models.char import CharacterDB
-from app.db.models.base import UserDB
+from app.db.models.main import UserDB
 from enum import Enum
 
 class TransferStatus:
@@ -74,3 +75,34 @@ class Stats:
         self.item_sketchs_coins = len(self.item_sketchs)
         self.transfers_coins = len(self.transfers)
         return self
+    
+class Craft:
+    def __init__(self, 
+                 data: CraftDB, 
+                 ingredients: list[ItemDB] | None = None, 
+                 results: list[ItemDB] | None = None, 
+                 tools: list[ItemDB] | None = None):
+        self.data = data
+        self.ingredients = ingredients
+        self.results = results
+        self.tools = tools
+        
+
+    def ingredients_emodzi(self, to_str: bool = False, sep: str = ''):
+        emodzi_list = [i.sketch.emodzi for i in self.ingredients] if self.ingredients else []
+        if len(emodzi_list) == 0:
+            return '💮'
+        return sep.join(emodzi_list) if to_str else emodzi_list
+    
+    def results_emodzi(self, to_str: bool = False, sep: str = ''):
+        emodzi_list = [i.sketch.emodzi for i in self.results] if self.results else []
+        if len(emodzi_list) == 0:
+            return '⚗️'
+        return sep.join(emodzi_list) if to_str else emodzi_list
+    
+    def tools_emodzi(self, to_str: bool = False, sep: str = ''):
+        emodzi_list = [i.sketch.emodzi for i in self.tools] if self.tools else []
+        if len(emodzi_list) == 0:
+            return '🛠️'
+        return sep.join(emodzi_list) if to_str else emodzi_list  
+

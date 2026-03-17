@@ -3,26 +3,28 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from decouple import config
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram.types import BotCommand, BotCommandScopeChat, BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats, BotCommandScopeAllChatAdministrators
 
 
-scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
 admins = [int(config('owner'))]
 owner = int(config('owner'))
 newspaper_id = int(config('newcpaper_id'))
-token = config('token')
+token = config('token2')
+log_groups = [int(x) for x in config('log_groups').split(',')]
 bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
 cmds = {
     'mychar':'👤 Список ваших персонажей',
     'inventory':'💼 Инвентарь',
     'transfer':'✉️ Ваши сделки',
+    'craft':'⚗️ Доступыне крафты',
 
     'newchar':'➕ Создать персонажа',
     'newtransfer':'➕ Создать сделку',
     'newitem':'➕ Создать предмет',
+    'newcraft':'➕ Создать крафт',
 
+    'chat':'⚙️ Настройки чата',
     'items':'📦 Список всех предметов в игре',
     'help':'📚 Получить справку',
 }

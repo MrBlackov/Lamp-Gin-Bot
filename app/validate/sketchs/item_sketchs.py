@@ -58,7 +58,7 @@ class ItemSketchValide(SketchsBasevalidate):
             rarity = float(rarity)
         except (ValueError, TypeError):
             raise RariryValideError('Rarity must be a float')
-        if not 0 <= rarity <= 1:
+        if not( 0 <= rarity <= 1):
             raise RariryValideError('Rarity must be between 0 and 1')
         return rarity
 
@@ -92,5 +92,5 @@ class ItemValide(SketchsBasevalidate):
     sketch_id: int
     quantity: int = 1
     transfer_id: int | None = None
-    from_char_transfers: bool | None = None
+    nbt: dict = {}
 

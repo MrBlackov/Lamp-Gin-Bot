@@ -38,7 +38,7 @@ class ExistenceDB(Base):
     amount_life: Mapped[int]
     inventory: Mapped[InventoryDB] = relationship(InventoryDB, uselist=False, lazy='joined', cascade='all, delete-orphan', back_populates='exist')
     attibute_point: Mapped[AttributePointDB] = relationship(AttributePointDB, uselist=False, lazy='joined', cascade='all, delete-orphan', back_populates='exist')   
-#    location: Mapped[LocationDB] = relationship(LocationDB, uselist=False, lazy='joined')  
+    location_id: Mapped[int] = mapped_column(ForeignKey('locationdb.id'), nullable=True)
     die: Mapped[bool] = mapped_column(default=False)
     @property
     def full_name(self):

@@ -5,27 +5,27 @@ from app.db.models.item import KitDB, KitSketchDB
 
 class KitIKB(BotIKB):
     def back(self, where: str):
-        self.builder.button(text='↩️ Назад', callback_data=KitBackCall(where=where))
+        self.builder.button(text='↩️ Назад', callback_data=KitBackCall(where=where, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
     
     def my_kits(self, kits: list[KitDB] | None, no_hide: list[KitSketchDB] | None):
         if kits:
             for kit in kits:
-                self.builder.button(text='🟢 ' + kit.sketch.name, callback_data=KitIdCall(kit_id=kit.id))
+                self.builder.button(text='🟢 ' + kit.sketch.name, callback_data=KitIdCall(kit_id=kit.id, tg_id=self.tg_id))
         if no_hide:
             for kit in no_hide:
-                self.builder.button(text='🆕 ' + kit.name, callback_data=KitIdCall(kit_id=kit.id, is_new=True))   
-        self.builder.button(text='✒️ Ввести промокод', callback_data=KitActionCall(to_enter_code=True))
+                self.builder.button(text='🆕 ' + kit.name, callback_data=KitIdCall(kit_id=kit.id, is_new=True, tg_id=self.tg_id))   
+        self.builder.button(text='✒️ Ввести промокод', callback_data=KitActionCall(to_enter_code=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
 
     def kit(self, kit_id: int, where: str):
-        self.builder.button(text='↩️ Назад', callback_data=KitBackCall(where=where))
-        self.builder.button(text='📟 Использовать', callback_data=KitActionCall(kit_id=kit_id, to_get_kit=True))
+        self.builder.button(text='↩️ Назад', callback_data=KitBackCall(where=where, tg_id=self.tg_id))
+        self.builder.button(text='📟 Использовать', callback_data=KitActionCall(kit_id=kit_id, to_get_kit=True, tg_id=self.tg_id))
         return self.builder.adjust(2).as_markup()
 
     def newkit(self, kit_id: int, where: str):
-        self.builder.button(text='💾 Сохранить', callback_data=KitActionCall(kit_id=kit_id, to_save=True))
-        self.builder.button(text='📟 Использовать', callback_data=KitActionCall(kit_id=kit_id, to_get_kit=True))
-        self.builder.button(text='↩️ Назад', callback_data=KitBackCall(where=where))
+        self.builder.button(text='💾 Сохранить', callback_data=KitActionCall(kit_id=kit_id, to_save=True, tg_id=self.tg_id))
+        self.builder.button(text='📟 Использовать', callback_data=KitActionCall(kit_id=kit_id, to_get_kit=True, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=KitBackCall(where=where, tg_id=self.tg_id))
         return self.builder.adjust(2).as_markup()
 

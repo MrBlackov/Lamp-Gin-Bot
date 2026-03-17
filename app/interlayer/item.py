@@ -4,8 +4,9 @@ from app.db.metods.gets import get_user_for_tg_id, get_main_char_for_user_id, ge
 from app.exeption.item import ItemError
 from app.db.models.item import ItemDB
 from app.db.models.char import CharacterDB
-from app.exeption.item import SizeNotIntItemSketchError, NameNoValideError, EmodziNoValideError, NoFindItemSketchForID, ItemNoHideCreatedError
+from app.exeption.item import SizeNotIntItemSketchError, RariryValideError, NameNoValideError, EmodziNoValideError, NoFindItemSketchForID, ItemNoHideCreatedError
 from app.exeption.char import NoHaveMainChar
+
 
 class ItemLayer:
     def __init__(self, tg_id: int):
@@ -70,10 +71,18 @@ class ItemLayer:
         elif what_change == 'emodzi':
             if len(new_data) > 1:
                 raise EmodziNoValideError(f'This user(tg_id={self.tg_id}) enter emodzi and len(emodzi) > 1')
-        elif what_change == 'size':
+        elif what_change in ['size', 'min_drop', 'max_drop']:
             if new_data.isdigit() == False:
                 raise SizeNotIntItemSketchError(f'This user(tg_id={self.tg_id}) enter size, but size no int')
             return int(new_data)
+        elif what_change == 'rarity':
+            try:
+                rarity = float(new_data)
+            except (ValueError, TypeError):
+                raise RariryValideError('Rarity must be a float')
+            if not( 0 <= rarity <= 1):
+                raise RariryValideError('Rarity must be between 0 and 1')
+            return rarity
         return new_data
 
     async def get_items_for_sketchs(self, sketch_id: int) -> dict[CharacterDB, ItemDB]:

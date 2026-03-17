@@ -1,5 +1,5 @@
 from app.db.dao.base import BaseDAO
-from app.db.models.base import TgChatDB, TgUserDB, DonateDB, UserDB
+from app.db.models.main import TgChatDB, TgUserDB, DonateDB, UserDB, ChatDB, ChatSettingDB, UserSettingDB, MessageDB
 
 class UserDAO(BaseDAO):
     model = UserDB
@@ -12,3 +12,15 @@ class TgUserDAO(BaseDAO):
 
 class DonateDAO(BaseDAO):
     model = DonateDB
+
+class ChatDAO(BaseDAO):
+    model = ChatDB
+
+class ChatSettingDAO(BaseDAO):
+    model = ChatSettingDB
+    
+class UserSettingDAO(BaseDAO):
+    model = UserSettingDB
+
+class MessageDAO(BaseDAO):
+    model = MessageDB

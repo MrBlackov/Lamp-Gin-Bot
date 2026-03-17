@@ -10,12 +10,14 @@ from app.interlayer.kit import KitLayer
 from app.aio.inline_buttons.kit import KitIKB
 from app.aio.cls.fsm.kit import KitState
 from app.aio.msg.kit import KitText
+from app.aio.cls.fsm.utils import KitFSM
 
 class KitService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
+        self.state = KitFSM(state)
         self.layer = KitLayer(tg_id)
-        self.IKB = KitIKB()
+        self.IKB = KitIKB(tg_id)
 
     async def kits(self):
         kits, no_hide = await self.layer.my_kits()
