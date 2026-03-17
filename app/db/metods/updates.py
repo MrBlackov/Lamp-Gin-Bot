@@ -1,4 +1,4 @@
-from app.db.metods.base import update_obj, update_obj_for_ids
+from app.db.metods.base import update_obj, update_obj_for_ids, update_objs
 from app.db.dao.main import UserDAO, UserDB, ChatDAO, ChatDB, ChatSettingDAO, ChatSettingDB, MessageDAO, MessageDB
 from app.db.dao.chars import ExistenceDB, CharacterDB, CharacterDAO, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB
@@ -45,6 +45,7 @@ async def update_char_location_default(char_id: int) -> bool:
 
 
 update_item = update_obj(ItemDAO)
+update_items = update_objs(ItemDAO)
 update_item_for_ids = update_obj_for_ids(ItemDAO)
 update_item_sketch = update_obj(ItemSketchDAO)
 

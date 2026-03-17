@@ -1,10 +1,11 @@
 from typing import List, Generic, TypeVar, List
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, func
 from pydantic import BaseModel
 from app.db.base import Base
 from app.logged.botlog import log
+from datetime import datetime, date
 
 T = TypeVar("T", bound=Base)
 
@@ -48,6 +49,22 @@ class BaseDAO(Generic[T]):
         except SQLAlchemyError as e:
             log.error(e)
             raise        
+
+    @classmethod
+    async def find_for_date(cls, 
+                             session: AsyncSession,
+                             date: date                         
+                            ):
+        try:
+            query = select(cls.model).filter(func.date(cls.model.created_at) == date)
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.debug(f"Select data in {cls.model.__tablename__}, date: {date}, data:{[r.__dict__ for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise       
 
     @classmethod
     async def find_all(cls, session: AsyncSession, filters: dict | None = None, order_by: dict | None = None):
@@ -157,14 +174,12 @@ class BaseDAO(Generic[T]):
             raise          
 
     @classmethod
-    async def update_many(cls, session: AsyncSession, filter_criteria: BaseModel, values: BaseModel):
-        filter_dict = filter_criteria.model_dump(exclude_unset=True)
-        values_dict = values.model_dump(exclude_unset=True)
+    async def update_many(cls, session: AsyncSession, filters: dict, values: BaseModel):
         try:
             stmt = (
                 update(cls.model)
-                .filter_by(**filter_dict)
-                .values(**values_dict)
+                .filter_by(**filters)
+                .values(**values)
             )
             result = await session.execute(stmt)
             await session.flush()

@@ -4,13 +4,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.logged.botlog import log
 from pydantic import BaseModel
-from app.db.dao.base import BaseDAO
+from app.db.dao.base import BaseDAO, date
 
 def add_obj(clsDAO: BaseDAO):
     @connection()
     @log.decor()
     async def add_new_obj(
-                          session: AsyncSession,
+                          session: AsyncSession, *,
                           data: BaseModel,
                           logger: bool = True
                          ) -> Base:
@@ -24,7 +24,7 @@ def add_obj(clsDAO: BaseDAO):
 @connection()
 @log.decor(arg=True)
 async def add_db_obj(
-                      session: AsyncSession,
+                      session: AsyncSession, *,
                       data: list[Base] | None,
                       logger: bool = True
                      ):
@@ -46,7 +46,7 @@ def add_obj_dict(clsDAO: BaseDAO):
     @connection()
     @log.decor()
     async def add_new_obj(
-                          session: AsyncSession,
+                          session: AsyncSession, *,
                           data: dict,
                           logger: bool = True
                          ):
@@ -61,7 +61,7 @@ def add_or_update_obj(clsDAO: BaseDAO):
     @connection()
     @log.decor()
     async def add_new_obj(
-                          session: AsyncSession,
+                          session: AsyncSession, *,
                           data: dict,
                           logger: bool = True,
                           **filters
@@ -77,7 +77,7 @@ def select_obj(clsP: BaseModel, clsDAO: BaseDAO,):
     @connection()
     @log.decor()
     async def _select_obj(                      
-                          session: AsyncSession,
+                          session: AsyncSession, *,
                           filters: dict,
                           logger: bool = True
                         ):
@@ -95,7 +95,7 @@ def select_obj_no_valide(clsDAO: BaseDAO,):
     @connection()
     @log.decor()
     async def _select_obj(                      
-                          session: AsyncSession,
+                          session: AsyncSession, *,
                           filters: dict,
                           logger: bool = True
                         ):
@@ -109,11 +109,29 @@ def select_obj_no_valide(clsDAO: BaseDAO,):
         
     return _select_obj
 
+def select_objs_for_data(clsDAO: BaseDAO,):
+    @connection()
+    @log.decor()
+    async def _select_obj(                      
+                          session: AsyncSession, *,
+                          date: date,
+                          logger: bool = True
+                        ):
+        data = await clsDAO.find_for_date(session, date)
+        if logger and data: log.info(f"Select data in {data.__tablename__}, id: {data.id}, data:{data.__dict__}")
+        elif data: log.trace(f"Select data in {data.__tablename__}, id: {data.id}, data:{data.__dict__}")
+        elif logger: log.info(f"Select data in None, filtres: {date}")
+        else: log.trace(f"Select data in None, filtres: {date}")
+         
+        return data 
+        
+    return _select_obj
+
 def select_objs(clsP: BaseModel, clsDAO: BaseDAO,):
     @connection(commit=False)
     @log.decor()
     async def _select_objs(                      
-                          session: AsyncSession,
+                          session: AsyncSession, *,
                           filters: dict | None = None,
                           logger: bool = True
                         ):
@@ -129,7 +147,7 @@ def select_objs_no_valide(clsDAO: BaseDAO):
     @connection(commit=False)
     @log.decor()
     async def _select_objs(                      
-                          session: AsyncSession,
+                          session: AsyncSession, *,
                           filters: dict | None = None,
                           logger: bool = True
                         ):
@@ -145,7 +163,7 @@ def select_objs_no_valide(clsDAO: BaseDAO):
 def get_for_ids(clsDAO: BaseDAO):
     @connection()
     @log.decor()
-    async def update_(session: AsyncSession, ids: list[int]):
+    async def update_(session: AsyncSession, *, ids: list[int]):
         return await clsDAO.select_for_ids(session, ids=ids)
     return update_
 
@@ -153,16 +171,24 @@ def get_for_ids(clsDAO: BaseDAO):
 def update_obj(clsDAO: BaseDAO):
     @connection()
     @log.decor()
-    async def update_(session: AsyncSession, filters: dict, new_data: dict):
+    async def update_(session: AsyncSession, *, filters: dict, new_data: dict):
         data_find = await clsDAO.find_one_or_none(session, filters=filters)
         update = await clsDAO.update_one(session, record=data_find, values=new_data)
+        return update
+    return update_
+
+def update_objs(clsDAO: BaseDAO):
+    @connection()
+    @log.decor()
+    async def update_(session: AsyncSession, *, new_data: dict, filters: dict = {}):
+        update = await clsDAO.update_many(session, filters=filters, values=new_data)
         return update
     return update_
 
 def update_obj_for_ids(clsDAO: BaseDAO):
     @connection()
     @log.decor()
-    async def update_(session: AsyncSession, ids: list[int], new_data: dict):
+    async def update_(session: AsyncSession, *, ids: list[int], new_data: dict):
         update = await clsDAO.update_many_for_ids(session, ids=ids, values=new_data)
         return update
     return update_
@@ -170,7 +196,7 @@ def update_obj_for_ids(clsDAO: BaseDAO):
 def delete_obj(clsDAO: BaseDAO):
     @connection()
     @log.decor()
-    async def delete_obj_(session: AsyncSession, id: int | None = None, logger: bool = True, **kwargs):
+    async def delete_obj_(session: AsyncSession, *, id: int | None = None, logger: bool = True, **kwargs):
         try:
             if id:
                 data_id = id
@@ -197,7 +223,7 @@ def delete_obj(clsDAO: BaseDAO):
 def delete_objs(clsDAO: BaseDAO,):
     @connection()
     @log.decor()
-    async def delete_obj_s(session: AsyncSession, logger: bool = True, **kwargs):
+    async def delete_obj_s(session: AsyncSession, *, logger: bool = True, **kwargs):
         try:
             data_find = await clsDAO.find_all(session, filters=kwargs)
 
@@ -222,7 +248,7 @@ def delete_objs(clsDAO: BaseDAO,):
 def delete_objs_for_ids(clsDAO: BaseDAO,):
     @connection()
     @log.decor()
-    async def delete_obj_s(session: AsyncSession, ids: list[int], logger: bool = True):
+    async def delete_obj_s(session: AsyncSession, *, ids: list[int], logger: bool = True):
         try:
             return await clsDAO.delete_many_for_ids(session, ids=ids)
         except SQLAlchemyError as sqle:

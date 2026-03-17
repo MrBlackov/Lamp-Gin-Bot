@@ -4,9 +4,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.logged.botlog import log
 from app.db.models.transfer import TransferDB
-from app.db.models.item import CraftDB, ItemDB
-from app.db.models.main import MessageDB
-from sqlalchemy import select, or_
+from app.db.models.item import CraftDB, ItemDB, ItemSketchDB
+from app.db.models.transfer import TransferDB
+from app.db.models.char import CharacterDB, ExistenceDB
+from app.db.models.main import MessageDB, TgChatDB, TgUserDB, UserDB, ChatDB
+from sqlalchemy import select, or_, and_
 from datetime import datetime
 
 @connection(commit=False)
@@ -70,3 +72,27 @@ async def get_message_to_delete(
         except SQLAlchemyError as e:
             log.debug(e)
             raise        
+
+@connection(commit=False)
+@log.decor()
+async def get_all_objs(
+                             session: AsyncSession,   
+                             table: Base,
+                             logging: bool = False                    
+                            ) -> list[Base]:
+        try:
+            query = select(table)
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            if logging:
+                log.debug(f"Select data in {table.__tablename__} data:{[r.__dict__ for r in record]}")
+            else:
+                log.trace(f"Select data in {table.__tablename__} data:{[r.__dict__ for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.debug(e)
+            raise        
+
+
+

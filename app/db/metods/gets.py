@@ -1,4 +1,4 @@
-from app.db.metods.base import add_or_update_obj, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide, get_for_ids
+from app.db.metods.base import add_or_update_obj, select_objs_for_data, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide, get_for_ids
 from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB, ChatDAO, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB, CraftDB, CraftDAO
