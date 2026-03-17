@@ -1,22 +1,23 @@
-from app.db.metods.base import add_or_update_obj, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide
-from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB
+from app.db.metods.base import add_or_update_obj, select_objs_for_data, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide, get_for_ids
+from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB, ChatDAO, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
-from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB
+from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB, CraftDB, CraftDAO
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.db.dao.transfer import TransferDAO, TransferDB
-from app.logic.cls import MyTransfers
+from app.logic.cls import MyTransfers, Craft
+from datetime import datetime
 
 add_or_update_user = add_or_update_obj(UserDAO)
 add_or_update_donate = add_or_update_obj(DonateDAO)
 
-
 select_user = select_obj(Users_add, UserDAO)
 select_users = select_objs(Users_add, UserDAO)
-select_char = select_obj(Character_add, CharacterDAO)
-select_chars = select_objs(Character_add, CharacterDAO)
-select_exist = select_obj(Existence_add, ExistenceDAO)
+
+select_chat = select_obj_no_valide(ChatDAO)
+select_chat_setting = select_obj_no_valide(ChatSettingDAO)
+select_message = select_obj_no_valide(MessageDAO)
 
 async def get_user_for_tg_id(tg_id: int, to_user: bool = False) -> int | UserDB:
     user = await add_or_update_user(data={'tg_id':tg_id}, tg_id=tg_id)
@@ -29,6 +30,29 @@ async def get_user_for_id(user_id: int) -> UserDB:
 async def get_users() -> list[UserDB]:
     return await select_users()
 
+async def get_chat_for_tg_id(tg_id: int) -> ChatDB | None:
+    chat: ChatDB = await select_chat(filters={'tg_id':tg_id}, logger=False)
+    if chat and chat.setting_id:
+        setting = await select_chat_setting(filters={'chat_id':chat.id}, logger=False)
+        return chat.add_setting(setting)
+    return chat
+
+async def get_chat_setting_for_id(setting_id: int) -> ChatSettingDB | None:
+    return await select_chat_setting(filters={'id':setting_id})
+
+async def get_chat_for_id(chat_id: int) -> ChatDB | None:
+    chat: ChatDB = await select_chat(filters={'id':chat_id})
+    if chat and chat.setting_id:    
+        setting = await select_chat_setting(filters={'chat_id':chat.id})
+        return chat.add_setting(setting)
+    return chat
+
+async def get_message(tg_chat_id: int, message_id: int):
+    return await select_message(filters={'chat_tg_id':tg_chat_id, 'msg_id':message_id})
+
+select_char = select_obj(Character_add, CharacterDAO)
+select_chars = select_objs(Character_add, CharacterDAO)
+select_exist = select_obj(Existence_add, ExistenceDAO)
 
 async def get_main_char_for_user_id(user_id: int) -> int | None:
     user: UserDB = await get_user_for_id(user_id)
@@ -48,6 +72,7 @@ select_item = select_obj(ItemValide, ItemDAO)
 select_items = select_objs(ItemValide, ItemDAO)
 select_item_sketch = select_obj(ItemSketchValide, ItemSketchDAO)
 select_item_sketchs = select_objs(ItemSketchValide, ItemSketchDAO)
+select_items_for_ids = get_for_ids(ItemDAO)
 
 async def get_item(sketch_id: int, inventory_id: int) -> ItemDB:
     return await select_item(filters={'sketch_id':sketch_id, 'inventory_id':inventory_id})
@@ -66,7 +91,14 @@ async def get_items() -> list[ItemDB]:
 
 async def get_items_for_inventory(inventory_id: int) -> list[ItemDB]:
     result = await select_items(filters={'inventory_id':inventory_id})
-    return result if result else []
+    return [r for r in result if r.is_pick_up == None] if result else []
+
+async def get_items_for_location(location_id: int) -> tuple[list[ItemDB], list[ItemDB]]:
+    result: list[ItemDB] = await select_items(filters={'location_id':location_id})
+    return ([r for r in result if r.is_pick_up == False], [r for r in result if r.is_pick_up]) if result else ([], [])
+
+async def get_items_for_ids(ids: list[int]) -> list[ItemDB] | None:
+    return await select_items_for_ids(ids=ids)
 
 async def get_item_sketchs(is_hide: bool = False) -> list[ItemSketchDB]:
     return await select_item_sketchs(filters={'is_hide':is_hide})
@@ -75,7 +107,12 @@ select_transfer = select_obj_no_valide(TransferDAO)
 select_transfers = select_objs_no_valide(TransferDAO)
 
 async def get_items_for_transfer(transfer_id: int, from_char: bool) -> list[ItemDB] | None:
-    return await select_items(filters={'transfer_id':transfer_id, 'from_char_transfers':from_char})
+    transfers: list[ItemDB] =  await select_items(filters={'transfer_id':transfer_id})
+    transfers = [t for t in transfers if t.from_char_transfers == from_char] if transfers else []
+    return transfers if len(transfers) > 0 else None
+
+async def get_items_for_craft(craft_id: int) -> list[ItemDB] | None:
+    return await select_items(filters={'craft_id':craft_id})
 
 async def get_transfer_for_id(transfer_id: int) -> TransferDB | None:
     return await select_transfer(filters={'id':transfer_id})
@@ -95,7 +132,7 @@ async def get_transfers_for_char_id(my_char_id: int, char_id: int) -> MyTransfer
     return MyTransfers(from_me, to_me)
 
 select_kit = select_obj_no_valide(KitDAO)
-select_kits = select_obj_no_valide(KitDAO)
+select_kits = select_objs_no_valide(KitDAO)
 select_kit_sketch = select_objs_no_valide(KitSketchDAO)
 select_kit_sketchs = select_objs_no_valide(KitSketchDAO)
 
@@ -119,7 +156,16 @@ async def get_kit_sketch_for_hide(hide: bool) -> list[KitSketchDB] | None:
     return await select_kit_sketchs(filters={'hide':hide})
 
 
+select_craft = select_obj_no_valide(CraftDAO)
+select_crafts = select_objs_no_valide(CraftDAO)
 
+async def get_craft_for_id(craft_id: int):
+    craft: CraftDB = await select_craft(filters={'id':craft_id})
+    items = await get_items_for_craft(craft.id)
+    return craft.add_items(items)
 
-
-
+async def get_crafts(is_hide: bool | None = True) -> list[CraftDB] | None:
+    crafts: list[CraftDB] = await select_crafts(filters={'is_hide':is_hide, 'is_create':True}) if type(is_hide) == bool else await select_crafts()
+    if crafts:
+        return [craft.add_items(await get_items_for_craft(craft.id)) for craft in crafts]
+    return crafts

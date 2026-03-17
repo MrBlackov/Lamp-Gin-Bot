@@ -16,6 +16,7 @@ from app.aio.cls.fsm.item import NewItemState
 from app.validate.sketchs.item_sketchs import ItemSketchValide
 from app.logged.infolog import infolog
 from app.exeption.item import ItemError
+from app.aio.cls.fsm.utils import ItemFSM
 
 class ItemBaseService(BaseService):
     def __init__(self, tg_id, state = None):
@@ -25,7 +26,8 @@ class ItemBaseService(BaseService):
 class AddItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.IKB = NewItemIKB()
+        self.state = ItemFSM(state, 'add')
+        self.IKB = NewItemIKB(tg_id)
         self.text = NewItemText
 
     async def add_data_item(self, string: str | None = None, document: Document | None = None):
@@ -86,6 +88,7 @@ class AddItemService(ItemBaseService):
         user, item = await self.layer.create(sketch)
         if user and item:
             await infolog.new_sketch_no_moderate(self.tg_id, UserText(user.tg_user, user).text + '\n' + ItemSketchText(item).text(True), self.IKB.moderator_menu(item.id))
+            await self.state.clear_this_state()
             return '✅ Предмет отправлен на модерацию', None
         raise ItemError('Dont have user or item')
         
@@ -98,6 +101,7 @@ class AddItemService(ItemBaseService):
         user, item = await self.layer.create(sketch)
         if user and item:
             await infolog.new_item(user.id, UserText(user.tg_user, user).text + ' \n \n' + ItemSketchText(item).text(True))
+            await self.state.clear_this_state()
             return '✅ Предмет создан, проверьте инвентарь - /inventory', None
         raise ItemError('Dont have user or item')
     
@@ -124,7 +128,8 @@ class AddItemService(ItemBaseService):
 class ChangeItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.IKB = ChangeItemSketchIKB()
+        self.state = ItemFSM(state, 'change')
+        self.IKB = ChangeItemSketchIKB(tg_id)
 
     async def start(self, string: str):
         data = str_to_json(string)
@@ -219,6 +224,7 @@ class ChangeItemService(ItemBaseService):
     async def delete_sketch(self, back_where: str = 'info'):
         sketch_id = await self.state.get_value('sketch_id')
         is_delete = await self.layer.delete_sketch(sketch_id)
+        await self.state.clear_this_state()
         return ('🗑️ Эскиз предмета был удален', None) if is_delete else ('❌ Эскиз предмета не был удален', self.IKB.back(back_where))
 
     async def delete_items(self, back_where: str = 'info'):
@@ -229,6 +235,7 @@ class ChangeItemService(ItemBaseService):
 class GiveItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
+        self.state = ItemFSM(state, 'give')
 
     async def give(self, string: str):
         data = str_to_json(string)
@@ -260,7 +267,8 @@ class GiveItemService(ItemBaseService):
 class ListItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.IKB = ListItemSketchIKB()
+        self.IKB = ListItemSketchIKB(tg_id)
+        self.state = ItemFSM(state, 'list')
 
     async def get_item_sketchs(self, value_in_page: int = 10):
         sketches = await self.layer.get_item_sketchs()
@@ -294,7 +302,7 @@ class ListItemService(ItemBaseService):
         searchs = LetterSearch(sketch_names).search(find)
         search_sketch = [sketches_dict.get(search) for search in searchs if search in sketch_names]
         pages = [tuple(search_sketch[i:i+value_in_page]) for i in range(0, len(search_sketch), value_in_page)]
-        await self.state.update_data(searchs=pages)
+        await self.state.update_data(searchs=pages, page=0)
         max_pages = len(pages)
         if max_pages > 0:
             return f'📦 Предметы (0/{max_pages}стр)', self.IKB.list_items(pages[0], 0, max_pages, back_where)

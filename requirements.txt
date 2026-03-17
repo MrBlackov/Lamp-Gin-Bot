@@ -5,7 +5,7 @@ pydantic-settings
 asyncpg
 python-decouple
 APScheduler
-aiogram
+aiogram==3.25.0
 loguru
 pytest
 flask

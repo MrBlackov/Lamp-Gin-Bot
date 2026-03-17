@@ -6,6 +6,8 @@ class InfoTopics:
     transfer = 16
     item = 9
     item_no_moderate = 37
+    craft = 414
+    craft_no_moderate = 419 
 
 class InfoLog:
     def __init__(self, token: int, **kwargs):
@@ -28,6 +30,14 @@ class InfoLog:
     
     async def new_sketch_no_moderate(self, user_id: int, text: str, markup = None):
         await self.bot.send_message(chat_id=self.topic.chat, text=text + f'\n #newitemsketch #user_id_{user_id}', reply_markup=markup, message_thread_id=self.topic.item_no_moderate)
+        return True
+    
+    async def new_craft_no_moderate(self, user_id: int, text: str, markup = None):
+        await self.bot.send_message(chat_id=self.topic.chat, text=text + f'\n #newcraftsketch #user_id_{user_id}', reply_markup=markup, message_thread_id=self.topic.craft_no_moderate)
+        return True
+
+    async def new_craft(self, user_id: int, text: str):
+        await self.bot.send_message(chat_id=self.topic.chat, text=text + f'\n #newcraft #user_id_{user_id}', message_thread_id=self.topic.craft)
         return True
     
 infolog = InfoLog(token=token)

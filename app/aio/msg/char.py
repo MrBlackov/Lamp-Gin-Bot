@@ -163,13 +163,20 @@ class CharInfoText:
     
 class InventoryItemsText:
     def inventory(size: int, max_sixe: int):
-        return f'Ваш инвентарь [{size}/{max_sixe}кг]'
+        return f'💼 Ваш инвентарь [{size}/{max_sixe}кг]'
     
     def no_items():
-        return 'Ваш инвентарь пустой'
+        return '🙁 Ваш инвентарь пустой'
     
     def throw():
-        return 'Сколько выбросить?'
+        return '🤔 Сколько выбросить?'
 
     def item(item: ItemDB):
         return ItemText(item).text
+    
+    def pick_up_quantity():
+        return '🤔 Сколько предметов хотите поднять?'
+    
+    def location_items():
+        return '👀 Предметы вокруг'
+    

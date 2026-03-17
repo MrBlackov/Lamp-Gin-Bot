@@ -96,6 +96,30 @@ class ThrowAwayQuantityFloat(ItemError):
     faq = ''  
 
 
+
+class PickUpQuantityMoreItemQuantity(ItemError):
+    msg = '❌ Вы отправили слишком большое количество предмета, укажите меньшее количество'
+    code = '402.16'
+    faq = ''
+
+class PickUpQuantityLessOne(ItemError):
+    msg = '❌ Вы отправили число меньше или равное нулю. Нужно целое число, которое больше нуля'
+    code = '402.17'
+    faq = ''
+
+class PickUpQuantityNoInt(ItemError):
+    msg = '❌ Вы отправили не число. Нужно число'
+    code = '402.18'
+    faq = ''
+
+class PickUpQuantityFloat(ItemError):
+    msg = '❌ Вы отправили не целое число. Нужно целое число'
+    code = '402.19'  
+    faq = ''  
+
+
+
+
 class GiveItemQuantityLessOne(ItemError):
     msg = '❌ Вы отправили число меньше или равное нулю. Нужно целое число, которое больше нуля'
     code = '402.4'

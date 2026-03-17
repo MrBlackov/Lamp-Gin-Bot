@@ -18,14 +18,14 @@ from app.aio.cls.callback.transfer import (ItemTransferCharIdCall,
                                            ItemTransferItemPageCall,
                                            InfoTransferStartCall)
 from app.aio.cls.fsm.transfer import ItemTransferState
+from app.aio.cls.fsm.utils import TransferFSM
 
 new_transfer_router = Router()
 
 @new_transfer_router.message(Command('newtransfer'))
 @log.decor(arg=True)
 @exept
-async def cmd_inventory(message: Message, state: FSMContext):
-    await state.clear()
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     msg, markup = await TransferService(message.from_user.id, state).new.new_transfer()
     await message.answer(msg, reply_markup=markup)
 
@@ -33,8 +33,7 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @new_transfer_router.callback_query(InfoTransferStartCall.filter(F.to_create == True)) 
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferStartCall | InfoTransferStartCall, state: FSMContext):
-    await state.clear()
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferStartCall | InfoTransferStartCall, state: FSMContext, **kwargs):
     
     msg, markup = await TransferService(callback.from_user.id, state).new.new_transfer()
     await callback.message.edit_text(msg, reply_markup=markup)
@@ -43,49 +42,44 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTr
 @new_transfer_router.callback_query(ItemTransferStartCall.filter(F.to_trade == True))     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferStartCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferStartCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).new.new_trade()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_transfer_router.callback_query(ItemTransferChoiseCharCall.filter(F.to_list == True))     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferChoiseCharCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferChoiseCharCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).new.to_list_char()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_transfer_router.callback_query(ItemTransferChoiseCharCall.filter(F.to_search == True))     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferChoiseCharCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferChoiseCharCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).new.to_search_char(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
     
 @new_transfer_router.callback_query(ItemTransferCharPageCall.filter())     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferCharPageCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferCharPageCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).new.to_page_char(callback_data.page)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_transfer_router.callback_query(ItemTransferBackCall.filter(F.where == 'char_page'))     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferBackCall, state: FSMContext):
-    
-    page = await state.get_value('charpage')
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferBackCall, state: FSMContext, **kwargs):
+    page = await TransferFSM(state, 'new').get_value('charpage')
     msg, markup = await TransferService(callback.from_user.id, state).new.to_page_char(page)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_transfer_router.message(ItemTransferState.search_char)
 @log.decor(arg=True)
 @exept
-async def cmd_inventory(message: Message, state: FSMContext):
-    msg0 = await state.get_value('msg')
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    msg0 = await TransferFSM(state, 'new').get_value('msg')
     msg, markup = await TransferService(message.from_user.id, state).new.search_char(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
@@ -97,10 +91,9 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @new_transfer_router.callback_query(ItemTransferCharIdCall.filter())     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferCharIdCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferCharIdCall, state: FSMContext, **kwargs):
     if type(callback_data) == ItemTransferBackCall:
-        char = await state.get_value('char2')
+        char = await TransferFSM(state, 'new').get_value('char2')
         char_id = char.id
     else:
         char_id = callback_data.char_id
@@ -110,47 +103,43 @@ async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTr
 @new_transfer_router.callback_query(ItemTransferChoiseCharCall.filter(F.to_my_char == True))     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferChoiseCharCall, state: FSMContext):
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferChoiseCharCall, state: FSMContext, **kwargs):
     await callback.answer("🙂 Это вы", True)
    
 @new_transfer_router.callback_query(ItemTransferActionCall.filter())     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferActionCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferActionCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).new.add_item(callback_data.action, callback_data.side)
     await callback.message.edit_text(msg, reply_markup=markup)
    
 @new_transfer_router.callback_query(ItemTransferItemPageCall.filter())     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferItemPageCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferItemPageCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).new.to_page_item(callback_data.page)
     await callback.message.edit_text(msg, reply_markup=markup)
     
 @new_transfer_router.callback_query(ItemTransferBackCall.filter(F.where == 'item_page'))     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferBackCall, state: FSMContext):
-    
-    page = await state.get_value('itempage')
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferBackCall, state: FSMContext, **kwargs):
+    page = await TransferFSM(state, 'new').get_value('itempage')
     msg, markup = await TransferService(callback.from_user.id, state).new.to_page_item(page)
     await callback.message.edit_text(msg, reply_markup=markup)
     
 @new_transfer_router.callback_query(ItemTransferItemIdCall.filter())     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferItemIdCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferItemIdCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).new.to_item_info(callback_data.item_id, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
         
 @new_transfer_router.message(ItemTransferState.item_quantity)
 @log.decor(arg=True)
 @exept
-async def cmd_inventory(message: Message, state: FSMContext):
-    msg0 = await state.get_value('msg')
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    msg0 = await TransferFSM(state, 'new').get_value('msg')
     msg, markup = await TransferService(message.from_user.id, state).new.item_quantity(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
@@ -160,16 +149,14 @@ async def cmd_inventory(message: Message, state: FSMContext):
 @new_transfer_router.callback_query(ItemTransferTradeStatusCall.filter(F.status == ItemTransferStatusEnum.CONFIRMED.value))     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferTradeStatusCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferTradeStatusCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).new.to_send()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_transfer_router.callback_query(ItemTransferTradeStatusCall.filter(F.status == ItemTransferStatusEnum.CREATED.value))     
 @log.decor(arg=True)
 @call_exept
-async def callback_add_char_names(callback: CallbackQuery, callback_data: ItemTransferTradeStatusCall, state: FSMContext):
-    
+async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferTradeStatusCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).new.to_created()
     await callback.message.edit_text(msg, reply_markup=markup)
 

@@ -45,8 +45,8 @@ class CreateExistence:
             first_name=names[0],
             last_name=names[1] if len(names) > 1 else None,
             gender=self.gender,
-            attibute_point=self.person.points,
-            age=self.person.age,
+            attibute_point=sketch.points,
+            age=sketch.age,
             amount_life=self.person.amount_age,
             inventory=Inventory_add(
                 items=sketch.items

@@ -336,4 +336,5 @@ async def tg_log():
         except Exception as e:
             print(e)  
             await asyncio.sleep(log.sleep_timeout)
+            return None
         

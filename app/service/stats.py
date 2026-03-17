@@ -7,13 +7,14 @@ from app.aio.msg.stats import TextHTML, StatsText
 from app.service.base import BaseService 
 from app.exeption import error_faq, BotError
 from app.interlayer.stats import StatsLayer
-
+from app.aio.cls.fsm.utils import StatsFSM
 
 class StatsService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.layer = StatsLayer(tg_id)
         self.text = StatsText
+        self.state = StatsFSM(state)
 
     async def all_coins(self):
         stats = await self.layer.all()
