@@ -4,8 +4,8 @@ from app.validate.service.info import UserChars
 from app.enum_type.char import Gender
 from app.validate.api.characters import GetSketchsInfo
 from app.validate.api.query import CreateCharSkecth
-from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory, get_item_sketchs
-from app.db.metods.updates import update_main_char, update_char, update_exist, update_char_location_default
+from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, get_char_for_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory, get_item_sketchs
+from app.db.metods.updates import update_main_char, update_char, update_donate_delete_char_quan, update_char_location_default
 from app.db.metods.adds import add_char, add_db_obj
 from app.logic.char import CharLogic
 from app.validate.add.characters import Character_add
@@ -14,7 +14,7 @@ from app.logic.item import ItemSketchsLogic, ItemsLogic, ItemDB
 from app.logged.infolog import infolog
 from app.aio.config import admins, bot, newspaper_id
 from aiogram.types.chat_member_banned import ChatMemberStatus
-from app.exeption.char import NoHaveMainChar
+from app.exeption.char import NoHaveMainChar, NoDeleteCharError
 from app.exeption.item import PickUpQuantityMoreItemQuantity
 
 class CreateCharacterLayer:
@@ -83,27 +83,40 @@ class InfoCharacterLayer:
         print(newspaper_id)
         return await bot.get_chat_member(newspaper_id, self.tg_id)
 
-    async def get_chars(self) -> UserChars:
+    async def get_chars(self, is_die: bool | None = False) -> UserChars:
         self = await self.get_char_info()
         channel_member = await self.get_chat_member()
         use_bonus = False
         if channel_member:
             if channel_member.status != ChatMemberStatus.LEFT and channel_member.status != ChatMemberStatus.KICKED:
                 use_bonus = True
-        chars = await self.logic.get_chars(user_id=self.user.id)
+        chars = await self.logic.get_chars(self.user.id, is_die)
         if chars:
             main_char_id = await self.logic.get_main_char_id(user_id=self.user.id)
             return UserChars(chars=chars, main_id=main_char_id, max_chars=self.user.donates.char_quantity, use_bonus=use_bonus)
         return UserChars(no_chars=True, max_chars=self.user.donates.char_quantity, use_bonus=use_bonus)
 
+    async def get_char(self, char_id: int):
+        return await get_char_for_id(char_id)
+
     async def char_to_main(self, char_id: int):
         user_id = await self.logic.user_id()
         update = await update_main_char(user_id, char_id)
-        data = await self.get_chars()
+        data = await self.get_chars(None)
         return data
 
     async def locator(self):
         return await self.logic.get_all_chars()
+    
+    async def delete_char(self, exist_id: int):
+        await self.get_char_info()
+        if self.user.donates.delete_char_quantiry == None or self.user.donates.delete_char_quantiry > 0:
+            die = await self.logic.to_die(exist_id)
+            if die:
+                await update_donate_delete_char_quan(self.user.donates.id, self.user.donates.delete_char_quantiry)
+                await update_main_char(self.user.id)
+                return die
+        raise NoDeleteCharError(f'This user(id={self.user.id}) dont have delete_char_quantiry')
 
 class InventoryCharacterLayer:
     def __init__(self, tg_id: int):

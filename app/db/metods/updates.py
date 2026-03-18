@@ -1,5 +1,5 @@
 from app.db.metods.base import update_obj, update_obj_for_ids, update_objs
-from app.db.dao.main import UserDAO, UserDB, ChatDAO, ChatDB, ChatSettingDAO, ChatSettingDB, MessageDAO, MessageDB
+from app.db.dao.main import UserDAO, UserDB, ChatDAO, ChatDB, ChatSettingDAO, ChatSettingDB, MessageDAO, MessageDB, DonateDAO, DonateDB
 from app.db.dao.chars import ExistenceDB, CharacterDB, CharacterDAO, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
@@ -11,6 +11,7 @@ update_user = update_obj(UserDAO)
 update_char = update_obj(CharacterDAO)
 update_exist = update_obj(ExistenceDAO)
 update_chat = update_obj(ChatDAO)
+update_donate = update_obj(DonateDAO)
 update_chat_setting = update_obj(ChatSettingDAO)
 update_message = update_obj(MessageDAO)
 
@@ -36,13 +37,17 @@ async def update_chat_setting_by_chat_id(chat_id: int, msg_delete_time: int | No
     print(new_data)
     return await update_chat_setting(filters={'chat_id':chat_id}, new_data=new_data)
 
-async def update_main_char(user_id: int, char_id: int) -> bool:
+async def update_main_char(user_id: int, char_id: int | None = None) -> bool:
     return await update_user(filters={'id':user_id}, new_data={'main_char':char_id})
+
+async def update_char_die(exist_id: int, is_die: bool = True) -> bool:
+    return await update_exist(filters={'id':exist_id}, new_data={'die':is_die})
 
 async def update_char_location_default(char_id: int) -> bool:
     return await update_char(filters={'id':char_id}, new_data={'location_id':1})
 
-
+async def update_donate_delete_char_quan(donate_id: int, new_quan: int | None = None, use_delete: int = 1):
+    return await update_donate(filters={'id':donate_id}, new_data={'delete_char_quantiry': ((new_quan - use_delete) if type(new_quan) == int else 0)})
 
 update_item = update_obj(ItemDAO)
 update_items = update_objs(ItemDAO)

@@ -46,6 +46,11 @@ class InfoCharChooseCall(BaseCall, prefix='info_char_chouse'):
     char_id: int | None = None
     back: bool = False
 
+class InfoCharDeleteCall(BaseCall, prefix='info_char_delete'):
+    char_id: int | None = None
+    exist_id: int | None = None
+    is_delete: bool = False
+    back: bool = False
 
 class InventoryItemsCall(BaseCall, prefix='inventory_items'):
     item: int

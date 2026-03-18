@@ -19,3 +19,9 @@ class NoHaveMainChar(CharError):
 class InventaryOverFlowing(CharError):
     msg = '❌ Инвентарь будет переполнен, предмет невозможно получить'
     code = '402.7'
+
+class NoDeleteCharError(CharError):
+    msg = '❌ У вас кончилась веревка'
+    code = '505.1'
+    faq = 'Удалить персонажа можно только один раз (пока что)'
+

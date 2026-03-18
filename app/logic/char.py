@@ -3,7 +3,7 @@ from app.validate.info.characters import CharacterInfo, AttributePointsInfo, EXi
 from app.logged.botlog import logs
 from app.db.models.main import UserDB
 from app.db.metods.gets import get_chars_for_user_id, get_char_for_id, get_all_chars, get_main_char_for_user_id, get_user_for_id, get_user_for_tg_id
-from app.db.metods.updates import update_main_char
+from app.db.metods.updates import update_main_char, update_char_die, update_donate_delete_char_quan
 from app.exeption.char import CharError
 
 class CharLogic:
@@ -32,9 +32,9 @@ class CharLogic:
         logs.trace(new_char.model_dump())
         return new_char
 
-    async def get_chars(self, user_id: int) -> list[CharacterInfo] | None:
+    async def get_chars(self, user_id: int, is_die: bool | None = False) -> list[CharacterInfo] | None:
         chars = []
-        char_dbs: list[CharacterDB] = await get_chars_for_user_id(user_id)
+        char_dbs: list[CharacterDB] = await get_chars_for_user_id(user_id, is_die)
         if char_dbs:
             for char_db in char_dbs:
                 char = await self.to_info(char_db)
@@ -51,6 +51,9 @@ class CharLogic:
         new_user: UserDB = await update_main_char(user_id, char_id)
         chars = await self.get_chars(user_id)
         return chars, new_user.main_char
+    
+    async def to_die(self, exist_id: int):
+        return await update_char_die(exist_id)
 
 
 

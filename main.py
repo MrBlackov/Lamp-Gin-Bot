@@ -29,6 +29,7 @@ async def main():
         asyncio.gather(loggers(), return_exceptions=True)
         asyncio.gather(run_scheduler(), return_exceptions=True)
         logs.critical(f"Polling failed: {e}") 
+        return True
 
 if __name__ == "__main__": 
     asyncio.run(main())

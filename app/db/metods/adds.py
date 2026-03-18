@@ -1,4 +1,4 @@
-from app.db.metods.base import add_or_update_obj, add_obj, add_obj_dict, add_db_obj
+from app.db.metods.base import add_or_update_obj, add_obj, add_obj_dict, add_db_obj, update_obj
 from app.db.dao.main import TgChatDAO, TgUserDAO, DonateDAO, ChatDAO, TgChatDB, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB
 from app.db.dao.chars import CharacterDAO, ExistenceDAO, AttributePointDAO, InventoryDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitSketchDB, KitDB, KitDAO, KitSketchDAO
@@ -27,6 +27,7 @@ async def add_chat(chat: Chat):
     print(chat.tg_id)
     setting = await add_or_update_chat_setting(data={'chat_id':chat.id}, chat_id=chat.id)
     print(setting.id)
+    await update_obj(ChatDAO)(filters={'id':chat.id}, new_data={'setting_id':setting.id})
     return chat.add_setting(setting)
     
 async def add_message_delete(chat_id: int, message_id: int, time_delete: datetime, is_delete: bool = True) -> MessageDB:

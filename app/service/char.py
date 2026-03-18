@@ -12,7 +12,7 @@ import random
 from app.service.base import BaseService 
 from app.interlayer.char import CreateCharacterLayer, InfoCharacterLayer, InventoryCharacterLayer
 from app.aio.cls.fsm.char import InventoryState
-from app.exeption.char import BonusCharSubError
+from app.exeption.char import BonusCharSubError, NoDeleteCharError
 from aiogram.types.chat_member_banned import ChatMemberStatus
 from app.exeption.item import ItemError
 from app.aio.cls.fsm.utils import CharFSM
@@ -138,35 +138,44 @@ class InfoCharacterService(BaseService):
         super().__init__(tg_id, state)
         self.state = CharFSM(state, 'info')
         self.IKB = InfoCharIKB(tg_id)
+        self.layer = InfoCharacterLayer(self.tg_id)
 
     async def get_chars(self):
-        datas = await InfoCharacterLayer(self.tg_id).get_chars()
+        datas = await self.layer.get_chars(None)
         if datas.no_chars:
             return None, '😕 У вас нет персонажей, создать - /newchar'
-        chars = {}
-        data = datas.chars
-        for d in data:
-            chars[d.id] = d
+        chars = {char.id:char for char in datas.chars}
         await self.state.update_data(chars=chars, main_id=datas.main_id)
-        chars = {char.id:char.exist.full_name for char in data}
         return self.IKB.get_list(datas.main_id, chars), '🪪 Ваши персонажи'
 
     async def get_char(self, char_id: int):
         data: dict = await self.state.get_value('chars')
         main_id: int = await self.state.get_value('main_id')
-        char = data[char_id]
-        return self.IKB.chouse_main_char(char_id, True if char_id == main_id else False), CharInfoText(char).text
+        if data == None:
+            new_data = await self.layer.get_chars(None)
+            data = {char.id:char for char in new_data.chars}
+        char = data.get(char_id)
+        if char == None:
+            char = await self.layer.get_char(char_id)
+        return self.IKB.chouse_main_char(char_id, char.exist.id, (True if char_id == main_id else False), char.exist.die), CharInfoText(char).text
     
     async def char_to_main(self, char_id: int):
-        datas = await InfoCharacterLayer(self.tg_id).char_to_main(char_id)
+        datas = await self.layer.char_to_main(char_id)
         chars = {}
         data = datas.chars
         for d in data:
             chars[d.id] = d
         await self.state.update_data(chars=chars, main_id=datas.main_id)
-        chars = {char.id:char.exist.full_name for char in data}
+        chars = {char.id:char for char in data}
         return self.IKB.get_list(datas.main_id, chars), '🪪 Ваши персонажи'
+    
+    async def to_delete_char(self, char_id: int, exist_id: int):
+        return self.IKB.to_delete_char(char_id, exist_id), '🙁 Вы точно хотите прервать жизнь персонажа?'
 
+    async def delete_char(self, exist_id: int):
+        await self.layer.delete_char(exist_id)
+        return await self.get_chars()
+    
 class InventoryService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)

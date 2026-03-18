@@ -24,7 +24,7 @@ def filter_by_filepath(file_path: str):
 
 class BotLog:
     
-    def __init__(self, chat_id: int, max_size: int = 100, timeout: int = 1, sleep_timeout: int = 20):
+    def __init__(self, chat_id: int, max_size: int = 0, timeout: int = 1, sleep_timeout: int = 20):
         self.chat_id = chat_id
         self.log = logger
         self.index = 0
@@ -125,7 +125,7 @@ class BotLog:
         except Exception as e:
             await self._queue.put(item)
             print(e)
-            raise e
+            return True
         
         return item
 
@@ -336,5 +336,5 @@ async def tg_log():
         except Exception as e:
             print(e)  
             await asyncio.sleep(log.sleep_timeout)
-            return None
+            return True
         
