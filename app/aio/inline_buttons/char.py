@@ -6,7 +6,8 @@ from app.aio.cls.callback.char import (
                                        AddCharSketchCall,
                                        AddCharDescriptCall,
                                        AddCharFinishCall,
-                                       InfoCharListCall,
+                                       InfoCharListCall, 
+                                       InfoCharDeleteCall,
                                        InfoCharChooseCall,
                                        InventoryItemsCall,
                                        InventoryItemsGoCall, 
@@ -14,6 +15,7 @@ from app.aio.cls.callback.char import (
                                        InventoryItemsPickUpCall
                                        )
 from app.db.models.item import ItemDB
+from app.db.models.char import CharacterDB
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -86,23 +88,36 @@ class AddCharIKB(BotIKB):
         return self.builder.adjust(1).as_markup()
 
 class InfoCharIKB(BotIKB):
-    def get_list(self, main_char_id: int | None, char_dict: dict[int, str]):
+    def get_list(self, main_char_id: int | None, char_dict: dict[int, CharacterDB]):
+        die_chars = []
         if main_char_id in char_dict:
             main_char = char_dict.pop(main_char_id)
-            self.builder.button(text=f'👑 {main_char}', callback_data=InfoCharListCall(char_id=main_char_id, main=True, tg_id=self.tg_id))
-        for char_id, char_name in char_dict.items():
-            self.builder.button(text=f'♟️ {char_name}', callback_data=InfoCharListCall(char_id=char_id, tg_id=self.tg_id))
+            self.builder.button(text=f'👑 {main_char.exist.full_name}', callback_data=InfoCharListCall(char_id=main_char_id, main=True, tg_id=self.tg_id))
+        for char_id, char in char_dict.items():
+            if char.exist.die:
+                die_chars.append(char)
+                continue
+            self.builder.button(text=f'♟️ {char.exist.full_name}', callback_data=InfoCharListCall(char_id=char_id, tg_id=self.tg_id))
+        for char in die_chars:
+            self.builder.button(text=f'☠️ {char.exist.full_name}', callback_data=InfoCharListCall(char_id=char.id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
             
-    def chouse_main_char(self, char_id: int, main: bool = False): 
-        self.builder.button(text='↩️ Назад', callback_data=InfoCharChooseCall(back=True, tg_id=self.tg_id))
-        if main == False:
-            self.builder.button(text='🕹️ Выбрать', callback_data=InfoCharChooseCall(char_id=char_id, tg_id=self.tg_id))   
+    def chouse_main_char(self, char_id: int, exist_id: int, main: bool = False, is_die: bool = False):  
+        if main == False and is_die == False:
+            self.builder.button(text='🕹️ Выбрать', callback_data=InfoCharChooseCall(char_id=char_id, tg_id=self.tg_id)) 
+        if is_die == False:
+            self.builder.button(text='☠️ Повеситься', callback_data=InfoCharDeleteCall(char_id=char_id, exist_id=exist_id, tg_id=self.tg_id))  
+        self.builder.button(text='↩️ Назад', callback_data=InfoCharChooseCall(back=True, tg_id=self.tg_id)) 
+        return self.builder.adjust(1).as_markup()
+    
+    def to_delete_char(self, char_id: int, exist_id: int):
+        self.builder.button(text='❌ Нет', callback_data=InfoCharDeleteCall(char_id=char_id, back=True, tg_id=self.tg_id)) 
+        self.builder.button(text='✅ Да', callback_data=InfoCharDeleteCall(char_id=char_id, exist_id=exist_id, is_delete=True, tg_id=self.tg_id))  
         return self.builder.adjust(2).as_markup()
 
     @property
     def add_char(self):
-        return AddCharIKB(tg_id)
+        return AddCharIKB(self.tg_id)
 
 class InventoryIKB(BotIKB):
     def back(self, where: str, item_id: int | None = None):

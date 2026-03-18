@@ -38,7 +38,7 @@ class MessageUtils:
                 await self.delete_for_time()
             except Exception as e:
                 print('MessageUtilsRunner: ', e)
-                return None
+                return True
             finally:
                 await asyncio.sleep(5)
                 
