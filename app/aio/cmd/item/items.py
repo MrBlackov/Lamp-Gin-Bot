@@ -30,28 +30,28 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 @item_router.callback_query(ListItemSketchBackCall.filter(F.where == 'cmd'))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: ListItemSketchToListCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).list.get_item_sketchs()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @item_router.callback_query(ListItemSketchToListCall.filter())     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: ListItemSketchToListCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).list.list_items(back_where='cmd')
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @item_router.callback_query(ListItemSketchToPageCall.filter()) 
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: ListItemSketchToPageCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).list.list_items(callback_data.page)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @item_router.callback_query(ListItemSketchToQueryCall.filter())     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: ListItemSketchToQueryCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).list.to_search(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
@@ -69,7 +69,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 @item_router.callback_query(ListItemSketchItemCall.filter())     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: ListItemSketchItemCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).list.to_item(callback_data.item)
     await callback.message.edit_text(msg, reply_markup=markup)

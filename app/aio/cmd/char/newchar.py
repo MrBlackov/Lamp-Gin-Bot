@@ -29,21 +29,21 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 @add_char_router.callback_query(AddCharNameCall.filter(F.get_bonus == True))
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def cmd_handler(callback: CallbackQuery, callback_data: AddCharNameCall, state: FSMContext, **kwargs):
     msg, markup = await Character(callback.from_user.id).to_create.chouse_gender_bonus(callback_data.back if callback_data else False)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @add_char_router.callback_query(AddCharNameCall.filter(F.back == True))
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def cmd_handler(callback: CallbackQuery, callback_data: AddCharNameCall, state: FSMContext, **kwargs):
     msg, markup = await Character(callback.from_user.id).to_create.chouse_gender(callback_data.back if callback_data else False)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @add_char_router.callback_query(AddCharGenderCall.filter())     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharGenderCall, state: FSMContext, **kwargs):
     
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_get_sketchs(callback_data.gender, callback_data.to_change)
@@ -54,7 +54,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharGender
 @add_char_router.callback_query(AddCharRandomNameCall.filter(F.back == True))     
 @add_char_router.callback_query(AddCharQueryNameCall.filter(F.back == True))
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext, **kwargs):
     
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_sketchs(callback_data.first_name)
@@ -65,7 +65,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharQueryN
 
 @add_char_router.callback_query(AddCharNameCall.filter(F.regim == 'query'))
 @log.decor(arg=True)        
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharNameCall, state: FSMContext, **kwargs):
     await callback.answer('Query')
     markup = Character(tg_id=callback.from_user.id).to_create.IKB.query_back(callback_data.first_name)
@@ -86,7 +86,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 @add_char_router.callback_query(AddCharQueryNameCall.filter(F.next_page == True))
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def cmd_handler(callback: CallbackQuery, callback_data: AddCharQueryNameCall, state: FSMContext, **kwargs):
     await callback.answer('Query')
     print(True)
@@ -98,7 +98,7 @@ async def cmd_handler(callback: CallbackQuery, callback_data: AddCharQueryNameCa
 @add_char_router.callback_query(AddCharNameCall.filter(F.regim == 'random'))
 @add_char_router.callback_query(AddCharRandomNameCall.filter(F.regeneration == True))
 @log.decor(arg=True)      
-@call_exept  
+@call_exept()  
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharNameCall | AddCharRandomNameCall, state: FSMContext, **kwargs):
     markup, name = await Character(callback.from_user.id, state).to_create.to_random_name(callback_data.first_name)
     await callback.message.edit_text(f'{name}?', reply_markup=markup)
@@ -109,7 +109,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharNameCa
 @add_char_router.callback_query(AddCharQueryNameCall.filter(F.name != None), AddCharQueryNameCall.filter(F.first_name == True))
 @add_char_router.callback_query(AddCharRandomNameCall.filter(F.name != None), AddCharRandomNameCall.filter(F.first_name == True))
 @log.decor(arg=True)     
-@call_exept   
+@call_exept()   
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext, **kwargs):
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_sketchs(False)
     await CharFSM(state, 'add').update_data(first_name = callback_data.name)
@@ -117,7 +117,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharQueryN
 
 @add_char_router.callback_query(AddCharSketchCall.filter(F.back == True))
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharSketchCall, state: FSMContext, **kwargs):
     markup = await Character(tg_id=callback.from_user.id, state=state).to_create.to_sketchs(False)
     first_name = await CharFSM(state, 'add').get_value('first_name')
@@ -125,7 +125,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharSketch
     
 @add_char_router.callback_query(AddCharNameCall.filter(F.to_pass==True))
 @log.decor(arg=True)
-@call_exept        
+@call_exept()        
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext, **kwargs):
     first_name = await CharFSM(state, 'add').get_value('first_name')
     await CharFSM(state, 'add').update_data(last_name='')
@@ -135,7 +135,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharQueryN
 
 @add_char_router.callback_query(AddCharDescriptCall.filter(F.back == True))
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharSketchCall | AddCharDescriptCall, state: FSMContext, **kwargs):
     first_name = await CharFSM(state, 'add').get_value('first_name')
     last_name: str = await CharFSM(state, 'add').get_value('last_name')
@@ -150,7 +150,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharSketch
 @add_char_router.callback_query(AddCharQueryNameCall.filter(F.name != None), AddCharQueryNameCall.filter(F.first_name == False))
 @add_char_router.callback_query(AddCharRandomNameCall.filter(F.name != None), AddCharRandomNameCall.filter(F.first_name == False))
 @log.decor(arg=True)       
-@call_exept 
+@call_exept() 
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharQueryNameCall | AddCharRandomNameCall, state: FSMContext, **kwargs):
     first_name = await CharFSM(state, 'add').get_value('first_name')
     await CharFSM(state, 'add').update_data(last_name=callback_data.name)
@@ -160,7 +160,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharQueryN
 
 @add_char_router.callback_query(AddCharSketchCall.filter(F.id != None), AddCharSketchCall.filter(F.another == True))
 @log.decor(arg=True)      
-@call_exept  
+@call_exept()  
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharSketchCall, state: FSMContext, **kwargs):
     first_name = await CharFSM(state, 'add').get_value('first_name')
     last_name: str = await CharFSM(state, 'add').get_value('last_name')
@@ -173,7 +173,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharSketch
 
 @add_char_router.callback_query(AddCharSketchCall.filter(F.id != None), AddCharSketchCall.filter(F.another == False))
 @log.decor(arg=True)     
-@call_exept   
+@call_exept()   
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharSketchCall, state: FSMContext, **kwargs):
     markup, text = await Character(callback.from_user.id, state).to_create.to_descript(callback_data.id)
     await callback.message.edit_text(text, reply_markup=markup)    
@@ -184,7 +184,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: AddCharSketch
 
 @add_char_router.callback_query(AddCharDescriptCall.filter(F.to_pass == True), StateFilter(CreateCharState.description))
 @log.decor(arg=True)      
-@call_exept  
+@call_exept()  
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharDescriptCall, state: FSMContext, **kwargs):
     char = await Character(callback.from_user.id, state).to_create.get_info()
     await callback.message.edit_text(char.info_to_str, reply_markup=await char.markup_to_info())
@@ -204,7 +204,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 @add_char_router.callback_query(AddCharFinishCall.filter(F.go == True))
 @log.decor(arg=True)      
-@call_exept  
+@call_exept()  
 async def callback_handler(callback: CallbackQuery, callback_data: AddCharFinishCall, state: FSMContext, **kwargs):
     to_create = await Character(callback.from_user.id, state).to_create.create()
     if to_create: 

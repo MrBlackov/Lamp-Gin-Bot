@@ -33,7 +33,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 @new_item_router.callback_query(NewItemACtionCall.filter(F.to_argree_rules == True))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).add.to_name()
     await callback.message.edit_text(msg, reply_markup=markup)
@@ -62,14 +62,14 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 @new_item_router.callback_query(NewItemBackCall.filter(F.where == 'menu'))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemBackCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).add.menu()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_item_router.callback_query(NewItemACtionCall.filter(F.to_redact == True))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).add.to_redact(callback_data.redact_key, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
@@ -87,14 +87,14 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 @new_item_router.callback_query(NewItemACtionCall.filter(F.to_send == True))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).add.to_send()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_item_router.callback_query(NewItemACtionCall.filter(F.to_create == True))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).add.create()
     await callback.message.edit_text(msg, reply_markup=markup)
@@ -102,14 +102,14 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
 @new_item_router.callback_query(NewItemAdminACtionCall.filter(F.to_create == True))     
 @new_item_router.callback_query(NewItemAdminACtionCall.filter(F.to_create == False))     
 @log.decor(arg=True)
-@call_exept
+@call_exept(False)
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemAdminACtionCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_item_router.callback_query(NewItemAdminACtionCall.filter(F.to_redact == False))     
 @log.decor(arg=True)
-@call_exept
+@call_exept(False)
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemAdminACtionCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
     await callback.message.edit_text(msg, reply_markup=markup)
