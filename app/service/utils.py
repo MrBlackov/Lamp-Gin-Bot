@@ -66,24 +66,24 @@ def permisiion_check(is_callback: bool, to_raise: bool = False):
     def decorator(func):
         if is_callback:
             @wraps(func)
-            async def wrapped(callback: CallbackQuery, **kwargs): 
+            async def wrapped(callback: CallbackQuery, *args, **kwargs): 
                 if callback.message.chat.type in ['group', 'supergroup', 'channel']:
                     member = await bot.get_chat_member(callback.message.chat.id, callback.from_user.id)
                     if member.status != ChatMemberStatus.CREATOR:
                         if to_raise:
                             raise PermissionError(f'У пользователя(tg_id={callback.from_user.id}) нет прав для использования этой команды')
                         return
-                return await func(callback, **kwargs)
+                return await func(callback, *args, **kwargs)
             return wrapped
         @wraps(func)
-        async def wrapped(message: Message, **kwargs): 
+        async def wrapped(message: Message, *args, **kwargs): 
             if message.chat.type in ['group', 'supergroup', 'channel']:
                 member = await bot.get_chat_member(message.chat.id, message.from_user.id)
                 if member.status != ChatMemberStatus.CREATOR:
                     if to_raise:
                         raise PermissionError(f'У пользователя(tg_id={message.from_user.id}) нет прав для использования этой команды')
                     return
-            return await func(message, **kwargs)       
+            return await func(message, *args, **kwargs)       
         return wrapped
     return decorator
 
