@@ -33,7 +33,7 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
 
 @chat_router.callback_query(ChatBackCall.filter(F.where == 'menu'))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 @permisiion_check(True, True)
 async def callback_handler(callback: CallbackQuery, callback_data: ChatBackCall, state: FSMContext, **kwargs):
     msg, markup = await ChatService(callback.from_user.id, state).menu(callback.message.chat.id)
@@ -41,7 +41,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: ChatBackCall,
 
 @chat_router.callback_query(ChatSettingActionCall.filter(F.to_msg_delete_time == True))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 @permisiion_check(True, True)
 async def callback_handler(callback: CallbackQuery, callback_data: ChatSettingActionCall, state: FSMContext, **kwargs):
     msg, markup = await ChatService(callback.from_user.id, state).redact_msg_delete_time(callback_data.chat_id, callback.message)
@@ -68,7 +68,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 @chat_router.callback_query(ChatSettingActionCall.filter(F.is_msg_delete == True))   
 @chat_router.callback_query(ChatSettingActionCall.filter(F.is_msg_delete == False))   
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 @permisiion_check(True, True)
 async def callback_handler(callback: CallbackQuery, callback_data: ChatSettingActionCall, state: FSMContext, **kwargs):
     msg, markup = await ChatService(callback.from_user.id, state).redact_is_msg_delete(callback_data.chat_id, callback_data.is_msg_delete)

@@ -20,21 +20,21 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 @kit_router.callback_query(KitBackCall.filter(F.where == 'cmd')) 
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: KitBackCall, state: FSMContext, **kwargs):
     msg, markup = await KitService(callback.from_user.id, state).kits()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @kit_router.callback_query(KitIdCall.filter())     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: KitIdCall, state: FSMContext, **kwargs):
     msg, markup = await KitService(callback.from_user.id, state).kit(callback_data.kit_id, callback_data.is_new)
     await callback.message.edit_text(msg, reply_markup=markup)  
  
 @kit_router.callback_query(KitActionCall.filter(F.to_enter_code == True))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: KitActionCall, state: FSMContext, **kwargs):
     msg, markup = await KitService(callback.from_user.id, state).to_enter_code(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)  

@@ -34,14 +34,14 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
 
 @change_item_router.callback_query(ChangeItemSketchBackCall.filter(F.where == 'info'))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: ChangeItemSketchBackCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).change.to_sketch()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @change_item_router.callback_query(ChangeItemSketchCall.filter(F.to_items == False))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: ChangeItemSketchCall, state: FSMContext, **kwargs):
     msg, markup = await ItemService(callback.from_user.id, state).change.to_change_data(callback_data.what, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)    

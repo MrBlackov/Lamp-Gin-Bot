@@ -14,14 +14,14 @@ faq_router = Router()
 
 @faq_router.callback_query(ToErrorFAQCall.filter())     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_to_error_faq(callback: CallbackQuery, callback_data: ToErrorFAQCall, state: FSMContext, **kwargs):
     msg, markup = FaqService(callback.from_user.id, state).to_error_faq(callback.message.text, callback_data.code)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @faq_router.callback_query(NewItemACtionCall.filter(F.to_read_rules == True))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
     msg, markup = FaqService(callback.from_user.id, state).to_item_rules()
     await callback.message.answer(msg, reply_markup=markup)
@@ -68,7 +68,7 @@ async def cmd_help(message: Message, state: FSMContext, **kwargs):
 
 @faq_router.callback_query(NewItemACtionCall.filter(F.to_faq == True))     
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
     msg, markup = FaqService(callback.from_user.id, state).help_items()
     await callback.message.answer(msg, reply_markup=markup)

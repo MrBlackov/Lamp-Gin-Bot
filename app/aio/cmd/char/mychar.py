@@ -28,7 +28,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     
 @add_char_router.callback_query(InfoCharChooseCall.filter(F.back == True))   
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharChooseCall, state: FSMContext, **kwargs):
     markup, text = await Character(callback.from_user.id, state).info.get_chars()
     await callback.message.edit_text(text, reply_markup=markup)
@@ -36,28 +36,28 @@ async def callback_handler(callback: CallbackQuery, callback_data: InfoCharChoos
 @add_char_router.callback_query(InfoCharListCall.filter()) 
 @add_char_router.callback_query(InfoCharDeleteCall.filter(F.back == True))           
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharListCall | InfoCharDeleteCall, state: FSMContext, **kwargs):
     markup, text = await Character(callback.from_user.id, state).info.get_char(callback_data.char_id)
     await callback.message.edit_text(text, reply_markup=markup)
 
 @add_char_router.callback_query(InfoCharChooseCall.filter())         
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharChooseCall, state: FSMContext, **kwargs):
     markup, text = await Character(callback.from_user.id, state).info.char_to_main(callback_data.char_id)
     await callback.message.edit_text(text, reply_markup=markup)    
 
 @add_char_router.callback_query(InfoCharDeleteCall.filter(F.is_delete == False))         
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharDeleteCall, state: FSMContext, **kwargs):
     markup, text = await Character(callback.from_user.id, state).info.to_delete_char(callback_data.char_id, callback_data.exist_id)
     await callback.message.edit_text(text, reply_markup=markup)   
 
 @add_char_router.callback_query(InfoCharDeleteCall.filter(F.is_delete == True))         
 @log.decor(arg=True)
-@call_exept
+@call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharDeleteCall, state: FSMContext, **kwargs):
     markup, text = await Character(callback.from_user.id, state).info.delete_char(callback_data.exist_id)
     await callback.message.edit_text(text, reply_markup=markup)   
