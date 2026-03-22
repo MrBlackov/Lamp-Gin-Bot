@@ -20,7 +20,7 @@ new_item_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg, markup = await ItemService(message.from_user.id, state).add.to_name()
+    msg, markup = await ItemService(message.from_user.id, state).add.to_name(message)
     msg0 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg0)
 
@@ -35,7 +35,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
-    msg, markup = await ItemService(callback.from_user.id, state).add.to_name()
+    msg, markup = await ItemService(callback.from_user.id, state).add.to_name(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
     await state.update_data(msg=callback.message)
 
@@ -104,14 +104,14 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
 @log.decor(arg=True)
 @call_exept(False)
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemAdminACtionCall, state: FSMContext, **kwargs):
-    msg, markup = await ItemService(callback.from_user.id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
+    msg, markup = await ItemService(callback_data.tg_id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_item_router.callback_query(NewItemAdminACtionCall.filter(F.to_redact == False))     
 @log.decor(arg=True)
 @call_exept(False)
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemAdminACtionCall, state: FSMContext, **kwargs):
-    msg, markup = await ItemService(callback.from_user.id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
+    msg, markup = await ItemService(callback_data.tg_id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 
