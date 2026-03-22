@@ -64,6 +64,3 @@ def roll_dice(dice_string):
         'bonus': bonus,
         'total': total
     }
-
-
-print('\n'.join([str(roll_dice('3d20+20')) for _ in range(100)]))

@@ -4,6 +4,8 @@ from app.logged.botlog import logs
 from app.aio.config import admins, bot, newspaper_id
 from app.aio.cls.fsm.utils import FSMUtils
 
+NOT_NEW_STATE = object()
+
 class BaseService:
     def __init__(self, tg_id: int, state: FSMContext | None = None):
         self.tg_id = tg_id
@@ -22,6 +24,13 @@ class BaseService:
             return await bot.get_chat_member(self.newspaper_id, tg_id)
         return await bot.get_chat_member(self.newspaper_id, self.tg_id)
 
-    
+    async def another(self, tg_id: int, state: FSMContext | None = NOT_NEW_STATE):
+        self.tg_id = tg_id
+        if state != NOT_NEW_STATE:
+            self.state = state
+        return self
+
+
+
 
 
