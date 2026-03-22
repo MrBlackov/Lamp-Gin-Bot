@@ -46,10 +46,11 @@ class AddItemService(ItemBaseService):
             return '✅ Предмет создан, посмотреть /inventory'
         
     async def to_create_item(self):
-        return ' Прочитайте требования к будущему эскизу', self.IKB.to_rules()
+        return '📑 Прочитайте требования к будущему эскизу', self.IKB.to_rules()
 
-    async def to_name(self):
+    async def to_name(self, msg):
         await self.state.set_state(NewItemState.to_name)
+        await self.state.update_data(msg=msg)
         return self.text.to_redact_text('name'), None
     
     async def to_emodzi(self, name: str, msg):

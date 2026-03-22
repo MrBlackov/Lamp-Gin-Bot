@@ -16,3 +16,7 @@ class BaseLayer:
         self.char_id = await get_main_char_for_user_id(self.user.id)
         self.char = await get_char_for_id(self.char_id)
         return self
+
+    def another(self, tg_id: int):
+        self.tg_id = tg_id
+        return self

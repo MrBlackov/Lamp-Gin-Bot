@@ -119,7 +119,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: CraftActionCa
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: CraftActionCall, state: FSMContext, **kwargs):
-    msg, markup = await CraftService(callback.from_user.id, state).add.send_craft()
+    msg, markup = await CraftService(callback.from_user.id, state).add.send_craft(callback_data.tg_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @craft_router.callback_query(CraftActionCall.filter(F.to_craft == True))     

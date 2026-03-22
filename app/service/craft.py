@@ -136,7 +136,7 @@ class AddCraftService(BaseService):
         await infolog.new_craft(user.id, UserText(user.tg_user, user).text + '\n' + self.text(craft).text(is_create=True))
         return f'✅ Вы успешно создали рецепт, id: {craft.id}', None
 
-    async def send_craft(self):
+    async def send_craft(self, tg_id :int):
         ingredients: dict = await self.state.get_value('ingredients') or {} 
         tools: dict = await self.state.get_value('tools') or {}
         results: dict = await self.state.get_value('results') or {}
@@ -145,7 +145,7 @@ class AddCraftService(BaseService):
             raise CraftNoHaveIngredientsError(f'This user(tg_id={self.tg_id}) try to create craft without ingredients')
         if results == {}:
             raise CraftNoHaveResultsError(f'This user(tg_id={self.tg_id}) try to create craft without results')
-        craft, user = await self.layer.send_craft(ingredients=[v for v in ingredients.values()], tools=[v for v in tools.values()], results=[v for v in results.values()], time=time)
+        craft, user = await self.layer.another(tg_id).send_craft(ingredients=[v for v in ingredients.values()], tools=[v for v in tools.values()], results=[v for v in results.values()], time=time)
         await infolog.new_craft_no_moderate(user.id, UserText(user.tg_user, user).text + ' \n' + self.text(craft).text(is_create=True), self.IKB.moderator_menu(craft.id))
         await self.state.clear_this_state()
         return '✅ Вы успешно отправили рецепт на модерацию', None
