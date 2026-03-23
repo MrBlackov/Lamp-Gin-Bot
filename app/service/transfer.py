@@ -192,15 +192,12 @@ class InfoTransferService(BaseService):
 
     async def main_menu(self):
         transfers = await self.layer.transfers()
-        print(transfers)
         await self.state.update_data(transfers=transfers, back_where='cmd')
         return f'🗂️ Ваши сделки ({transfers.quantity} шт.)', self.IKB.menu()
 
     async def to_transfer(self, status_name: str):
         status = MyTransfers().get_status(status_name)
-        print(status.name)
         mytransfers: MyTransfers = await self.state.get_value('transfers')
-        print(mytransfers)
         await self.state.update_data(text=status.text)
         from_me = mytransfers.from_me
         to_me = mytransfers.to_me

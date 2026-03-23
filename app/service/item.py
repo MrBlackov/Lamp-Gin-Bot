@@ -22,11 +22,12 @@ class ItemBaseService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
         self.layer = ItemLayer(tg_id)
+        self.state = ItemFSM(state)
 
 class AddItemService(ItemBaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.state = ItemFSM(state, 'add')
+        self.state = ItemFSM(state, 'new')
         self.IKB = NewItemIKB(tg_id)
         self.text = NewItemText
 
@@ -51,13 +52,13 @@ class AddItemService(ItemBaseService):
     async def to_name(self, msg):
         await self.state.set_state(NewItemState.to_name)
         await self.state.update_data(msg=msg)
-        return self.text.to_redact_text('name'), None
+        return self.text.to_redact_text('name'), self.IKB.cancel()
     
     async def to_emodzi(self, name: str, msg):
         await self.state.set_state(NewItemState.to_emodzi)
         await self.state.update_data(msg=msg)
         await self.state.update_data(sketch=ItemSketchValide(name=name).model_dump())
-        return self.text.to_redact_text('emodzi'), None
+        return self.text.to_redact_text('emodzi'), self.IKB.cancel()
     
     async def to_menu(self, emodzi: str):
         return await self.redact_value(emodzi, 'emodzi')

@@ -67,6 +67,13 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemBackCa
     msg, markup = await ItemService(callback.from_user.id, state).add.menu()
     await callback.message.edit_text(msg, reply_markup=markup)
 
+@new_item_router.callback_query(NewItemBackCall.filter(F.where == 'cancel'))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemBackCall, state: FSMContext, **kwargs):
+    await ItemFSM(state, 'new').set_state()
+    await callback.message.edit_text('🙁 Создание предмета отменено', reply_markup=None)
+
 @new_item_router.callback_query(NewItemACtionCall.filter(F.to_redact == True))     
 @log.decor(arg=True)
 @call_exept()
@@ -104,14 +111,14 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
 @log.decor(arg=True)
 @call_exept(False)
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemAdminACtionCall, state: FSMContext, **kwargs):
-    msg, markup = await ItemService(callback_data.tg_id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
+    msg, markup = await ItemService(callback.from_user.id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_item_router.callback_query(NewItemAdminACtionCall.filter(F.to_redact == False))     
 @log.decor(arg=True)
 @call_exept(False)
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemAdminACtionCall, state: FSMContext, **kwargs):
-    msg, markup = await ItemService(callback_data.tg_id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
+    msg, markup = await ItemService(callback.from_user.id, state).add.create_after_moderating(callback_data.sketch_id, callback_data.to_create)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 

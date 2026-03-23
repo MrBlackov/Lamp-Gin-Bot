@@ -24,6 +24,9 @@ class NewItemIKB(BotIKB):
     def back(self, where: str):
         return self.builder.button(text='↩️ Назад', callback_data=NewItemBackCall(where=where, tg_id=self.tg_id)).as_markup()
 
+    def cancel(self):
+        return self.builder.button(text='❌ Отменить создание', callback_data=NewItemBackCall(where='cancel', tg_id=self.tg_id)).as_markup()
+ 
     def to_rules(self):
         self.builder.button(text='📖 FAQ по предметам', callback_data=NewItemACtionCall(to_faq=True, tg_id=self.tg_id))
         self.builder.button(text='📜 Требования', callback_data=NewItemACtionCall(to_read_rules=True, tg_id=self.tg_id))
