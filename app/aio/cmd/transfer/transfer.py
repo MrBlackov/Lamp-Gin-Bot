@@ -25,6 +25,7 @@ transfer_router.include_routers(new_transfer_router)
 
 @new_transfer_router.message(Command('mytransfers'))
 @new_transfer_router.message(Command('transfer'), F.text == '/transfer')
+@new_transfer_router.message(Command('transfer'), F.text == '/transfer@TheGinBot')
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

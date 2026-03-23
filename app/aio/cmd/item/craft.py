@@ -126,7 +126,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: CraftActionCa
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: CraftActionCall, state: FSMContext, **kwargs):
-    msg, markup = await CraftService(callback.from_user.id, state).add.create_craft()
+    msg, markup = await CraftService(callback_data.tg_id, state).add.create_craft()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @craft_router.callback_query(CraftAdminACtionCall.filter(F.to_create == True))     
@@ -134,7 +134,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: CraftActionCa
 @log.decor(arg=True)
 @call_exept(False)
 async def callback_handler(callback: CallbackQuery, callback_data: CraftAdminACtionCall, state: FSMContext, **kwargs):
-    msg, markup = await CraftService(callback.from_user.id, state).add.accert_new_craft(callback_data.craft_id, callback_data.to_create)
+    msg, markup = await CraftService(callback_data.tg_id, state).add.accert_new_craft(callback_data.craft_id, callback_data.to_create)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 
