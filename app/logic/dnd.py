@@ -28,12 +28,14 @@ class dice:
     
     @property
     def throw(self):
-        return self.to_throw()._throw[0]
+        return self._to_throw()._throw[0]
     
-    def to_throw(self, quantity: int = 1):
+    def _to_throw(self, quantity: int = 1):
         self._throw = tuple([self.fake.random_int(min=self.min, max=self.max, step=self.step) for _ in range(quantity)])
         return self
-
+    
+    def to_throw(self, quantity: int = 1):
+        return self._to_throw(quantity)._throw
     @property
     def sum(self):
         return sum(self.throw)
@@ -56,7 +58,38 @@ class dices:
                     throw.append(value)
             self.throw = tuple(throw)
         return self
+        
+    def _roll_dice(command: str, d: list[int] = [1, 20]):
+        k_dice = 1
+        mod = 0
+        try:
+            if 'd' in command:
+                d_index = command.index('d')
+                if d_index > 0:
+                    k_dice = int(command[:d_index])
+                command = command.replace(command[0:d_index+1] + ' ', '')
+            parts = command.split(' ')
+            for c in parts:
+                if '+' == c:
+                    mod_index = parts.index('+')
+                    if mod_index > 0:
+                        mod += float(parts[mod_index+1])
+                elif '-' == c:
+                    mod_index = parts.index('-')
+                    if mod_index > 0:
+                        mod -= float(parts[mod_index+1])
+        except ValueError as e:
+            raise
+        
+        dices_throw = dice(d[1], d[0]).to_throw(k_dice)
+        self = dices()
+        self.throw = dices_throw
+        self.result = self.medium + mod
+        return self
     
+    def roll_dice(command: str, d: list[int] = [1, 20]):
+        return dices._roll_dice(command, d).result
+
     @property
     def sum(self):
         return sum(self.throw)

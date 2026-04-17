@@ -17,10 +17,10 @@ class InventoryDB(Base):
 class AttributePointDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))    
     exist: Mapped['ExistenceDB'] = relationship('ExistenceDB', uselist=False, lazy='select', cascade='all', back_populates='attibute_point')
-    strength: Mapped[int]
-    dexterity: Mapped[int]
-    intelligence: Mapped[int]
-    health: Mapped[int]
+    strength: Mapped[int] # Сила
+    dexterity: Mapped[int] # Ловкость
+    intelligence: Mapped[int] # Интелект
+    health: Mapped[int] # Здоровье
     spirituality: Mapped[int] = mapped_column(default=0)
     speed_value: Mapped[int] = mapped_column(default=0)
     
