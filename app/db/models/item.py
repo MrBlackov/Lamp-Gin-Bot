@@ -130,3 +130,23 @@ class CraftDB(Base):
     
     def ingredient_text(self, max_simvols: int = 7):
         return self.to_mini_text(self.ingredients[0].sketch.name, max_simvols)
+
+
+#class SkillSketchDB(Base):
+#    name: Mapped[str]
+#    default_coins: Mapped[int] = mapped_column(default=0)
+#    is_base: Mapped[bool] = mapped_column(default=False)
+#    is_random: Mapped[bool] = mapped_column(default=False)
+#    and_lucky: Mapped[bool] = mapped_column(default=True)
+#    is_avtivate: Mapped[bool] = mapped_column(default=False)
+#    has_IQ: Mapped[int | None] = mapped_column(default=None)
+#    formula: Mapped[list | None] = mapped_column(ARRAY, default=None)
+#    item_skill: Mapped[int | None] = mapped_column(ForeignKey('itemsketchdb.id'), nullable=True)
+#
+#class SkillDB(Base):
+#    coins: Mapped[float]
+#    sketch_id: Mapped[int] = mapped_column(ForeignKey('skillsketchdb.id'))
+#    sketch: Mapped[SkillSketchDB] = relationship(SkillSketchDB, uselist=False, lazy='joined')
+#    attribute_point_id: Mapped[int] = mapped_column(ForeignKey('attributepointdb.id'))
+#
+#
