@@ -37,30 +37,12 @@ def generate_password(length=12, use_digits=True, use_punctuation=True):
     password = ''.join(random.choice(chars) for _ in range(length))
     return password
 
-def roll_dice(dice_string):
+def action_point(points: list[int | float | list]) -> float | int:
+    p = 0
+    for point in points:
+        if type(point) == int or type(point) == float:
+            p += point
+        elif type(point) == list:
+            p += action_point(point)
     
-    if '+' in dice_string:
-        match = re.match(r'(\d+)d(\d+)(?:\+(\d+))?', dice_string)
-        if not match:
-            return None
-        
-        count, sides, bonus = match.groups()
-        bonus = int(bonus) if bonus else 0
-    else:
-        match = re.match(r'(\d+)d(\d+)(?:\-(\d+))?', dice_string)
-        if not match:
-            return None
-        
-        count, sides, bonus = match.groups()
-        bonus = int(bonus) if bonus else 0
-        bonus = -bonus
-        
-    rolls = [random.randint(1, int(sides)) for _ in range(int(count))]
-    total = sum(rolls) + bonus
-        
-
-    return {
-        'rolls': rolls,
-        'bonus': bonus,
-        'total': total
-    }
+    return p/len(points)
