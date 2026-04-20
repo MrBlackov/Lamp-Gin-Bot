@@ -1,7 +1,7 @@
 from app.db.metods.base import add_or_update_obj, select_objs_for_data, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide, get_for_ids
 from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB, ChatDAO, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB
 from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
-from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB, CraftDB, CraftDAO
+from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB, CraftDB, CraftDAO, SkillDAO, SkillDB, SkillSketchDAO, SkillSketchDB
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
@@ -170,3 +170,35 @@ async def get_crafts(is_hide: bool | None = True) -> list[CraftDB] | None:
     if crafts:
         return [craft.add_items(await get_items_for_craft(craft.id)) for craft in crafts]
     return crafts
+
+select_skill = select_obj_no_valide(SkillDAO)
+select_skills = select_objs_no_valide(SkillDAO)
+
+select_skill_sketch = select_obj_no_valide(SkillSketchDAO)
+select_skill_sketchs = select_objs_no_valide(SkillSketchDAO)
+
+async def get_skill_for_id(id: int) -> SkillDB:
+    return await select_skill(filters={'id':id})
+
+async def get_skills_for_attribute_point_id(ap_id: int) -> list[SkillDB]:
+    return await select_skills(filters={'attribute_point_id':ap_id})
+
+async def get_all_skills() -> list[SkillSketchDB]:
+    return await select_skill_sketchs()
+
+async def get_base_skills() -> list[SkillSketchDB]:
+    return await select_skill_sketchs(filters={'is_base':True})
+
+async def get_skill_for_sketch_id(sketch_id: int) -> SkillDB:
+    return await select_skill(filters={'sketch_id':sketch_id})
+
+async def get_skill_sketch_for_id(sketch_id: int) -> SkillSketchDB:
+    return await select_skill_sketch(filters={'id':sketch_id})
+
+async def get_skill_sketch_for_tag(tag: str) -> SkillSketchDB:
+    return await select_skill_sketch(filters={'tag':tag})
+
+
+
+
+

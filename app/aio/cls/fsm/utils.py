@@ -56,6 +56,9 @@ class ChatFSM(FSMUtils):
 
 class StatsFSM(FSMUtils):
     prefixs = ['stats']
+
+class SkillFSM(FSMUtils):
+    prefixs = ['skill']
     
 class TransferFSM(FSMUtils):
     prefixs = ['transfer']

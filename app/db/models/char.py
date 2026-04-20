@@ -2,7 +2,7 @@ from sqlalchemy import String, ARRAY, BigInteger, ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.enum_type.char import Gender
-from app.db.models.item import ItemDB, KitDB
+from app.db.models.item import ItemDB, KitDB, SkillDB
 
 class InventoryDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))
@@ -23,11 +23,28 @@ class AttributePointDB(Base):
     health: Mapped[int] # Здоровье
     spirituality: Mapped[int] = mapped_column(default=0)
     speed_value: Mapped[int] = mapped_column(default=0)
+    skills: Mapped[list[SkillDB] | None] = relationship(SkillDB, uselist=True, lazy='select')
     
     @property
     def speed(self):
         return (self.dexterity + self.health)/4 + self.speed_value
-
+    
+    @property
+    def st(self):
+        return self.strength
+    
+    @property
+    def dx(self):
+        return self.dexterity
+    
+    @property
+    def iq(self):
+        return self.intelligence
+    
+    @property
+    def hp(self):
+        return self.health
+    
 class ExistenceDB(Base): 
     people_id: Mapped[int | None] = mapped_column(ForeignKey('characterdb.id', ondelete='CASCADE'), default=None)
     char: Mapped['CharacterDB'] = relationship('CharacterDB', uselist=False, lazy='select', cascade='all', back_populates='exist')

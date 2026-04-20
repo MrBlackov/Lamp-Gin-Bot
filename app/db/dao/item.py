@@ -1,5 +1,5 @@
 from app.db.dao.base import BaseDAO
-from app.db.models.item import ItemDB, ItemSketchDB, KitDB, KitSketchDB, CraftDB
+from app.db.models.item import ItemDB, ItemSketchDB, KitDB, KitSketchDB, CraftDB, SkillDB, SkillSketchDB
 
 class ItemDAO(BaseDAO):
     model = ItemDB
@@ -16,3 +16,11 @@ class KitSketchDAO(BaseDAO):
 
 class CraftDAO(BaseDAO):
     model = CraftDB
+
+class SkillSketchDAO(BaseDAO):
+    model = SkillSketchDB
+
+class SkillDAO(BaseDAO):
+    model = SkillDB
+
+    
