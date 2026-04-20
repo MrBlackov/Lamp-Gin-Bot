@@ -9,6 +9,7 @@ from app.aio.cmd.item.items import item_router
 from app.aio.cmd.item.craft import craft_router
 from app.aio.cmd.char.inventory import inventory_router
 from app.aio.cmd.transfer.transfer import transfer_router
+from app.aio.cmd.transfer.transfer import transfer_router
 from app.aio.cls.callback.char import (
                                        InfoCharChooseCall, 
                                        InfoCharListCall,
