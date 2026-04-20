@@ -132,21 +132,28 @@ class CraftDB(Base):
         return self.to_mini_text(self.ingredients[0].sketch.name, max_simvols)
 
 
-#class SkillSketchDB(Base):
-#    name: Mapped[str]
-#    default_coins: Mapped[int] = mapped_column(default=0)
-#    is_base: Mapped[bool] = mapped_column(default=False)
-#    is_random: Mapped[bool] = mapped_column(default=False)
-#    and_lucky: Mapped[bool] = mapped_column(default=True)
-#    is_avtivate: Mapped[bool] = mapped_column(default=False)
-#    has_IQ: Mapped[int | None] = mapped_column(default=None)
-#    formula: Mapped[list | None] = mapped_column(ARRAY, default=None)
-#    item_skill: Mapped[int | None] = mapped_column(ForeignKey('itemsketchdb.id'), nullable=True)
-#
-#class SkillDB(Base):
-#    coins: Mapped[float]
-#    sketch_id: Mapped[int] = mapped_column(ForeignKey('skillsketchdb.id'))
-#    sketch: Mapped[SkillSketchDB] = relationship(SkillSketchDB, uselist=False, lazy='joined')
-#    attribute_point_id: Mapped[int] = mapped_column(ForeignKey('attributepointdb.id'))
-#
-#
+class SkillSketchDB(Base):
+    name: Mapped[str]
+    tag: Mapped[str]
+
+    default_level: Mapped[int] = mapped_column(default=1)
+    xmod: Mapped[int] = mapped_column(default=1)
+    is_attribute: Mapped[bool] = mapped_column(default=False)
+    is_base: Mapped[bool] = mapped_column(default=False)
+    is_random: Mapped[bool] = mapped_column(default=False)
+    rarity: Mapped[float] = mapped_column(default=0)
+    is_random_level: Mapped[bool] = mapped_column(default=False)
+    random_max_level: Mapped[int | None] = mapped_column(default=None)
+    random_min_level: Mapped[int | None] = mapped_column(default=None)
+    random_throw_number: Mapped[int | None] = mapped_column(default=None)
+    is_avtivate: Mapped[bool] = mapped_column(default=False)
+    has_IQ: Mapped[int | None] = mapped_column(default=None)
+    
+
+class SkillDB(Base):
+    level: Mapped[float]
+    coins: Mapped[int] = mapped_column(default=0)
+    sketch_id: Mapped[int] = mapped_column(ForeignKey('skillsketchdb.id'))
+    sketch: Mapped[SkillSketchDB] = relationship(SkillSketchDB, uselist=False, lazy='joined')
+    attribute_point_id: Mapped[int] = mapped_column(ForeignKey('attributepointdb.id'))
+

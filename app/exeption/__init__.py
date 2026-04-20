@@ -1,3 +1,7 @@
+"""
+Часть с исключениями
+"""
+
 from .another import DiceError, AnotherError
 from .api import ApiError, ValidationApiError
 from .base import BotError, get_error_faq
