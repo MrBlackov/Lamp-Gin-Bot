@@ -1,4 +1,4 @@
-from app.aio.cls.callback.base import BaseCall
+from app.aio.cls.callback.base import BaseCall, MenuCall
 
 class ChatSettingActionCall(BaseCall, prefix='chat_setting_action'):
     to_msg_delete_time: bool = False

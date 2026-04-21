@@ -12,7 +12,8 @@ from app.aio.cls.callback.char import (
                                        InventoryItemsCall,
                                        InventoryItemsGoCall, 
                                        InventoryItemsActionCall,
-                                       InventoryItemsPickUpCall
+                                       InventoryItemsPickUpCall,
+                                       MenuCall
                                        )
 from app.db.models.item import ItemDB
 from app.db.models.char import CharacterDB
@@ -105,8 +106,13 @@ class InfoCharIKB(BotIKB):
     def chouse_main_char(self, char_id: int, exist_id: int, main: bool = False, is_die: bool = False):  
         if main == False and is_die == False:
             self.builder.button(text='🕹️ Выбрать', callback_data=InfoCharChooseCall(char_id=char_id, tg_id=self.tg_id)) 
-        if is_die == False:
-            self.builder.button(text='☠️ Повеситься', callback_data=InfoCharDeleteCall(char_id=char_id, exist_id=exist_id, tg_id=self.tg_id))  
+        if main:
+            self.builder.button(text='💡 Навыки', callback_data=MenuCall(where='myskills', tg_id=self.tg_id)) 
+            self.builder.button(text='💼 Инвентарь', callback_data=MenuCall(where='inventory', tg_id=self.tg_id)) 
+            self.builder.button(text='⚗️ Крафты', callback_data=MenuCall(where='crafts', tg_id=self.tg_id)) 
+            self.builder.button(text='✉️ Сделки', callback_data=MenuCall(where='transfers', tg_id=self.tg_id)) 
+        if is_die == False:  
+            self.builder.button(text='☠️ Повеситься', callback_data=InfoCharDeleteCall(char_id=char_id, exist_id=exist_id, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=InfoCharChooseCall(back=True, tg_id=self.tg_id)) 
         return self.builder.adjust(1).as_markup()
     

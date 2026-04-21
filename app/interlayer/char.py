@@ -68,6 +68,10 @@ class InfoCharacterLayer:
         self.logic = CharLogic(tg_id)
         self.tg_id = tg_id
 
+    async def get_main_char(self):
+        await self.get_char_info()
+        return self.char
+
     async def get_char_info(self, user_id: int | None = None):
         if user_id:
             self.user = await get_user_for_id(user_id)

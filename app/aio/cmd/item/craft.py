@@ -14,7 +14,8 @@ from app.aio.cls.callback.craft import (CraftBackCall,
                                         CraftItemIdCall,
                                         CraftItemPagesCall,
                                         CraftUseCall,
-                                        CraftAdminACtionCall)
+                                        CraftAdminACtionCall,
+                                        MenuCall)
 from app.aio.cls.fsm.craft import CraftState, AddCraftState
 from app.aio.cls.fsm.utils import CraftFSM
 
@@ -29,7 +30,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     msg, markup = await CraftService(message.from_user.id, state).add.craft_menu()
     await message.answer(msg, reply_markup=markup)
 
-@craft_router.callback_query(CraftBackCall.filter(F.where == 'craft_menu'))     
+@craft_router.callback_query(CraftBackCall.filter(F.where == 'craft_menu')) 
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: CraftBackCall, state: FSMContext, **kwargs):
@@ -147,10 +148,11 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     msg, markup = await CraftService(message.from_user.id, state).info.get_no_hide_craft()
     await message.answer(msg, reply_markup=markup)
 
-@craft_router.callback_query(CraftBackCall.filter(F.where == 'cmd'))     
+@craft_router.callback_query(CraftBackCall.filter(F.where == 'cmd'))  
+@craft_router.callback_query(MenuCall.filter(F.where == 'crafts'))       
 @log.decor(arg=True)
 @call_exept()
-async def callback_handler(callback: CallbackQuery, callback_data: CraftBackCall, state: FSMContext, **kwargs):
+async def callback_handler(callback: CallbackQuery, callback_data: CraftBackCall | MenuCall, state: FSMContext, **kwargs):
     msg, markup = await CraftService(callback.from_user.id, state).info.get_no_hide_craft()
     await callback.message.edit_text(msg, reply_markup=markup)
 

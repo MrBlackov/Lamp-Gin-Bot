@@ -1,7 +1,7 @@
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from app.aio.cls.callback.main import ChatSettingActionCall, ChatBackCall
+from app.aio.cls.callback.main import ChatSettingActionCall, ChatBackCall, MenuCall
 
 class ChatIKB(BotIKB):
     def back(self, where: str):

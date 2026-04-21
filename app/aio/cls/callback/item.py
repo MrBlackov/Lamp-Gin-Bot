@@ -1,4 +1,4 @@
-from app.aio.cls.callback.base import BaseCall
+from app.aio.cls.callback.base import BaseCall, MenuCall
 from typing import Any, Literal
 
 class NewItemACtionCall(BaseCall, prefix='new_item_action'):

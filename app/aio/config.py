@@ -14,10 +14,12 @@ log_groups = [int(x) for x in config('log_groups').split(',')]
 bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
 cmds = {
-    'mychar':'👤 Список ваших персонажей',
+    'mychar':'👑 Действующий персонаж',
+    'mychars':'👤 Список ваших персонажей',
     'inventory':'💼 Инвентарь',
     'transfer':'✉️ Ваши сделки',
     'craft':'⚗️ Доступные крафты',
+    'myskills':'💡 Ваши навыки',
 
     'newchar':'➕ Создать персонажа',
     'newtransfer':'➕ Создать сделку',

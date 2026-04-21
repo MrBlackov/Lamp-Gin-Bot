@@ -26,7 +26,9 @@ class ItemSketchsLogic:
         if item.max_drop < item.min_drop:
             raise MaxDropLessMinDropError(f'This item(name:{item.name}) to created, but max_drop < min_drop')
         log.info(f' User({item.creator_id}) created new item_sketch: {item.model_dump()}')
-        return await add_item_sketch(data=item)
+        item_dict = dict(item.__dict__)
+        item_dict['_emodzi'] = item_dict.pop('emodzi')
+        return await add_db_obj(ItemSketchDB(**item_dict))
     
     async def get_sketch(self, sketch_id: int):
         return await get_item_sketch(sketch_id)
@@ -35,6 +37,7 @@ class ItemSketchsLogic:
         return await get_item_sketchs()
     
     async def update_sketch(self, item_id: int, new_data: dict):
+        new_data['_emodzi'] = new_data.pop('emodzi')
         return await update_item_sketch_for_id(item_id, new_data)
 
     async def get_items_for_sketch(self, sketch_id: int) -> ItemSketchDB:

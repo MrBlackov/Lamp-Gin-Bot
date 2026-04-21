@@ -41,6 +41,35 @@ class TextHTML:
         ''' Ссылка
             - url: Ссылка на ресурс '''
         return f'<a href="{url}">{self.text}</a>'
-
+    
+    def custom_emoji(self, emoji_id: str):
+        ''' Пользовательская эмодзи
+            - emoji_id: ID пользовательской эмодзи '''
+        return f'<tg-emoji emoji-id="{emoji_id}">{self.text}</tg-emoji>'
+    
+    def spoiler(self):
+        ''' Скрытый текст (спойлер) '''
+        return f'<tg-spoiler>{self.text}</tg-spoiler>'
+    
+    @classmethod
+    def to_list(cls, items: list[str], type: str = 'num', sep: str = '\n'):
+        ''' Нумерованный список
+            - items: Список элементов 
+            - type: Тип списка (num - нумерованный, любой другой - кастомный символ)
+            - sep: Разделитель между элементами списка '''
+        if type == 'num':
+            return cls(sep.join([f'{i+1}. {item}' for i, item in enumerate(items)]))
+        elif type == 'bullet':
+            return cls(sep.join([f'• {item}' for item in items]))
+        else:
+            return cls(sep.join([f'{type} {item}' for item in items]))
+        
+    @classmethod
+    def num_list(cls, items: list[str], sep: str = '\n'):
+        ''' Нумерованный список
+            - items: Список элементов для нумерации
+            - sep: Разделитель между элементами списка '''
+        return cls.to_list(items, type='num', sep=sep)
+    
 def get_invisibly_edited():
     return str('\u200b'*random.choice(range(10)))

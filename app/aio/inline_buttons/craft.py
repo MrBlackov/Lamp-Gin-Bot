@@ -8,7 +8,8 @@ from app.aio.cls.callback.craft import (CraftBackCall,
                                         CraftItemIdCall,
                                         CraftItemPagesCall,
                                         CraftUseCall,
-                                        CraftAdminACtionCall)
+                                        CraftAdminACtionCall,
+                                        MenuCall)
 from app.db.models.item import CraftDB, ItemSketchDB
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 

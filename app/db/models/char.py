@@ -29,21 +29,16 @@ class AttributePointDB(Base):
     def speed(self):
         return (self.dexterity + self.health)/4 + self.speed_value
     
-    @property
-    def st(self):
-        return self.strength
-    
-    @property
-    def dx(self):
-        return self.dexterity
-    
-    @property
-    def iq(self):
-        return self.intelligence
-    
-    @property
-    def hp(self):
-        return self.health
+    def tag(self, tag: str):
+        if tag == 'st':
+            return self.strength
+        elif tag == 'dx':
+            return self.dexterity
+        elif tag == 'iq':
+            return self.intelligence
+        elif tag == 'hp':
+            return self.health
+
     
 class ExistenceDB(Base): 
     people_id: Mapped[int | None] = mapped_column(ForeignKey('characterdb.id', ondelete='CASCADE'), default=None)

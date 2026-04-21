@@ -5,7 +5,7 @@ from aiogram.types import Message, CallbackQuery
 from app.logged.botlog import log
 from app.service.char import Character
 from app.exeption.decorator import exept, call_exept
-from app.aio.cls.callback.char import InventoryItemsCall, InventoryItemsGoCall, InventoryItemsActionCall, InventoryItemsPickUpCall
+from app.aio.cls.callback.char import InventoryItemsCall, InventoryItemsGoCall, InventoryItemsActionCall, InventoryItemsPickUpCall, MenuCall
 from app.aio.cls.fsm.char import InventoryState
 from app.service.utils import is_natural_int
 from app.aio.cls.fsm.utils import CharFSM
@@ -22,9 +22,10 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     await message.answer(msg, reply_markup=markup)
 
 @inventory_router.callback_query(InventoryItemsGoCall.filter(F.where == 'inventory'))     
+@inventory_router.callback_query(MenuCall.filter(F.where == 'inventory'))  
 @log.decor(arg=True)
 @call_exept()
-async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsCall, state: FSMContext, **kwargs):
+async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsCall | MenuCall, state: FSMContext, **kwargs):
     msg, markup = await Character(callback.from_user.id, state).inventory.inventory()
     await callback.message.edit_text(msg, reply_markup=markup)
     

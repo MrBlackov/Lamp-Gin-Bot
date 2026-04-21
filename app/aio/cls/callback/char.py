@@ -1,4 +1,4 @@
-from app.aio.cls.callback.base import BaseCall
+from app.aio.cls.callback.base import BaseCall, MenuCall, MenuCall
 from typing import Literal
 
 class AddCharGenderCall(BaseCall, prefix='add_char_gender'):

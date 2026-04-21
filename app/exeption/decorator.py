@@ -5,7 +5,7 @@ from app.logged.botlog import log
 from app.aio.config import owner
 from app.aio.inline_buttons.faq import FaqIKB
 from app.aio.msg.utils import TextHTML
-from app.aio.cls.callback.base import BaseCall
+from app.aio.cls.callback.base import BaseCall, MenuCall
 
 def exept(func):
     @wraps(func)
