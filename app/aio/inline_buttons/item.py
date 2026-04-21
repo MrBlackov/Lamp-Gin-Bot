@@ -16,7 +16,8 @@ from app.aio.cls.callback.item import (NewItemACtionCall,
                                        ChangeItemSketchBackCall,
                                        ChangeItemSketchItemCall,
                                        ChangeItemSketchToPageCall,
-                                       ChangetemSketchItemInCharCall)
+                                       ChangetemSketchItemInCharCall, 
+                                       MenuCall)
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 

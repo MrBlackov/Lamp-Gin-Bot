@@ -3,6 +3,7 @@ from app.aio.cmd.char.mychar import char_router
 from app.aio.cmd.faq import faq_router
 from app.aio.cmd.kit.kit import kit_router
 from app.aio.cmd.stats import stats_router
+from app.aio.cmd.skill import skill_router
 from app.aio.cmd.main.chat import chat_router
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
@@ -15,7 +16,7 @@ from aiogram.methods import CreateForumTopic
 from app.aio.middlewares.message_clean import MessageCleanDpMiddleware
 
 base_router = Router()
-base_router.include_routers(char_router, chat_router, faq_router, stats_router)
+base_router.include_routers(char_router, skill_router, faq_router, chat_router, stats_router)
 base_router.message.middleware(MessageCleanDpMiddleware())
 
 @base_router.message(Command('user'))
@@ -57,3 +58,14 @@ async def cmd_start(message: Message, **kwargs):
 async def cmd_start(message: Message, state: FSMContext, **kwargs):
     await state.set_state()
     await message.answer('Отмена произошла успешно')
+
+@base_router.message(Command('emodzi'))
+@log.decor(arg=True)
+@exept
+async def cmd_start(message: Message, state: FSMContext, **kwargs):
+    if message.entities:
+        for entity in message.entities:
+            if entity.type == "custom_emoji":
+                custom_emoji_id = entity.custom_emoji_id
+                await message.answer(f"ID эмодзи: {custom_emoji_id}, эмодзи <tg-emoji emoji-id='{custom_emoji_id}'>🤔</tg-emoji>")
+                break

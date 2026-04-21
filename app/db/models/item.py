@@ -6,7 +6,8 @@ from datetime import datetime
 
 class ItemSketchDB(Base):
     name: Mapped[str] = mapped_column(String(30))
-    emodzi: Mapped[str] = mapped_column(default='')
+    _emodzi: Mapped[str] = mapped_column(default='')
+    custom_emodzi_id: Mapped[str | None] = mapped_column(default=None)
     description: Mapped[str | None] = mapped_column(default=None)
     size: Mapped[int] = mapped_column(default=100)
     items: Mapped[list['ItemDB']] = relationship('ItemDB', uselist=True, lazy='select', cascade='all', back_populates='sketch')
@@ -18,6 +19,10 @@ class ItemSketchDB(Base):
     max_drop: Mapped[int] = mapped_column(default=1)
     nbt: Mapped[dict] = mapped_column(JSON, default={})
     is_hide: Mapped[bool] = mapped_column(default=False, nullable=True)
+
+    @property
+    def emodzi(self):
+        return f'<tg-emoji emoji-id="{self.custom_emodzi_id}">{self._emodzi}</tg-emoji>' if self.custom_emodzi_id else self._emodzi
 
 class ItemDB(Base):
     inventory_id: Mapped[int | None] = mapped_column(ForeignKey('inventorydb.id'), nullable=True)
@@ -135,6 +140,9 @@ class CraftDB(Base):
 class SkillSketchDB(Base):
     name: Mapped[str]
     tag: Mapped[str]
+    _emodzi: Mapped[str] = mapped_column(default='💡')
+    custom_emodzi_id: Mapped[str | None] = mapped_column(default=None)
+    description: Mapped[str | None] = mapped_column(default=None)
 
     default_level: Mapped[int] = mapped_column(default=1)
     xmod: Mapped[int] = mapped_column(default=1)
@@ -147,8 +155,12 @@ class SkillSketchDB(Base):
     random_min_level: Mapped[int | None] = mapped_column(default=None)
     random_throw_number: Mapped[int | None] = mapped_column(default=None)
     is_avtivate: Mapped[bool] = mapped_column(default=False)
-    has_IQ: Mapped[int | None] = mapped_column(default=None)
+    explore_iq: Mapped[int | None] = mapped_column(default=None)
+    up_level_formula: Mapped[dict[str, float] | None] = mapped_column(JSON, default=None)
     
+    @property
+    def emodzi(self):
+        return f'<tg-emoji emoji-id="{self.custom_emodzi_id}">{self._emodzi}</tg-emoji>' if self.custom_emodzi_id else self._emodzi
 
 class SkillDB(Base):
     level: Mapped[float]

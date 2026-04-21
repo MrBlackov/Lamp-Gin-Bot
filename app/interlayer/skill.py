@@ -7,9 +7,9 @@ class SkillLayer(BaseLayer):
         super().__init__(tg_id)
         self.logic = SkillLogic()
 
-    async def get_my_skills(self):
+    async def get_my_skills(self, **kwargs):
         await self.get_char_info()
-        return await self.logic.get_my_skills(self.char.exist.attibute_point.id)
+        return await self.logic.get_my_skills(self.char.exist.attibute_point.id, **kwargs)
 
     async def get_skill(self, skill_id: int):
         return await get_skill_for_id(skill_id)

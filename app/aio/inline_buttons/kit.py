@@ -1,6 +1,6 @@
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
-from app.aio.cls.callback.kit import KitBackCall, KitIdCall, KitActionCall
+from app.aio.cls.callback.kit import KitBackCall, KitIdCall, KitActionCall, MenuCall
 from app.db.models.item import KitDB, KitSketchDB
 
 class KitIKB(BotIKB):

@@ -140,6 +140,10 @@ class InfoCharacterService(BaseService):
         self.IKB = InfoCharIKB(tg_id)
         self.layer = InfoCharacterLayer(self.tg_id)
 
+    async def get_main_char(self):
+        char = await self.layer.get_main_char()
+        return self.IKB.chouse_main_char(char.id, char.exist.id, True, char.exist.die), CharInfoText(char).text
+    
     async def get_chars(self):
         datas = await self.layer.get_chars(None)
         if datas.no_chars:

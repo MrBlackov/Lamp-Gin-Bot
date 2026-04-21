@@ -15,7 +15,8 @@ from app.aio.cls.callback.transfer import (InfoTransferInfoCall,
                                            InfoTransferStatusCall,
                                            InfoTransferSortedCall,
                                            InfoTransferActionCall,
-                                           InfoTransferSearchCall,)
+                                           InfoTransferSearchCall,
+                                           MenuCall)
 from app.aio.cls.fsm.transfer import InfoTransferState
 from app.aio.cls.fsm.utils import TransferFSM
 
@@ -33,9 +34,10 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     await message.answer(msg, reply_markup=markup)
 
 @transfer_router.callback_query(InfoTransferBackCall.filter(F.where == 'cmd')) 
+@transfer_router.callback_query(MenuCall.filter(F.where == 'transfers')) 
 @log.decor(arg=True)
 @call_exept()
-async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferBackCall, state: FSMContext, **kwargs):
+async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferBackCall | MenuCall, state: FSMContext, **kwargs):
     msg, markup = await TransferService(callback.from_user.id, state).info.main_menu()
     await callback.message.edit_text(msg, reply_markup=markup)
 

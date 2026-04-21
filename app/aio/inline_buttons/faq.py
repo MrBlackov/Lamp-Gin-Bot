@@ -1,4 +1,4 @@
-from app.aio.cls.callback.faq import ToErrorFAQCall, MenuFAQCall
+from app.aio.cls.callback.faq import ToErrorFAQCall, MenuFAQCall, MenuCall
 from app.db.models.item import ItemDB
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs

@@ -24,6 +24,13 @@ char_router.include_routers(add_char_router, item_router, inventory_router, tran
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    markup, text = await Character(message.from_user.id, state).info.get_main_char()
+    await message.answer(text, reply_markup=markup)
+
+@char_router.message(Command('mychars'))
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     markup, text = await Character(message.from_user.id, state).info.get_chars()
     await message.answer(text, reply_markup=markup)
     
