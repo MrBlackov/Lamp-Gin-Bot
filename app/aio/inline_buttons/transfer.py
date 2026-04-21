@@ -20,7 +20,8 @@ from app.aio.cls.callback.transfer import (ItemTransferCharIdCall,
                                            InfoTransferStatusCall,
                                            InfoTransferSortedCall,
                                            InfoTransferActionCall,
-                                           InfoTransferSearchCall)
+                                           InfoTransferSearchCall, 
+                                           MenuCall)
 from app.enum_type.transfer import ItemTransferStatusEnum
 
 class ItemTransferIKB(BotIKB):

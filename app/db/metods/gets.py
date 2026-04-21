@@ -180,8 +180,10 @@ select_skill_sketchs = select_objs_no_valide(SkillSketchDAO)
 async def get_skill_for_id(id: int) -> SkillDB:
     return await select_skill(filters={'id':id})
 
-async def get_skills_for_attribute_point_id(ap_id: int) -> list[SkillDB]:
-    return await select_skills(filters={'attribute_point_id':ap_id})
+async def get_skills_for_attribute_point_id(ap_id: int, **kwargs) -> list[SkillDB]:
+    filters = {'attribute_point_id':ap_id}
+    filters.update(kwargs)
+    return await select_skills(filters=filters)
 
 async def get_all_skills() -> list[SkillSketchDB]:
     return await select_skill_sketchs()

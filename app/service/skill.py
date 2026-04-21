@@ -1,23 +1,32 @@
 from aiogram.fsm.context import FSMContext
-from app.aio.inline_buttons.faq import FaqIKB
+from app.aio.inline_buttons.skill import SKillIKB
 from app.enum_type.char import Gender
 from app.logged.botlog import logs
 from app.logged.infolog import infolog
-from app.aio.msg.stats import TextHTML, StatsText
+from app.aio.msg.skill import TextHTML, SkillText
 from app.service.base import BaseService 
 from app.exeption import error_faq, BotError
-from app.interlayer.skill import SkillLogic
+from app.interlayer.skill import SkillLayer
 from app.aio.cls.fsm.utils import SkillFSM
 
 class SkillService(BaseService):
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
-        self.layer = SkillLogic(tg_id)
-        self.text = StatsText
+        self.layer = SkillLayer(tg_id)
+        self.text = SkillText
         self.state = SkillFSM(state)
+        self.IKB = SKillIKB(tg_id)
 
     async def get_my_skills(self):
-        pass
-
-
+        skills = await self.layer.get_my_skills()
+        await self.state.update_data(all_skills=skills, skill_ids={s.id:s for s in skills})
+        return self.text(skills).text, self.IKB.skills(skills, page=0, max_page=1)
+    
+    async def skill(self, skill_id: int):
+        skill_ids = await self.state.get_value('skill_ids')
+        if skill_ids == None:
+            skill = await self.layer.get_skill(skill_id)
+        else:
+            skill = skill_ids.get(skill_id)
+        return self.text.text_alert(skill)
 
