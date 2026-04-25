@@ -7,7 +7,7 @@ from app.aio.config import owner
 from app.service.faq import FaqService
 from app.exeption.decorator import exept, call_exept
 from app.exeption.faq import FaqErrorNoEnterError, FaqErrorNoFindError
-from app.aio.cls.callback.faq import ToErrorFAQCall
+from app.aio.cls.callback.faq import ToErrorFAQCall, FAQCall
 from app.aio.cls.callback.item import NewItemACtionCall
 
 faq_router = Router()   
@@ -18,6 +18,13 @@ faq_router = Router()
 async def callback_to_error_faq(callback: CallbackQuery, callback_data: ToErrorFAQCall, state: FSMContext, **kwargs):
     msg, markup = FaqService(callback.from_user.id, state).to_error_faq(callback.message.text, callback_data.code)
     await callback.message.edit_text(msg, reply_markup=markup)
+
+@faq_router.callback_query(FAQCall.filter())     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_faq(callback: CallbackQuery, callback_data: FAQCall, state: FSMContext, **kwargs):
+    msg = FaqService(callback.from_user.id, state).to_faq(callback_data.faq)
+    await callback.answer(msg, show_alert=True)
 
 @faq_router.callback_query(NewItemACtionCall.filter(F.to_read_rules == True))     
 @log.decor(arg=True)

@@ -6,6 +6,7 @@ from app.aio.config import owner
 from app.aio.inline_buttons.faq import FaqIKB
 from app.aio.msg.utils import TextHTML
 from app.aio.cls.callback.base import BaseCall, MenuCall
+import random
 
 def exept(func):
     @wraps(func)
@@ -34,11 +35,14 @@ def exept(func):
             await dowload.delete()
     return wrapped
 
-def call_exept(check_is_user: bool = True):
+def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity_tips: float | None = None):
     def decor(func):
         @wraps(func)
         async def wrapped(callback: CallbackQuery, callback_data: BaseCall, **kwargs): 
             try:
+                if tips and rarity_tips:
+                    if rarity_tips <= random.random():
+                        await callback.answer(random.choice(tips))
                 if check_is_user:
                     if callback.from_user.id != callback_data.tg_id:
                         raise ALienCallbackError(f'This user(tg_id={callback.from_user.id}) enter is alien callback keyboard')

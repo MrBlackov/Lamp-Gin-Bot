@@ -20,7 +20,7 @@ class SkillService(BaseService):
     async def get_my_skills(self):
         skills = await self.layer.get_my_skills()
         await self.state.update_data(all_skills=skills, skill_ids={s.id:s for s in skills})
-        return self.text(skills).text, self.IKB.skills(skills, page=0, max_page=1)
+        return '💡 Ваши навыки', self.IKB.skills(skills, page=0, max_page=1)
     
     async def skill(self, skill_id: int):
         skill_ids = await self.state.get_value('skill_ids')
@@ -28,5 +28,5 @@ class SkillService(BaseService):
             skill = await self.layer.get_skill(skill_id)
         else:
             skill = skill_ids.get(skill_id)
-        return self.text.text_alert(skill)
+        return self.text.text_alert(skill), self.IKB.back(where='myskills')
 

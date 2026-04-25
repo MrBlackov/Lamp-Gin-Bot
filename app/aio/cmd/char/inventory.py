@@ -61,8 +61,8 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     quan = is_natural_int(message.text, message.from_user.id)
     msg, markup = await Character(message.from_user.id, state).inventory.throw_away(item_id, quan)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
-    await state.set_state()
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
     await msg0.delete()
 
 
@@ -122,8 +122,8 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
                           PickUpQuantityNoInt)
     msg, markup = await Character(message.from_user.id, state).inventory.pick_up(quan)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
-    await state.set_state()
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
     await msg0.delete()
 
 

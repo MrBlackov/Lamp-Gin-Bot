@@ -43,21 +43,23 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg0 = await ItemFSM(state, 'new').get_value('msg')
+    fsm = ItemFSM(state, 'new')
+    msg0 = await fsm.get_value('msg')
     msg, markup = await ItemService(message.from_user.id, state).add.to_emodzi(message.text, message)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
+    await fsm.update_data(msg=msg2)
     await msg0.delete()
 
 @new_item_router.message(NewItemState.to_emodzi)
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg0 = await ItemFSM(state, 'new').get_value('msg')
+    fsm = ItemFSM(state, 'new')
+    msg0 = await fsm.get_value('msg')
     msg, markup = await ItemService(message.from_user.id, state).add.to_menu(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
-    await state.set_state()
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
     await msg0.delete()
 
 @new_item_router.callback_query(NewItemBackCall.filter(F.where == 'menu'))     
@@ -85,13 +87,14 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg0 = await ItemFSM(state, 'new').get_value('msg')
+    fsm = ItemFSM(state, 'new')
+    msg0 = await fsm.get_value('msg')
     msg, markup = await ItemService(message.from_user.id, state).add.redact(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
-    await state.set_state()
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
     await msg0.delete()
-
+    
 @new_item_router.callback_query(NewItemACtionCall.filter(F.to_send == True))     
 @log.decor(arg=True)
 @call_exept()
