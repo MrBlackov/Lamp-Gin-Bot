@@ -13,13 +13,126 @@ from app.aio.cls.callback.char import (
                                        InventoryItemsGoCall, 
                                        InventoryItemsActionCall,
                                        InventoryItemsPickUpCall,
-                                       MenuCall
+                                       MenuCall,
+                                       NewCharBackCall,
+                                       NewCharBonusCall,
+                                       NewCharGenderCall,
+                                       NewCharActionCall,
+                                       NewCharNameActionCall,
+                                       NewCharNameCall,
+                                       NewCharPageNameCall,
+                                       NewCharPageSkillCall,
+                                       NewCharSkillCall,
                                        )
-from app.db.models.item import ItemDB
+from app.aio.cls.callback.faq import FAQCall
+from app.db.models.item import ItemDB, SkillDB, SkillSketchDB
 from app.db.models.char import CharacterDB
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+class NewCharIKB(BotIKB):
+    def back(self, where: str):
+        return self.builder.button(text='↩️ Назад', callback_data=NewCharBackCall(where=where, tg_id=self.tg_id)).as_markup()
+
+    def chouse_gender(self):
+        self.builder.button(text='👨 Мужской', callback_data=NewCharGenderCall(gender='M', tg_id=self.tg_id))
+        self.builder.button(text='👩 Женский', callback_data=NewCharGenderCall(gender='W', tg_id=self.tg_id))
+        return self.builder.adjust(2).as_markup()
+    
+    def get_bonus_char(self, url: str):
+        self.builder.button(text='➕ Подписаться', url=url)
+        self.builder.button(text='✅ Проверить', callback_data=NewCharBonusCall(tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()
+    
+    def actions(self):
+        self.builder.button(text='♠️ Имя', callback_data=NewCharActionCall(to_rename=True, name_type='first', tg_id=self.tg_id))
+        self.builder.button(text='♣️ Фаимилия', callback_data=NewCharActionCall(to_rename=True, name_type='last', tg_id=self.tg_id))
+        self.builder.button(text='💡 Навыки', callback_data=NewCharActionCall(to_skills=True, tg_id=self.tg_id))
+        #self.builder.button(text='🎲 Перегенерировать', callback_data=NewCharActionCall(to_generate=True, tg_id=self.tg_id))
+        self.builder.button(text='📝 Описание', callback_data=NewCharActionCall(to_description=True, tg_id=self.tg_id))
+        self.builder.button(text='✅ Создать', callback_data=NewCharActionCall(to_create=True, tg_id=self.tg_id))
+        self.builder.button(text='❓ Помощь', callback_data=FAQCall(faq='new_char', tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=NewCharBackCall(where='gender', tg_id=self.tg_id))
+        return self.builder.adjust(2, 2, 1, 1, 1).as_markup()
+
+    def redact_skills(self, skills: list[SkillDB], where: str):
+        for skill in skills:
+            if skill.sketch.custom_emodzi_id:
+                text = f' {skill.sketch.name} - {skill.level} ур.'
+                custom_emodzi_id = skill.sketch.custom_emodzi_id
+            else:
+                text = f'{skill.sketch.emodzi} {skill.sketch.name} - {skill.level} ур.'
+                custom_emodzi_id = None
+            self.builder.button(text=text, custom_emodzi_id=custom_emodzi_id, callback_data=NewCharSkillCall(skill_tag=skill.sketch.tag, is_base=skill.sketch.is_base, level=skill.level, tg_id=self.tg_id))
+        self.builder.button(text='➕ Добавить', callback_data=NewCharActionCall(to_add_skills=True, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=NewCharBackCall(where=where, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()        
+
+    def skills(self, skills: list[SkillSketchDB], page: int, max_page: int, where: str):
+        for skill in skills:
+            if skill.custom_emodzi_id:
+                button_text = {'text':  f' {skill.name} - {skill.price} 💮', 'icon_custom_emoji_id': skill.custom_emodzi_id}
+            else:
+                button_text = {'text': f'{skill.emodzi} {skill.name} - {skill.price} 💮'}
+            self.builder.button(**button_text, callback_data=NewCharSkillCall(skill_tag=skill.tag, is_base=skill.is_base, level=1, tg_id=self.tg_id))
+        self.builder.adjust(1)
+        pages = []
+        if page > 0:
+            pages.append(InlineKeyboardButton(text='⬅️', callback_data=NewCharPageSkillCall(page=page-1, tg_id=self.tg_id).pack()))
+        if page != max_page - 1:
+            pages.append(InlineKeyboardButton(text='➡️', callback_data=NewCharPageSkillCall(page=page+1, tg_id=self.tg_id).pack()))
+        if len(pages) > 0: 
+            self.builder.row(*pages)
+        if where:
+            self.builder.row(InlineKeyboardButton(text='↩️', callback_data=NewCharBackCall(where=where, tg_id=self.tg_id).pack()))
+        return self.builder.as_markup()        
+
+    def redact_skill_level(self, skill_tag: str, level: int, is_base: bool, where: str):
+        self.builder.button(text='➕', callback_data=NewCharSkillCall(skill_tag=skill_tag, level=level+1, is_base=is_base, tg_id=self.tg_id))
+        if level > 0:
+            self.builder.button(text='➖', callback_data=NewCharSkillCall(skill_tag=skill_tag, level=level-1, is_base=is_base, tg_id=self.tg_id))  
+            adjust = [2, 1]
+        else:
+            adjust = [1]
+        self.builder.button(text='✅ Применить', callback_data=NewCharBackCall(where=where, tg_id=self.tg_id))      
+        self.builder.button(text='↩️ Назад', callback_data=NewCharBackCall(where=where, tg_id=self.tg_id))
+        return self.builder.adjust(*adjust).as_markup()        
+
+    def redact_name(self, name_type: str, where: str):
+        self.builder.button(text='🔎 Поиск', callback_data=NewCharNameActionCall(to_query=True, name_type=name_type, tg_id=self.tg_id))
+        self.builder.button(text='🎲 Рандом', callback_data=NewCharNameActionCall(to_random=True, name_type=name_type, tg_id=self.tg_id))   
+        if name_type == 'last':
+            self.builder.button(text='❌ Убрать', callback_data=NewCharNameActionCall(to_delete=True, name_type='last', tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=NewCharBackCall(where=where, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()      
+    
+    def random_name(self, name: str, name_type: str, where: str):
+        self.builder.button(text='🔁 Другое', callback_data=NewCharNameActionCall(to_random=True, name_type=name_type, tg_id=self.tg_id))
+        self.builder.button(text='✅ Применить', callback_data=NewCharNameCall(name=name, name_type=name_type, tg_id=self.tg_id))     
+        self.builder.button(text='↩️ Назад', callback_data=NewCharBackCall(where=where, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()  
+
+    def names(self, names: list[str], name_type: str, page: int, max_page: int, where: str):
+        for name in names:
+            self.builder.button(text=name.title(), callback_data=NewCharNameCall(name=name.title(), name_type=name_type, tg_id=self.tg_id))
+        self.builder.adjust(2)
+        pages = []
+        if page > 0:
+            pages.append(InlineKeyboardButton(text='⬅️', callback_data=NewCharPageNameCall(page=page-1, tg_id=self.tg_id).pack()))
+        if page != max_page - 1:
+            pages.append(InlineKeyboardButton(text='➡️', callback_data=NewCharPageNameCall(page=page+1, tg_id=self.tg_id).pack()))
+        if len(pages) > 0: 
+            self.builder.row(*pages)
+        if where:
+            self.builder.row(InlineKeyboardButton(text='↩️', callback_data=NewCharBackCall(where=where, tg_id=self.tg_id).pack()))
+        return self.builder.as_markup()        
+
+    def finish(self, where: str):
+        self.builder.button(text='✅ Согласиться', callback_data=NewCharActionCall(to_create=True, is_finished=True, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=NewCharBackCall(where=where, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()
+
 
 class AddCharIKB(BotIKB):
     def query_back(self, first_name: bool = True):

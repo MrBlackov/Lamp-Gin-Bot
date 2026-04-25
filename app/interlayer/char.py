@@ -4,10 +4,10 @@ from app.validate.service.info import UserChars
 from app.enum_type.char import Gender
 from app.validate.api.characters import GetSketchsInfo
 from app.validate.api.query import CreateCharSkecth
-from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, get_char_for_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory, get_item_sketchs
+from app.db.metods.gets import get_user_for_tg_id, get_all_skills, get_user_for_id, get_char_for_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory, get_item_sketchs
 from app.db.metods.updates import update_main_char, update_char, update_donate_delete_char_quan, update_char_location_default
 from app.db.metods.adds import add_char, add_db_obj
-from app.logic.char import CharLogic
+from app.logic.char import CharLogic, NewCharLogic
 from app.validate.add.characters import Character_add
 from app.db.models.char import CharacterDB, ExistenceDB, InventoryDB, AttributePointDB
 from app.logic.item import ItemSketchsLogic, ItemsLogic, ItemDB
@@ -16,8 +16,24 @@ from app.aio.config import admins, bot, newspaper_id
 from aiogram.types.chat_member_banned import ChatMemberStatus
 from app.exeption.char import NoHaveMainChar, NoDeleteCharError
 from app.exeption.item import PickUpQuantityMoreItemQuantity
+from app.interlayer.base import BaseLayer
 
-class CreateCharacterLayer:
+class NewCharLayer(BaseLayer):
+    def __init__(self, tg_id):
+        super().__init__(tg_id)
+        self.logic = NewCharLogic()
+
+    async def generate_char(self, gender: str):
+        skills = await get_all_skills()
+        return await self.logic.generate_char(gender, skills)
+
+    async def add_character(self, sketch):
+        await self.get_char_info()
+        sketch.user_id = self.user.id
+        return await self.logic.add_char(sketch)
+
+
+class CreateCharacterLayer(BaseLayer):
     async def get_sketchs(gender: Gender = 'M', quantity: int = 5):
         prs = person(gender)
         items = await get_item_sketchs()
@@ -63,7 +79,7 @@ class CreateCharacterLayer:
         await update_char(filters={'id':char_db.id}, new_data={'exist':new_exist_db})
         return True
 
-class InfoCharacterLayer:
+class InfoCharacterLayer(BaseLayer):
     def __init__(self, tg_id: int):
         self.logic = CharLogic(tg_id)
         self.tg_id = tg_id
@@ -122,7 +138,7 @@ class InfoCharacterLayer:
                 return die
         raise NoDeleteCharError(f'This user(id={self.user.id}) dont have delete_char_quantiry')
 
-class InventoryCharacterLayer:
+class InventoryCharacterLayer(BaseLayer):
     def __init__(self, tg_id: int):
         self.tg_id = tg_id
         self.item_logic = ItemsLogic()

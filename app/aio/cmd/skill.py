@@ -30,5 +30,5 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Skill
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: SkillCall, state: FSMContext, **kwargs):
-    msg = await SkillService(callback.from_user.id, state).skill(callback_data.skill_id)
-    await callback.answer(msg, show_alert=True)
+    msg, markup = await SkillService(callback.from_user.id, state).skill(callback_data.skill_id)
+    await callback.message.edit_text(msg, reply_markup=markup)

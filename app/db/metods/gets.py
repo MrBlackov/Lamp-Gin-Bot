@@ -104,6 +104,9 @@ async def get_items_for_ids(ids: list[int]) -> list[ItemDB] | None:
 async def get_item_sketchs(is_hide: bool = False) -> list[ItemSketchDB]:
     return await select_item_sketchs(filters={'is_hide':is_hide})
 
+async def get_item_sketch_for_tag(tag: str) -> ItemSketchDB:
+    return await select_item_sketch(filters={'tag':tag})
+
 select_transfer = select_obj_no_valide(TransferDAO)
 select_transfers = select_objs_no_valide(TransferDAO)
 

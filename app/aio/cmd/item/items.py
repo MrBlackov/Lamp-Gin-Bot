@@ -60,11 +60,12 @@ async def callback_handler(callback: CallbackQuery, callback_data: ListItemSketc
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg0 = await ItemFSM(state, 'list').get_value('msg')
+    fsm = ItemFSM(state, 'list')
+    msg0 = await fsm.get_value('msg')
     msg, markup = await ItemService(message.from_user.id, state).list.search(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
-    await state.set_state()
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
     await msg0.delete()
 
 @item_router.callback_query(ListItemSketchItemCall.filter())     

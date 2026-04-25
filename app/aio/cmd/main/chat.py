@@ -61,8 +61,8 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
                           MainQuantityNoInt)
     msg, markup = await ChatService(message.from_user.id, state).new_msg_delete_time(quan)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
-    await state.set_state()
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
     await msg0.delete()
 
 @chat_router.callback_query(ChatSettingActionCall.filter(F.is_msg_delete == True))   

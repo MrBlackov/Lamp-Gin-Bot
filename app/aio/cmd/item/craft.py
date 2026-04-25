@@ -77,11 +77,12 @@ async def callback_handler(callback: CallbackQuery, callback_data: CraftItemIdCa
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg0 = await CraftFSM(state, 'add').get_value('msg')
+    fsm = CraftFSM(state, 'add')
+    msg0 = await fsm.get_value('msg')
     msg, markup = await CraftService(message.from_user.id, state).add.item_quantity(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
-    await state.set_state()
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
     await msg0.delete()
 
 @craft_router.callback_query(CraftActionCall.filter(F.to_time == True))     
@@ -102,11 +103,12 @@ async def callback_handler(callback: CallbackQuery, callback_data: CraftActionCa
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg0 = await CraftFSM(state, 'add').get_value('msg')
+    fsm = CraftFSM(state, 'add')
+    msg0 = await fsm.get_value('msg')
     msg, markup = await CraftService(message.from_user.id, state).add.add_time(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
-    await state.set_state()
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
     await msg0.delete()
 
 @craft_router.callback_query(CraftActionCall.filter(F.to_faq == True))     
@@ -190,11 +192,12 @@ async def callback_handler(callback: CallbackQuery, callback_data: CraftActionCa
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg0 = await CraftFSM(state).get_value('msg')
+    fsm = CraftFSM(state)
+    msg0 = await fsm.get_value('msg')
     msg, markup = await CraftService(message.from_user.id, state).info.craft_quantity(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
-    await state.update_data(msg=msg2)
-    await state.set_state()
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
     await msg0.delete()
 
 @craft_router.callback_query(CraftUseCall.filter())     

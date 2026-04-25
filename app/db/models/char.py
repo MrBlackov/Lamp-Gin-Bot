@@ -17,10 +17,10 @@ class InventoryDB(Base):
 class AttributePointDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))    
     exist: Mapped['ExistenceDB'] = relationship('ExistenceDB', uselist=False, lazy='select', cascade='all', back_populates='attibute_point')
-    strength: Mapped[int] # Сила
-    dexterity: Mapped[int] # Ловкость
-    intelligence: Mapped[int] # Интелект
-    health: Mapped[int] # Здоровье
+    strength: Mapped[int] = mapped_column(default=0) # Сила
+    dexterity: Mapped[int] = mapped_column(default=0) # Ловкость
+    intelligence: Mapped[int] = mapped_column(default=0) # Интелект
+    health: Mapped[int] = mapped_column(default=0) # Здоровье
     spirituality: Mapped[int] = mapped_column(default=0)
     speed_value: Mapped[int] = mapped_column(default=0)
     skills: Mapped[list[SkillDB] | None] = relationship(SkillDB, uselist=True, lazy='select')
@@ -50,7 +50,7 @@ class ExistenceDB(Base):
     amount_life: Mapped[int]
     inventory: Mapped[InventoryDB] = relationship(InventoryDB, uselist=False, lazy='joined', cascade='all, delete-orphan', back_populates='exist')
     attibute_point: Mapped[AttributePointDB] = relationship(AttributePointDB, uselist=False, lazy='joined', cascade='all, delete-orphan', back_populates='exist')   
-    location_id: Mapped[int] = mapped_column(ForeignKey('locationdb.id'), nullable=True)
+    location_id: Mapped[int] = mapped_column(ForeignKey('locationdb.id'), default=1, nullable=True)
     die: Mapped[bool] = mapped_column(default=False)
     @property
     def full_name(self):
