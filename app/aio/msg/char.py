@@ -1,8 +1,29 @@
 from app.validate.add.characters import CharSketch
 from app.validate.info.characters import CharacterInfo
+from app.validate.newchar import CharSketch as NewCharSketch
 from app.aio.msg.utils import TextHTML
-from app.db.models.item import ItemDB
+from app.db.models.item import ItemDB, SkillDB
 from app.aio.msg.item import ItemText
+from app.aio.cls.tips.char import new_char_tips
+import random
+
+class NewCharText:
+    def __init__(self, sketch: NewCharSketch):
+        self.sketch = sketch
+    
+    tips = new_char_tips
+
+    def action_menu(self):
+        return f'👤 {self.sketch.first_name} {self.sketch.last_name if self.sketch.last_name else ''}\n\n💮 Очков навыка: {self.sketch.coins}\n\n💡 Навыки:' + TextHTML('\n'.join([
+            self.skill(s) for s in self.sketch.skills.values()
+        ])).blockquote() + '\n\n📝 Описание:' + TextHTML(self.sketch.description if self.sketch.description else '❌ Описание отсутствует').blockquote(True) + f'\n\n{random.choice(self.tips)}'
+    
+    def skill(self, skill: SkillDB):
+        return f'{skill.sketch.emodzi} {skill.sketch.name} - {skill.level} ур.' 
+
+    def redact_skill_level(self, skill: SkillDB):
+        return f'🔧 Редактировать навык \n' + TextHTML(f'{skill.sketch.emodzi} {skill.sketch.name} - {skill.level} ур.\n🏷️ Стоимость: {skill.sketch.price} 💮 \n💰 Очков навыка: {self.sketch.coins} 💮').blockquote()
+
 
 class SketchInfoText:
 

@@ -6,6 +6,7 @@ from datetime import datetime
 
 class ItemSketchDB(Base):
     name: Mapped[str] = mapped_column(String(30))
+    tag: Mapped[str] = mapped_column(nullable=True)
     _emodzi: Mapped[str] = mapped_column(default='')
     custom_emodzi_id: Mapped[str | None] = mapped_column(default=None)
     description: Mapped[str | None] = mapped_column(default=None)
@@ -146,15 +147,10 @@ class SkillSketchDB(Base):
 
     default_level: Mapped[int] = mapped_column(default=1)
     xmod: Mapped[int] = mapped_column(default=1)
-    is_attribute: Mapped[bool] = mapped_column(default=False)
-    is_base: Mapped[bool] = mapped_column(default=False)
-    is_random: Mapped[bool] = mapped_column(default=False)
-    rarity: Mapped[float] = mapped_column(default=0)
-    is_random_level: Mapped[bool] = mapped_column(default=False)
-    random_max_level: Mapped[int | None] = mapped_column(default=None)
-    random_min_level: Mapped[int | None] = mapped_column(default=None)
-    random_throw_number: Mapped[int | None] = mapped_column(default=None)
+    price: Mapped[int | None] = mapped_column(default=None)
     is_avtivate: Mapped[bool] = mapped_column(default=False)
+    is_product: Mapped[bool] = mapped_column(default=False)
+    is_base: Mapped[bool] = mapped_column(default=False)
     explore_iq: Mapped[int | None] = mapped_column(default=None)
     up_level_formula: Mapped[dict[str, float] | None] = mapped_column(JSON, default=None)
     
@@ -167,5 +163,5 @@ class SkillDB(Base):
     coins: Mapped[int] = mapped_column(default=0)
     sketch_id: Mapped[int] = mapped_column(ForeignKey('skillsketchdb.id'))
     sketch: Mapped[SkillSketchDB] = relationship(SkillSketchDB, uselist=False, lazy='joined')
-    attribute_point_id: Mapped[int] = mapped_column(ForeignKey('attributepointdb.id'))
+    attribute_point_id: Mapped[int] = mapped_column(ForeignKey('attributepointdb.id'), default=0)
 

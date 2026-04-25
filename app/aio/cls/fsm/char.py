@@ -1,7 +1,20 @@
 from aiogram.filters.state import State, StatesGroup
 from typing import Literal
 from app.validate.api.characters import CharSketchInfo
-from app.db.models.item import ItemDB
+from app.validate.newchar import CharSketch
+from app.db.models.item import ItemDB, SkillSketchDB
+
+class NewCharState(StatesGroup):
+    sketch: CharSketch
+    skills_pages: list[tuple[SkillSketchDB]]
+    names_pages: list[tuple[SkillSketchDB]]
+    coins: int
+    name_type: str
+    names: list[str]
+    msg = None
+    part_name: str = State()
+    description: str = State()
+
 
 class CreateCharState(StatesGroup):
     gender: Literal['M', 'W'] = State()

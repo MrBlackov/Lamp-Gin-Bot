@@ -5,6 +5,19 @@ class FaqText:
     def __init__(self, error: BotError):
         self.error = error
 
+    def to_faq(faq_code: str):
+        match faq_code:
+            case 'new_char':
+                return (
+                    '[♠️ Имя] - Поменять имя\n'
+                    '[♣️ Фаимилия] - Поменять фамилию\n'
+                    '[💡 Навыки] - Поменять навыки или повысить их уровень\n'
+                    #'[🎲 Перегенерировать] - Создать случайного персонажа'
+                    '[📝 Описание] - Добавить описание персонажа\n'
+                )
+            case _:
+                return '❌ Справка по этому разделу пока не готова'
+
     def help_error_faq(self):
         error_faq_dict = {
             f'🆔 Код ошибки: ': self.error.code,

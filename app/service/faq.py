@@ -22,7 +22,10 @@ class FaqService(BaseService):
         if error == None:
             raise FaqErrorNoFindError(f'This user(tg_id:{self.tg_id}) enter code, but dont find error')        
         return text + TextHTML(error.faq).blockquote(), None
-    
+
+    def to_faq(self, faq: str):
+        return self.text.to_faq(faq)
+
     def help_error_faq(self, code: str):
         error = error_faq.get(code, None)
         if error == None:

@@ -66,7 +66,8 @@ async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferS
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg0 = await TransferFSM(state, 'info').get_value('msg')
+    state = TransferFSM(state, 'info')
+    msg0 = await state.get_value('msg')
     msg, markup = await TransferService(message.from_user.id, state).info.search(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
