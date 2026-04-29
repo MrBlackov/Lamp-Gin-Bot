@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.enum_type.char import Gender
 from app.db.models.item import ItemDB, KitDB, SkillDB
+from app.db.models.map import LocationDB
 
 class InventoryDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))
@@ -23,8 +24,38 @@ class AttributePointDB(Base):
     health: Mapped[int] = mapped_column(default=0) # Здоровье
     spirituality: Mapped[int] = mapped_column(default=0)
     speed_value: Mapped[int] = mapped_column(default=0)
-    skills: Mapped[list[SkillDB] | None] = relationship(SkillDB, uselist=True, lazy='select')
     
+    def add_skills(self, skills: list[SkillDB] | None):
+        if skills:
+            self.skill_tags = {skill.sketch_tag:skill for skill in skills} if skills else {}
+            self.skills = [self.add_level(skill) for skill in skills] if skills else []
+        return self
+
+    def add_level(self, skill: SkillDB):
+        formula = skill.sketch.level_formula
+        if formula:
+            if len(formula) > 0:
+                if skill.sketch.tag in formula:
+                    skill_level = [skill.level]
+                    formula.remove(skill.sketch.tag)
+                else:
+                    skill_level = []
+                for f in formula:
+                    if self.skill_tags.get(f):
+                        skill_level.append(self.add_level(self.skill_tags.get(f)).level)
+                skill.level = self.action_point(skill_level)
+        return skill    
+
+    def action_point(self, points: list[int | float | list]) -> float | int:
+        p = 0
+        for point in points:
+            if type(point) == int or type(point) == float:
+                p += point
+            elif type(point) == list:
+                p += self.action_point(point)
+        
+        return p/len(points)
+
     @property
     def speed(self):
         return (self.dexterity + self.health)/4 + self.speed_value
@@ -43,15 +74,17 @@ class AttributePointDB(Base):
 class ExistenceDB(Base): 
     people_id: Mapped[int | None] = mapped_column(ForeignKey('characterdb.id', ondelete='CASCADE'), default=None)
     char: Mapped['CharacterDB'] = relationship('CharacterDB', uselist=False, lazy='select', cascade='all', back_populates='exist')
+    
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50), default='')
     gender: Mapped[Gender] = mapped_column(default=Gender.M.value)
     age: Mapped[int]
     amount_life: Mapped[int]
+    die: Mapped[bool] = mapped_column(default=False)
+    
     inventory: Mapped[InventoryDB] = relationship(InventoryDB, uselist=False, lazy='joined', cascade='all, delete-orphan', back_populates='exist')
     attibute_point: Mapped[AttributePointDB] = relationship(AttributePointDB, uselist=False, lazy='joined', cascade='all, delete-orphan', back_populates='exist')   
     location_id: Mapped[int] = mapped_column(ForeignKey('locationdb.id'), default=1, nullable=True)
-    die: Mapped[bool] = mapped_column(default=False)
     @property
     def full_name(self):
         if self.first_name and self.last_name:

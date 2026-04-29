@@ -4,6 +4,18 @@ class CharError(BotError):
     msg = '⁉️ Неизвестная ошибка в системе Персонажей'
     code = '500.3'
 
+class SKillLessOneError(CharError):
+    msg = '❌ Этот навык нельзя убрать'    
+    code = '502.2'
+
+class SKillLessZeroError(CharError):
+    msg = '❌ Вы уже убрали навык'    
+    code = '502.3'
+
+class SKillCoinsLessZeroError(CharError):
+    msg = '❌ У вас недостаточно 💮 Очков навыка'
+    code = '502.4'
+
 class CharHastNameError(CharError):
     msg = '⁉️ Персонаж Безымянный, буквально...'    
     code = '500.7'

@@ -142,20 +142,14 @@ class InventoryCharacterLayer(BaseLayer):
     def __init__(self, tg_id: int):
         self.tg_id = tg_id
         self.item_logic = ItemsLogic()
-
-    async def get_char_info(self):
-        self.user_id = await get_user_for_tg_id(self.tg_id)
-        self.char_id = await get_main_char_for_user_id(self.user_id)
-        self.char = await get_char_for_id(self.char_id)
-        return self
     
     async def inventory(self):
-        self = await self.get_char_info()
+        await self.get_char_info()
         if self.char == None:
             raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         inventory = self.char.exist.inventory
         self.items = await get_items_for_inventory(inventory.id)
-        self.max_size = self.char.exist.attibute_point.strength
+        self.max_size = self.char.exist.attibute_point.skill_tags.get('inventory').level
         size = 0
         for item in self.items:
             size += item.sketch.size*item.quantity

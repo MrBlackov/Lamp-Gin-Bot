@@ -8,6 +8,7 @@ from app.db.models.item import CraftDB, ItemDB, ItemSketchDB
 from app.db.models.transfer import TransferDB
 from app.db.models.char import CharacterDB, ExistenceDB
 from app.db.models.main import MessageDB, TgChatDB, TgUserDB, UserDB, ChatDB
+from app.db.models.action import ActionStateDB
 from sqlalchemy import select, or_, and_
 from datetime import datetime
 
@@ -54,6 +55,42 @@ async def get_crafts_for_item_id(
             return record
         except SQLAlchemyError as e:
             log.error(e)
+            raise        
+
+@connection(commit=False)
+@log.decor()
+async def get_action_states_for_datetime(
+                             session: AsyncSession,    
+                             is_start: bool,     
+                             time: datetime = datetime.now(),
+                             operator: str = '<='     
+                            ):
+        try:
+            if is_start:
+                arg = ActionStateDB.start
+            else:
+                arg = ActionStateDB.end
+            
+            match operator:
+                case '<=':
+                    query = select(ActionStateDB).where(arg <= time)
+                case '>':
+                    query = select(ActionStateDB).where(arg > time)
+                case '>=':
+                    query = select(ActionStateDB).where(arg >= time)
+                case '<':
+                    query = select(ActionStateDB).where(arg < time)
+                case '==':
+                    query = select(ActionStateDB).where(arg == time)
+                case '!=':
+                    query = select(ActionStateDB).where(arg != time)
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.trace(f"Select data in {ActionStateDB.__tablename__} data:{[r.__dict__ for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.debug(e)
             raise        
 
 @connection(commit=False)

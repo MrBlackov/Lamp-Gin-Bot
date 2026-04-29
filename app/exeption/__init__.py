@@ -10,6 +10,7 @@ from .service import ValidStrToJSONError, ValidToIntError, ValidToTypeError, Val
 from .transfer import TransferError, TransferEnoughError, TransferNoFindError, TransferNoHaventItemError, TransferQuantityNoIntError, TransferSellerNoHaventItemError
 from .char import CharError, CharHastNameError, BonusCharSubError, NoHaveMainChar
 from .faq import FaqError, FaqErrorNoEnterError, FaqErrorNoFindError
+from .action import ActionError, SleepError
 
 error_faq: dict[str, BotError] = get_error_faq()
 #print('\n'.join([f'{code}: {error}' for code, error in error_faq.items()]))

@@ -15,7 +15,7 @@ class NewCharText:
 
     def action_menu(self):
         return f'👤 {self.sketch.first_name} {self.sketch.last_name if self.sketch.last_name else ''}\n\n💮 Очков навыка: {self.sketch.coins}\n\n💡 Навыки:' + TextHTML('\n'.join([
-            self.skill(s) for s in self.sketch.skills.values()
+            self.skill(s) for s in self.sketch.no_hide_skills
         ])).blockquote() + '\n\n📝 Описание:' + TextHTML(self.sketch.description if self.sketch.description else '❌ Описание отсутствует').blockquote(True) + f'\n\n{random.choice(self.tips)}'
     
     def skill(self, skill: SkillDB):
