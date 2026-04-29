@@ -13,7 +13,7 @@ import random
 from app.service.base import BaseService 
 from app.interlayer.char import CreateCharacterLayer, InfoCharacterLayer, InventoryCharacterLayer, NewCharLayer
 from app.aio.cls.fsm.char import InventoryState, NewCharState
-from app.exeption.char import BonusCharSubError, NoDeleteCharError
+from app.exeption.char import BonusCharSubError, NoDeleteCharError, SKillCoinsLessZeroError, SKillLessOneError, SKillLessZeroError
 from aiogram.types.chat_member_banned import ChatMemberStatus
 from app.exeption.item import ItemError
 from app.aio.cls.fsm.utils import CharFSM
@@ -55,14 +55,14 @@ class NewCharacterService(BaseService):
     
     async def to_skills(self):
         char_sketch: CharSketch = await self.state.get_value('sketch')
-        return f'💡 Навыки [{char_sketch.coins} 💮]', self.IKB.redact_skills(char_sketch.skills.values(), 'menu')
+        return f'💡 Навыки [{char_sketch.coins} 💮]', self.IKB.redact_skills(char_sketch.no_hide_skills, 'menu')
     
     async def skills(self, skill_tag: str, level: int, is_base: bool):
         char_sketch: CharSketch = await self.state.get_value('sketch')
         if is_base and level < 1:
-            raise
+            raise SKillLessOneError('You cant less one level of base skill')
         if level < 0:
-            raise
+            raise SKillLessZeroError('You cant less zero level of skill')
         sketch = char_sketch.all_skills.get(skill_tag)
         skill = char_sketch.skills.get(skill_tag)
         if skill:
@@ -72,7 +72,7 @@ class NewCharacterService(BaseService):
             r_level = 1
             char_sketch.coins -= level*sketch.price
         if char_sketch.coins < 0:
-            raise
+            raise SKillCoinsLessZeroError('You dont have enough skill coins')
         if level > 0:
             skill = SkillDB(level=level, sketch=sketch, sketch_id=sketch.id)
             char_sketch.skills[skill_tag] = skill

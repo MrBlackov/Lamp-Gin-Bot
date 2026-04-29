@@ -14,7 +14,11 @@ class CharSketch(BaseModel):
     all_first_names: list[str]
     all_last_names: list[str]
     description: str | None = None
-    
+
+    @property
+    def no_hide_skills(self):
+        return [skill for skill in self.skills.values() if not skill.sketch.is_hide]
+
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
 

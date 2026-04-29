@@ -3,10 +3,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.db.models.map import LocationDB  # noqa: F401
 from datetime import datetime
+from app.db.models.kit import KitDB, KitSketchDB
+from app.db.models.skill import SkillDB, SkillSketchDB
 
 class ItemSketchDB(Base):
     name: Mapped[str] = mapped_column(String(30))
     tag: Mapped[str] = mapped_column(nullable=True)
+    action: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=['throw'])
     _emodzi: Mapped[str] = mapped_column(default='')
     custom_emodzi_id: Mapped[str | None] = mapped_column(default=None)
     description: Mapped[str | None] = mapped_column(default=None)
@@ -49,21 +52,6 @@ class ItemDB(Base):
     @property
     def to_char_transfer(self):
         return False if self.from_char_transfers else True
-
-class KitSketchDB(Base):
-    name: Mapped[str | None] = mapped_column(default=None)
-    code: Mapped[str | None] = mapped_column(default=None)
-    all_item_skeths: Mapped[bool] = mapped_column(default=False)
-    hide: Mapped[bool] = mapped_column(default=True)    
-    item_skeths: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemsketchdb.id')), default=None)
-    kits: Mapped[list['KitDB']] = relationship('KitDB', uselist=True, lazy='select', cascade='all', back_populates='sketch')
-
-class KitDB(Base):
-    get: Mapped[bool] = mapped_column(default=False)    
-    sketch_id: Mapped[int] = mapped_column(ForeignKey('kitsketchdb.id'))
-    inventory_id: Mapped[int | None] = mapped_column(ForeignKey('inventorydb.id'), nullable=True)
-    sketch: Mapped[KitSketchDB] = relationship(KitSketchDB, uselist=False, lazy='joined', back_populates='kits')   
-    inventory: Mapped[Base] = relationship('InventoryDB', uselist=False, lazy='select', back_populates='kit') 
 
 class CraftDB(Base):
     ingredient_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
@@ -136,32 +124,4 @@ class CraftDB(Base):
     
     def ingredient_text(self, max_simvols: int = 7):
         return self.to_mini_text(self.ingredients[0].sketch.name, max_simvols)
-
-
-class SkillSketchDB(Base):
-    name: Mapped[str]
-    tag: Mapped[str]
-    _emodzi: Mapped[str] = mapped_column(default='💡')
-    custom_emodzi_id: Mapped[str | None] = mapped_column(default=None)
-    description: Mapped[str | None] = mapped_column(default=None)
-
-    default_level: Mapped[int] = mapped_column(default=1)
-    xmod: Mapped[int] = mapped_column(default=1)
-    price: Mapped[int | None] = mapped_column(default=None)
-    is_avtivate: Mapped[bool] = mapped_column(default=False)
-    is_product: Mapped[bool] = mapped_column(default=False)
-    is_base: Mapped[bool] = mapped_column(default=False)
-    explore_iq: Mapped[int | None] = mapped_column(default=None)
-    up_level_formula: Mapped[dict[str, float] | None] = mapped_column(JSON, default=None)
-    
-    @property
-    def emodzi(self):
-        return f'<tg-emoji emoji-id="{self.custom_emodzi_id}">{self._emodzi}</tg-emoji>' if self.custom_emodzi_id else self._emodzi
-
-class SkillDB(Base):
-    level: Mapped[float]
-    coins: Mapped[int] = mapped_column(default=0)
-    sketch_id: Mapped[int] = mapped_column(ForeignKey('skillsketchdb.id'))
-    sketch: Mapped[SkillSketchDB] = relationship(SkillSketchDB, uselist=False, lazy='joined')
-    attribute_point_id: Mapped[int] = mapped_column(ForeignKey('attributepointdb.id'), default=0)
 

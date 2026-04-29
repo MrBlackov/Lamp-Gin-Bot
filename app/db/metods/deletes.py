@@ -1,6 +1,7 @@
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB
 from app.db.dao.chars import CharacterDAO, CharacterDB
 from app.db.dao.transfer import TransferDAO
+from app.db.dao.action import ActionStateDAO, ActionStateDB
 from app.db.dao.main import MessageDAO
 from app.db.metods.base import delete_obj, delete_objs, delete_objs_for_ids
 
@@ -32,3 +33,11 @@ delete_craft = delete_obj(CraftDAO)
 
 async def delete_craft_for_id(craft_id: int):
     return await delete_craft(id=craft_id)
+
+delete_action_state = delete_obj(ActionStateDAO)
+delete_action_states = delete_objs_for_ids(ActionStateDAO)
+
+
+
+
+
