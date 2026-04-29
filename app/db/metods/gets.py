@@ -6,6 +6,7 @@ from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.db.dao.transfer import TransferDAO, TransferDB
+from app.db.dao.action import ActionStateDAO, ActionStateDB
 from app.logic.cls import MyTransfers, Craft
 from datetime import datetime
 
@@ -203,7 +204,28 @@ async def get_skill_sketch_for_id(sketch_id: int) -> SkillSketchDB:
 async def get_skill_sketch_for_tag(tag: str) -> SkillSketchDB:
     return await select_skill_sketch(filters={'tag':tag})
 
+select_action_state = select_obj_no_valide(ActionStateDAO)
+select_action_states = select_objs_no_valide(ActionStateDAO)
 
+async def get_action_state_for_id(id: int) -> ActionStateDB:
+    return await select_action_state(filters={'id':id})
 
+async def get_action_state_for_tag(tag: str, exist_id: int | None = None) -> ActionStateDB:
+    filters = {'tag':tag}
+    if exist_id != None:
+        filters['exist_id'] = exist_id
+    return await select_action_state(filters=filters)
 
+async def get_action_states_for_exist_id(exist_id: int) -> list[ActionStateDB]:
+    return await select_action_states(filters={'exist_id':exist_id})
 
+async def get_action_states() -> list[ActionStateDB]:
+    return await select_action_states()
+
+async def get_action_states_for_block_freedom(is_block_freedom: bool, exist_id: int | None = None) -> list[ActionStateDB]:
+    filters = {'is_block_freedom':is_block_freedom}
+    if exist_id != None:
+        filters['exist_id'] = exist_id
+    return await select_action_states(filters=filters)
+
+    

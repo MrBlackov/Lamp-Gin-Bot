@@ -40,15 +40,15 @@ def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity
         @wraps(func)
         async def wrapped(callback: CallbackQuery, callback_data: BaseCall, **kwargs): 
             try:
-                if tips and rarity_tips:
-                    if rarity_tips <= random.random():
-                        await callback.answer(random.choice(tips))
                 if check_is_user:
                     if callback.from_user.id != callback_data.tg_id:
                         raise ALienCallbackError(f'This user(tg_id={callback.from_user.id}) enter is alien callback keyboard')
                 answer_text = ''
                 show_alert=None
                 result = await func(callback, callback_data, **kwargs)
+                if tips and rarity_tips:
+                    if rarity_tips <= random.random():
+                        await callback.answer(random.choice(tips))
                 return result, callback
             except BotError as bote:
                 log.warning(f'AioPartPath: {bote}')
