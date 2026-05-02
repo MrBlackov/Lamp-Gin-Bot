@@ -6,8 +6,12 @@ from aiogram.types import Message, CallbackQuery
 from app.logged.botlog import log
 from app.aio.config import owner
 from app.exeption.decorator import exept, call_exept
-from app.service.action import ActionService, ActionFSM, all_action
-from app.aio.cls.callback.action import ActionBackCall, ActionCall, MenuCall
+from app.service.action import ActionService, ActionFSM, ActionSelf
+from app.aio.cls.callback.action import ActionBackCall, ActionCall, MenuCall, ActionRedactCall
+from app.aio.cls.fsm.action import ActionState
+from app.service.utils import is_natural_int
+from app.exeption.action import ActionError, ActionQuantityFloat, ActionQuantityLessOne, ActionQuantityNoInt, NotNewStatsError
+from aiogram.exceptions import TelegramBadRequest
 
 action_router = Router()
 
@@ -36,14 +40,45 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Actio
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionCall, state: FSMContext, **kwargs):
-    msg, markup = await ActionService(callback.from_user.id, state).to_action(callback_data.tag)
+    msg, markup = await ActionService(callback.from_user.id, state).to_action(callback_data.tag, callback_data.step, callback_data.minute)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-for action in all_action:
+@action_router.callback_query(ActionRedactCall.filter(F.to_time == True))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionRedactCall, state: FSMContext, **kwargs):
+    msg, markup = await ActionService(callback.from_user.id, state).to_time_redact(callback_data.tag, callback.message)
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@action_router.message(ActionState.minute, F.content_type == 'text')
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    fsm = ActionFSM(state)
+    msg0 = await fsm.get_value('msg')
+    quan = is_natural_int(message.text, message.from_user.id, ActionQuantityLessOne, ActionQuantityFloat, ActionQuantityNoInt, ActionError)
+    msg, markup = await ActionService(message.from_user.id, state).time_redact(quan)
+    msg2 = await message.answer(msg, reply_markup=markup)
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
+    await msg0.delete()
+
+@action_router.callback_query(ActionRedactCall.filter(F.to_stats == True))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionRedactCall, state: FSMContext, **kwargs):
+    try:
+        msg, markup = await ActionService(callback.from_user.id, state).to_stats(callback_data.tag)
+        await callback.message.edit_text(msg, reply_markup=markup)
+    except TelegramBadRequest:
+        raise NotNewStatsError('❌ Обновлений нету', level='debug')
+
+for action in ActionSelf.cmd_actions:
     for prefix, cmd in action.commands().items():
         @action_router.message(Command(*cmd, prefix=prefix))
         @log.decor(arg=True)
         @exept
-        async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-            msg, markup = await ActionService(message.from_user.id, state).cmd_action(message.text)
+        async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
+            print(command.command, command.args)
+            msg, markup = await ActionService(message.from_user.id, state).cmd_action(command.prefix + command.command, command.args)
             await message.answer(msg, reply_markup=markup)

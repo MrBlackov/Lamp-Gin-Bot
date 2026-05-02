@@ -1,13 +1,14 @@
 from app.aio.inline_buttons.action import ActionIKB
 from app.aio.msg.action import ActionText
 from app.service.base import BaseService 
-from app.interlayer.action import ActionLayer, actions, all_action
+from app.interlayer.action import ActionLayer, ActionSelf
 from app.exeption.action import SleepError, StopError
 from app.aio.cls.fsm.utils import ActionFSM
+from app.aio.cls.fsm.action import ActionState
+from app.exeption.action import ActionError
 
 class ActionService(BaseService):
-    actions = actions
-    all_actions = all_action
+    actions = ActionSelf
 
     def __init__(self, tg_id, state = None):
         super().__init__(tg_id, state)
@@ -19,42 +20,64 @@ class ActionService(BaseService):
     @property
     def cmds_and_tags(self):
         cmds = {}
-        for action in self.all_actions:
+        for action in self.actions.cmd_actions:
             for prefix, command_list in action.commands(True):
                 cmds[prefix+command_list] = action.tag
         return cmds
    
     async def get_actions(self, is_details: bool = True):
         try:
-            await self.layer.actions()
-            return '🎮 Что будем делать?', self.IKB.actions({a.tag:[a.emodzi, a.name] for a in self.actions}, is_details)
+            energy = await self.layer.actions()
+            return self.text.actions(energy.coins), self.IKB.actions({a.tag:[a.emodzi, a.name] for a in self.actions.IKB_actions}, is_details)
         except SleepError as e:
             return e.msg, self.IKB.wake_up()
         except StopError as e:
             return e.msg, self.IKB.stop()
     
-    async def to_action(self, tag: str):
+    async def to_action(self, tag: str, step: int = 1, minute: int | None = None):
         try:
-            action = await self.layer.action(tag)
-            char_name = action.char.exist.full_name
+            action = await self.layer.action(tag, step, minute)
             emodzi = action.emodzi
+            action_text = action.name
+            minute = action.minute
             msg_format = {
-                'char_name': char_name,
-                'emodzi': emodzi
+                'char_name': action.char.exist.full_name,
+                'emodzi': emodzi,
+                **action.msg_kwargs
             }
             msg = action.msg.format(**msg_format)
             match action.result:
                 case 'is_sleep' | 'to_sleep':
                     return msg, self.IKB.wake_up()
-                case 'wake_up' | 'no_sleep' | 'stop' | 'no_action':
+                case 'wake_up' | 'no_sleep' | 'stop' | 'no_action' | 'recovery':
                     return msg, self.IKB.back('actions')   
                 case 'is_action' | 'to_action':
-                    return msg, self.IKB.stop()
+                    return msg, self.IKB.stop()     
+                case 'stats':
+                    return msg, self.IKB.stats()   
+                case 'to_action_time':
+                    return msg, self.IKB.time_action(tag=tag, minute=minute, emodzi=emodzi, action_text=action_text, where='actions')
         except SleepError as e:
             return e.msg, self.IKB.wake_up()
         except StopError as e:
             return e.msg, self.IKB.stop()
 
-    async def cmd_action(self, cmd: str):
+    async def cmd_action(self, cmd: str, minute: str | None =  None):
         cmds = self.cmds_and_tags
-        return await self.to_action(cmds.get(cmd))
+        return await self.to_action(cmds.get(cmd), minute=int(minute) if minute else None)
+    
+    async def to_time_redact(self, tag: str, msg):
+        await self.state.update_data(tag=tag, msg=msg)
+        await self.state.set_state(ActionState.minute)
+        return '✒️ Введите время в минутах', self.IKB.back('action')
+
+    async def back_action(self, tag: str):
+        tag = await self.state.get_value('tag')
+        return await self.to_action(tag)
+    
+    async def time_redact(self, minute: str):
+        tag = await self.state.get_value('tag')
+        return await self.to_action(tag, minute=int(minute))
+        
+    async def to_stats(self, tag: str):
+        return await self.to_action(tag)

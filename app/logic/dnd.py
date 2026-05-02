@@ -253,7 +253,7 @@ class CharGenerator:
         return (self.faker.first_name_male(), self.faker.last_name_male()) if self.gender == 'M' else (self.faker.first_name_female(), self.faker.last_name_female())
 
     def skills(self, base_skills: list[SkillSketchDB]):
-        return {s.sketch.tag:s for s in [SkillDB(level=bs.default_level, sketch=bs, sketch_id=bs.id) for bs in base_skills]}
+        return {s.sketch.tag:s for s in [SkillDB(level=bs.default_level, coins=bs.default_coins, sketch=bs, sketch_tag=bs.tag, sketch_id=bs.id) for bs in base_skills]}
 
     def get_names_for_local(self, local:  str | None = None): 
         if local:

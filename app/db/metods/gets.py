@@ -1,6 +1,6 @@
 from app.db.metods.base import add_or_update_obj, select_objs_for_data, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide, get_for_ids
 from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB, ChatDAO, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB
-from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO
+from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO, ExistenceDB
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB, CraftDB, CraftDAO, SkillDAO, SkillDB, SkillSketchDAO, SkillSketchDB
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
@@ -69,6 +69,12 @@ async def get_chars_for_user_id(user_id: int, is_die: bool | None = False) -> li
 
 async def get_all_chars() -> list[CharacterDB]:
     return await select_chars()
+
+select_exist = select_obj_no_valide(ExistenceDAO)
+select_exists = select_objs_no_valide(ExistenceDAO)
+
+async def get_exist_for_id(id: int) -> ExistenceDB:
+    return await select_exist(filters={'id':id})
 
 select_item = select_obj(ItemValide, ItemDAO)
 select_items = select_objs(ItemValide, ItemDAO)

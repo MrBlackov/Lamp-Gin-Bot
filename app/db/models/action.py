@@ -10,6 +10,7 @@ class ActionStateDB(Base):
     is_block_freedom: Mapped[bool] = mapped_column(default=False)
     reset: Mapped[int | None] = mapped_column(default=None)
     start: Mapped[datetime | None] = mapped_column(default=None)
+    #check_datetime: Mapped[datetime | None] = mapped_column(default=None)
     end: Mapped[datetime | None] = mapped_column(default=None)
     nbt: Mapped[dict] = mapped_column(JSON, default={})
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id'))

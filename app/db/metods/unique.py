@@ -131,5 +131,17 @@ async def get_all_objs(
             log.debug(e)
             raise        
 
-
-
+@connection(commit=False)
+@log.decor()
+async def get_char_for_exist_id(
+                             session: AsyncSession,   
+                             exist_id: int,
+                             logging: bool = True
+                             ) -> CharacterDB:
+        try:
+            query = select(CharacterDB).join(ExistenceDB).where(ExistenceDB.id == exist_id)
+            result = await session.execute(query)
+            record = result.scalar_one_or_none()
+            return record
+        except SQLAlchemyError as e:
+            raise
