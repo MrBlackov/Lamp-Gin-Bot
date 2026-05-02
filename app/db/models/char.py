@@ -57,8 +57,8 @@ class AttributePointDB(Base):
         return p/len(points)
 
     @property
-    def speed(self):
-        return (self.dexterity + self.health)/4 + self.speed_value
+    def energy(self):
+        return self.skill_tags.get('energy')
     
     def tag(self, tag: str):
         if tag == 'st':

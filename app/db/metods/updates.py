@@ -102,10 +102,10 @@ async def update_skill_coins_for_id(id: int, new_coins: float) -> SkillDB:
 
 update_action_state = update_obj(ActionStateDAO)
 
-async def get_action_state_for_id(id: int, new_data: dict) -> ActionStateDB:
+async def update_action_state_for_id(id: int, new_data: dict) -> ActionStateDB:
     return await update_action_state(filters={'id':id}, new_data=new_data)
 
-async def get_action_state_for_tag(tag: str, new_data: dict) -> ActionStateDB:
+async def update_action_state_for_tag(tag: str, new_data: dict) -> ActionStateDB:
     return await update_action_state(filters={'tag':tag}, new_data=new_data)
 
 

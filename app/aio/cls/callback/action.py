@@ -7,5 +7,11 @@ class ActionBackCall(BaseCall, prefix='action_back'):
 
 class ActionCall(BaseCall, prefix='action'):
     tag: str
+    step: int = 1
+    minute: int | None = None
 
+class ActionRedactCall(BaseCall, prefix='action_redact'):
+    to_time: bool = False
+    tag: str
+    to_stats: bool = False
     

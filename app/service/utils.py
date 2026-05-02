@@ -31,7 +31,7 @@ def str_to_json(string: str):
 
     return json
 
-async def to_msg(chat_id: int, text: str):
+async def to_msg(chat_id: int, text: str, **kwargs):
     try:
         await bot.send_message(chat_id, text)
         return True, ''
