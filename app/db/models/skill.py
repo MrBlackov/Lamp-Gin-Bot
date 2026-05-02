@@ -11,6 +11,7 @@ class SkillSketchDB(Base):
     description: Mapped[str | None] = mapped_column(default=None)
 
     default_level: Mapped[int] = mapped_column(default=1)
+    default_coins: Mapped[int] = mapped_column(default=0)
     xmod: Mapped[float] = mapped_column(default=1.0)
     price: Mapped[int | None] = mapped_column(default=None)
     is_activate: Mapped[bool] = mapped_column(default=False)
@@ -28,9 +29,12 @@ class SkillSketchDB(Base):
 
 class SkillDB(Base):
     level: Mapped[float]
-    coins: Mapped[int] = mapped_column(default=0)
+    coins: Mapped[float] = mapped_column(default=0.0)
     sketch_id: Mapped[int] = mapped_column(ForeignKey('skillsketchdb.id'))
     sketch_tag: Mapped[str]
     sketch: Mapped[SkillSketchDB] = relationship(SkillSketchDB, uselist=False, lazy='joined')
     attribute_point_id: Mapped[int] = mapped_column(ForeignKey('attributepointdb.id'), default=0)
 
+    @property
+    def max_coins(self):
+        return self.sketch.default_coins*(self.level/10)

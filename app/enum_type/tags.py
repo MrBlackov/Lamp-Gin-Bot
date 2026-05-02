@@ -16,6 +16,7 @@ class SkillTags:
     inventory = 'inventory'
     sleep = 'sleep'
     vision = 'vision'
+    recovery = 'recovery'
 
 class ActionTags:
     sleep = 'sleep'
@@ -30,6 +31,8 @@ class ActionTags:
     play = 'play'
     stop = 'stop'
     lookaround = 'lookaround'
+    stats = 'stats'
+    recovery = 'recovery'
 
 
 
