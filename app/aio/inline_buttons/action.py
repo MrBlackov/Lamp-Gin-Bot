@@ -1,8 +1,10 @@
-from app.aio.cls.callback.action import ActionBackCall, MenuCall, ActionCall, ActionRedactCall
+from app.aio.cls.callback.action import ActionBackCall, MenuCall, ActionCall, ActionRedactCall, LookAroundCall
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from app.enum_type.tags import ActionTags
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from app.logic.actions import ActionBase
+from app.db.models.char import ExistenceDB
 
 class ActionIKB(BotIKB):
     def back(self, where: str):
@@ -35,4 +37,12 @@ class ActionIKB(BotIKB):
         self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where=where, is_details=True, tg_id=self.tg_id)).as_markup()
         self.builder.button(text=emodzi + ' ' + action_text, callback_data=ActionCall(tag=tag, step=2, minute=minute, tg_id=self.tg_id)).as_markup()
         return self.builder.adjust(1, 2).as_markup()
+
+    def lookaround(self, results: list[tuple[ExistenceDB | None, ActionBase | None]]):        
+        for exist, action in results:
+            self.builder.button(text=f'{action.emodzi} {exist.full_name} {action.action_text}', callback_data=LookAroundCall(tg_id=self.tg_id))
+        self.builder.button(text='👁️ Посмотреть ещё раз', callback_data=ActionCall(tag=ActionTags.lookaround, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where='actions', is_details=True, tg_id=self.tg_id)).as_markup()
+        return self.builder.adjust(1).as_markup()
+
 

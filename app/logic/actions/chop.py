@@ -1,5 +1,6 @@
 from app.logic.actions.base import (BlockFreedomAction, 
-                                    ActionTags, 
+                                    ActionTags,
+                                    SkillTags,
                                     add_db_obj,  
                                     ActionStateDB, 
                                     delete_action_state, 
@@ -11,6 +12,7 @@ class ChopAction(BlockFreedomAction):
     is_block_freedom: bool = True
     default_minute = 60
     spending_time = 1
+    is_have_items = True
 
     name = 'Рубить'
     emodzi = '🪓'
@@ -21,3 +23,8 @@ class ChopAction(BlockFreedomAction):
     to_cmd = True
     to_IKB = True
     commands_text = ['рубить', 'срубить', 'chop']
+
+    @property
+    def skills_levels_up(self):
+        return {SkillTags.woodcutter: 0.0005}
+

@@ -71,10 +71,14 @@ async def get_all_chars() -> list[CharacterDB]:
     return await select_chars()
 
 select_exist = select_obj_no_valide(ExistenceDAO)
-select_exists = select_objs_no_valide(ExistenceDAO)
+select_exists_for_ids = get_for_ids(ExistenceDAO)
+select_exists = select_objs_for_data(ExistenceDAO)
 
 async def get_exist_for_id(id: int) -> ExistenceDB:
     return await select_exist(filters={'id':id})
+
+async def get_exists_for_ids(ids: list[int]) -> list[ExistenceDB]:
+    return await select_exists_for_ids(ids=ids)
 
 select_item = select_obj(ItemValide, ItemDAO)
 select_items = select_objs(ItemValide, ItemDAO)

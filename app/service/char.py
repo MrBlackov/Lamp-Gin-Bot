@@ -74,12 +74,12 @@ class NewCharacterService(BaseService):
         if char_sketch.coins < 0:
             raise SKillCoinsLessZeroError('You dont have enough skill coins')
         if level > 0:
-            skill = SkillDB(level=level, sketch=sketch, sketch_id=sketch.id)
+            skill = SkillDB(level=level, coins=sketch.default_coins, sketch=sketch, sketch_tag=sketch.tag, sketch_id=sketch.id)
             char_sketch.skills[skill_tag] = skill
             if skill_tag in char_sketch.products:
                 char_sketch.products.pop(skill_tag)
         else:
-            skill = SkillDB(level=level, sketch=sketch, sketch_id=sketch.id)
+            skill = SkillDB(level=level, coins=sketch.default_coins, sketch=sketch, sketch_tag=sketch.tag, sketch_id=sketch.id)
             char_sketch.skills.pop(skill_tag)
             char_sketch.products[skill_tag] = sketch
         await self.state.update_data(sketch=char_sketch)

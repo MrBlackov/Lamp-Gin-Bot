@@ -5,6 +5,7 @@ from app.aio.config import admins, bot
 from app.exeption.action import SleepError, StopError
 from app.enum_type.tags import ActionTags, SkillTags
 from app.service.utils import to_msg
+from app.logic.actions import RecoveryAction, ActionSelf
 
 class BaseLayer:
     def __init__(self, tg_id: int):
@@ -21,6 +22,7 @@ class BaseLayer:
         self.char = await get_char_for_id(self.char_id)
         skills = await get_skills_for_attribute_point_id(self.char.exist.attibute_point.id)
         self.char.exist.attibute_point.add_skills(skills)
+        await RecoveryAction(self.char, action_tags=ActionSelf.action_tags).to_action()
         return self
     
     async def get_char_info_for_exist_id(self, exist_id: int):

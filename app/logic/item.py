@@ -56,21 +56,22 @@ class ItemSketchsLogic:
 
 
 class ItemsLogic:
-    async def give(self, sketch_id: int, inventory_id: int, char_id: int, quantity: int = 1, size_except: bool = True) -> ItemDB:
+    async def give(self, sketch_id: int, inventory_id: int, char: CharacterDB, quantity: int = 1, size_except: bool = True) -> ItemDB:
         try:
+            print(quantity)
             item = await get_item(sketch_id, inventory_id)
             sketch = item.sketch if item else await get_item_sketch(sketch_id)
-            char = await get_char_for_id(char_id)
             items = await get_items_for_inventory(inventory_id)
-            max_size = char.exist.attibute_point.strength*1000
+            max_size = char.exist.attibute_point.skill_tags.get('inventory').level*1000
             size = 0
             for i in items:
                 size += i.sketch.size*i.quantity
     
+            print(size+sketch.size*quantity, max_size)
             if size+sketch.size*quantity > max_size:
-                raise InventaryOverFlowing(f'This char({char_id}) inventary is full')
+                raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
     
-            log.info(f'Give item(sketch_id: {sketch_id}) for char(char_id: {char_id}), quantity: {quantity}')
+            log.info(f'Give item(sketch_id: {sketch_id}) for char(char_id: {char.id}), quantity: {quantity}')
             if item:
                 return await update_quantity_item(item.id, item.quantity + quantity)
             return await add_item(data=ItemValide(inventory_id=inventory_id, sketch_id=sketch_id, quantity=quantity))
