@@ -2,11 +2,11 @@ from app.logic.actions.base import (BlockFreedomAction,
                                     ActionTags, 
                                     StopAction, 
                                     add_db_obj, 
-                                    SleepCoinsError, 
                                     ActionStateDB, 
                                     delete_action_state, 
-                                    get_action_state_for_tag)
-
+                                    get_action_state_for_tag,
+                                    update_skill_for_id)
+from app.exeption.action import SleepCoinsError
 
 class SleepAction(BlockFreedomAction):
     tag = ActionTags.sleep
@@ -19,11 +19,15 @@ class SleepAction(BlockFreedomAction):
     action_text = 'спит'
     to_action_text = 'заснул'
     stop_text = 'Проснуться'
-    stats_info = [f'📈 Восстановление энергии: {-spending_time}']
 
     to_cmd = True
     to_IKB = True
     commands_text = ['поспать', 'спать', 'sleep']
+
+    @classmethod
+    def stats_info(self, char, **kwargs):
+        skill = char.exist.attibute_point.skill_tags.get(self.tag)
+        return [f'📈 Восстановление энергии: {-self.spending_time*skill.level}']
 
     async def to_action(self):
         if self.energy.coins >= self.energy.max_coins:
@@ -44,6 +48,12 @@ class SleepAction(BlockFreedomAction):
         self.msg = '{emodzi} {char_name} проснулся' if is_wake_up else '{emodzi} {char_name} спит'
         return self
     
+    async def state_action(self, action_state):
+        skill = self.char.exist.attibute_point.skill_tags.get(self.tag)
+        self.energy.coins -= self.spending_time*skill.level
+        await update_skill_for_id(self.energy.id, {'coins':self.energy.coins})
+        return self
+
 class WakeUpAction(StopAction):
     tag = ActionTags.wake_up
 

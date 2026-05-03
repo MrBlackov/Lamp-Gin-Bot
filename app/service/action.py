@@ -38,25 +38,26 @@ class ActionService(BaseService):
         try:
             action = await self.layer.action(tag, step, minute)
             emodzi = action.emodzi
-            action_text = action.name
-            minute = action.minute
+            result = action.result
             msg_format = {
                 'char_name': action.char.exist.full_name,
                 'emodzi': emodzi,
                 **action.msg_kwargs
             }
             msg = action.msg.format(**msg_format)
-            match action.result:
+            match result:
                 case 'is_sleep' | 'to_sleep':
                     return msg, self.IKB.wake_up()
-                case 'wake_up' | 'no_sleep' | 'stop' | 'no_action' | 'recovery':
+                case 'wake_up' | 'no_sleep' | 'stop' | 'no_action' | 'recovery' | 'no_lookaround':
                     return msg, self.IKB.back('actions')   
                 case 'is_action' | 'to_action':
                     return msg, self.IKB.stop()     
                 case 'stats':
-                    return msg, self.IKB.stats()   
+                    return msg, self.IKB.stats()    
+                case 'lookaround':
+                    return msg, self.IKB.lookaround(action.results)  
                 case 'to_action_time':
-                    return msg, self.IKB.time_action(tag=tag, minute=minute, emodzi=emodzi, action_text=action_text, where='actions')
+                    return msg, self.IKB.time_action(tag=tag, minute=action.minute, emodzi=emodzi, action_text=action.name, where='actions')
         except SleepError as e:
             return e.msg, self.IKB.wake_up()
         except StopError as e:

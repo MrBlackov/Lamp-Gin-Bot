@@ -1,5 +1,6 @@
 from app.logic.actions.base import (BlockFreedomAction, 
-                                    ActionTags, 
+                                    ActionTags,
+                                    SkillTags, 
                                     add_db_obj, 
                                     ActionStateDB, 
                                     delete_action_state, 
@@ -10,6 +11,7 @@ class FishingAction(BlockFreedomAction):
     tag = ActionTags.fishing
     is_block_freedom: bool = True
     spending_time = 0.2
+    is_have_items = True
 
     name = 'Рыбачить'
     emodzi = '🎣'

@@ -44,7 +44,6 @@ class BaseDAO(Generic[T]):
             result = await session.execute(query)
             log.trace(query)
             record = result.scalars().all()
-            log.debug(f"Select data in {cls.model.__tablename__}, ids: {ids}, data:{[r.__dict__ for r in record]}")
             return record
         except SQLAlchemyError as e:
             log.error(e)
@@ -60,7 +59,6 @@ class BaseDAO(Generic[T]):
             result = await session.execute(query)
             log.trace(query)
             record = result.scalars().all()
-            log.debug(f"Select data in {cls.model.__tablename__}, date: {date}, data:{[r.__dict__ for r in record]}")
             return record
         except SQLAlchemyError as e:
             log.error(e)

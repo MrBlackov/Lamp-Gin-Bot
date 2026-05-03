@@ -145,3 +145,34 @@ async def get_char_for_exist_id(
             return record
         except SQLAlchemyError as e:
             raise
+
+@connection(commit=False)
+@log.decor()
+async def get_item_for_tag(
+                             session: AsyncSession,   
+                             tag: str,
+                             inventory_id: int,
+                             logging: bool = True
+                             ) -> list[ItemDB]:
+        try:
+            query = select(ItemDB).where(ItemDB.inventory_id == inventory_id).join(ItemSketchDB).where(ItemSketchDB.tag == tag)
+            result = await session.execute(query)
+            record = result.scalars().all()
+            return record
+        except SQLAlchemyError as e:
+            raise
+
+@connection(commit=False)
+@log.decor()
+async def get_chars_for_exist_id(
+                             session: AsyncSession,   
+                             exist_ids: list[int],
+                             logging: bool = True
+                             ) -> list[CharacterDB]:
+        try:
+            query = select(CharacterDB).join(ExistenceDB).where(ExistenceDB.id.in_(exist_ids))
+            result = await session.execute(query)
+            record = result.scalars().all()
+            return record
+        except SQLAlchemyError as e:
+            raise

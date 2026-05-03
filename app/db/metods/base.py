@@ -12,7 +12,7 @@ def add_obj(clsDAO: BaseDAO):
     async def add_new_obj(
                           session: AsyncSession, *,
                           data: BaseModel,
-                          logger: bool = True
+                          logger: bool = False
                          ) -> Base:
         new_data = await clsDAO.add(session, data)
         if logger: log.info(f"New data in {new_data.__tablename__}, id: {new_data.id}, data:{data.model_dump()}")
@@ -26,7 +26,7 @@ def add_obj(clsDAO: BaseDAO):
 async def add_db_obj(
                       session: AsyncSession, *,
                       data: list[Base] | None,
-                      logger: bool = True
+                      logger: bool = False
                      ):
     if data == None or len(data) == 0:
         return None
@@ -48,7 +48,7 @@ def add_obj_dict(clsDAO: BaseDAO):
     async def add_new_obj(
                           session: AsyncSession, *,
                           data: dict,
-                          logger: bool = True
+                          logger: bool = False
                          ):
         new_data = await clsDAO.add_dict(session, data)
         if logger: log.info(f"New data in {new_data.__tablename__}, id: {new_data.id}, data:{data}")
@@ -63,7 +63,7 @@ def add_or_update_obj(clsDAO: BaseDAO):
     async def add_new_obj(
                           session: AsyncSession, *,
                           data: dict,
-                          logger: bool = True,
+                          logger: bool = False,
                           **filters
                          ):
         new_data = await clsDAO.add_or_update(session, data, **filters)
@@ -79,7 +79,7 @@ def select_obj(clsP: BaseModel, clsDAO: BaseDAO,):
     async def _select_obj(                      
                           session: AsyncSession, *,
                           filters: dict,
-                          logger: bool = True
+                          logger: bool = False
                         ):
         data = await clsDAO.find_one_or_none(session, filters)
         if logger and data: log.info(f"Select data in {data.__tablename__}, id: {data.id}, data:{clsP.model_validate(data).model_dump()}")
@@ -97,7 +97,7 @@ def select_obj_no_valide(clsDAO: BaseDAO,):
     async def _select_obj(                      
                           session: AsyncSession, *,
                           filters: dict,
-                          logger: bool = True
+                          logger: bool = False
                         ):
         data = await clsDAO.find_one_or_none(session, filters)
         if logger and data: log.info(f"Select data in {data.__tablename__}, id: {data.id}, data:{data.__dict__}")
@@ -115,7 +115,7 @@ def select_objs_for_data(clsDAO: BaseDAO,):
     async def _select_obj(                      
                           session: AsyncSession, *,
                           date: date,
-                          logger: bool = True
+                          logger: bool = False
                         ):
         data = await clsDAO.find_for_date(session, date)
         if logger and data: log.info(f"Select data in {data.__tablename__}, id: {data.id}, data:{data.__dict__}")
@@ -133,7 +133,7 @@ def select_objs(clsP: BaseModel, clsDAO: BaseDAO,):
     async def _select_objs(                      
                           session: AsyncSession, *,
                           filters: dict | None = None,
-                          logger: bool = True
+                          logger: bool = False
                         ):
         data = await clsDAO.find_all(session, filters)
         if logger and data: log.info(f"Select data in {data[0].__tablename__} datas:{[clsP.model_validate(d).model_dump() for d in data]}")
@@ -149,7 +149,7 @@ def select_objs_no_valide(clsDAO: BaseDAO):
     async def _select_objs(                      
                           session: AsyncSession, *,
                           filters: dict | None = None,
-                          logger: bool = True
+                          logger: bool = False
                         ):
         data = await clsDAO.find_all(session, filters)
         if logger and data: log.info(f"Select data in {data[0].__tablename__} datas:{[d.__dict__ for d in data]}")
@@ -196,7 +196,7 @@ def update_obj_for_ids(clsDAO: BaseDAO):
 def delete_obj(clsDAO: BaseDAO):
     @connection()
     @log.decor()
-    async def delete_obj_(session: AsyncSession, *, id: int | None = None, logger: bool = True, **kwargs):
+    async def delete_obj_(session: AsyncSession, *, id: int | None = None, logger: bool = False, **kwargs):
         try:
             if id:
                 data_id = id
@@ -223,7 +223,7 @@ def delete_obj(clsDAO: BaseDAO):
 def delete_objs(clsDAO: BaseDAO,):
     @connection()
     @log.decor()
-    async def delete_obj_s(session: AsyncSession, *, logger: bool = True, **kwargs):
+    async def delete_obj_s(session: AsyncSession, *, logger: bool = False, **kwargs):
         try:
             data_find = await clsDAO.find_all(session, filters=kwargs)
 
@@ -248,7 +248,7 @@ def delete_objs(clsDAO: BaseDAO,):
 def delete_objs_for_ids(clsDAO: BaseDAO,):
     @connection()
     @log.decor()
-    async def delete_obj_s(session: AsyncSession, *, ids: list[int], logger: bool = True):
+    async def delete_obj_s(session: AsyncSession, *, ids: list[int], logger: bool = False):
         try:
             return await clsDAO.delete_many_for_ids(session, ids=ids)
         except SQLAlchemyError as sqle:

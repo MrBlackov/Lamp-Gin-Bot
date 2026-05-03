@@ -6,23 +6,13 @@ from app.db.models.item import ItemDB
 from app.db.models.char import CharacterDB
 from app.exeption.item import SizeNotIntItemSketchError, RariryValideError, NameNoValideError, EmodziNoValideError, NoFindItemSketchForID, ItemNoHideCreatedError
 from app.exeption.char import NoHaveMainChar
+from app.interlayer.base import BaseLayer
 
-
-class ItemLayer:
+class ItemLayer(BaseLayer):
     def __init__(self, tg_id: int):
         self.tg_id = tg_id
         self.logic = ItemsLogic()
         self.sketch_logic = ItemSketchsLogic()
-
-    async def get_char_info(self, user_id: int | None = None):
-        if user_id:
-            self.user = await get_user_for_id(user_id)
-        else:
-            self.user = await get_user_for_tg_id(self.tg_id, True)
-        self.char_id = await get_main_char_for_user_id(self.user.id)
-        self.char = await get_char_for_id(self.char_id)
-        self.user_id = self.user.id
-        return self
 
     async def create(self, item: dict, user_id: int | None = None):
         self = await self.get_char_info(user_id)
@@ -44,9 +34,9 @@ class ItemLayer:
             raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         if sketch_id == None and name:
             item0 = await get_item_for_name(name)
-            item = await self.logic.give(item0.id, self.char.exist.inventory.id, self.char.id, quantity, size_except)
+            item = await self.logic.give(item0.id, self.char.exist.inventory.id, self.char, quantity, size_except)
         elif sketch_id: 
-            item = await self.logic.give(sketch_id, self.char.exist.inventory.id, self.char.id, quantity, size_except)
+            item = await self.logic.give(sketch_id, self.char.exist.inventory.id, self.char, quantity, size_except)
         else:
             raise ItemError('To give, but not enter sketcth_id or sketch_name')
         return item

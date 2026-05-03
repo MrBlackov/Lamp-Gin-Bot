@@ -7,7 +7,7 @@ from app.logged.botlog import log
 from app.aio.config import owner
 from app.exeption.decorator import exept, call_exept
 from app.service.action import ActionService, ActionFSM, ActionSelf
-from app.aio.cls.callback.action import ActionBackCall, ActionCall, MenuCall, ActionRedactCall
+from app.aio.cls.callback.action import ActionBackCall, ActionCall, MenuCall, ActionRedactCall, LookAroundCall
 from app.aio.cls.fsm.action import ActionState
 from app.service.utils import is_natural_int
 from app.exeption.action import ActionError, ActionQuantityFloat, ActionQuantityLessOne, ActionQuantityNoInt, NotNewStatsError
@@ -73,6 +73,13 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Actio
     except TelegramBadRequest:
         raise NotNewStatsError('❌ Обновлений нету', level='debug')
 
+@action_router.callback_query(LookAroundCall.filter())     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: LookAroundCall, state: FSMContext, **kwargs):
+    await callback.answer('❌ Ваших навыков недостаточно, чтобы увидеть все', show_alert=True)
+
+
 for action in ActionSelf.cmd_actions:
     for prefix, cmd in action.commands().items():
         @action_router.message(Command(*cmd, prefix=prefix))
@@ -82,3 +89,6 @@ for action in ActionSelf.cmd_actions:
             print(command.command, command.args)
             msg, markup = await ActionService(message.from_user.id, state).cmd_action(command.prefix + command.command, command.args)
             await message.answer(msg, reply_markup=markup)
+
+
+
