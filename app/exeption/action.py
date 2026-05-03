@@ -39,3 +39,19 @@ class NotNewStatsError(ActionError):
     msg = '❌ Обновлений нету'
     code = '510.9'
     faq = ''   
+    
+class HaveItemError(ActionError):
+    msg = '❌ У вас нету нужных предметов'
+    code = '510.10'
+    faq = ''  
+
+class HaveSkillError(ActionError):
+    msg = '❌ У вас нету нужных навыков'
+    code = '510.11'
+    faq = ''  
+
+class EnergyLessZeroError(ActionError):
+    msg = '❌ Ваш персонаж устал'
+    code = '510.11'
+    faq = 'Ваша энергия упала ниже 0, отдохните'    
+

@@ -97,6 +97,9 @@ async def update_skill_sketch_for_tag(tag: str, new_data: dict) -> SkillSketchDB
 async def update_skill_for_id(id: int, new_data: dict) -> SkillDB:
     return await update_skill(filters={'id':id}, new_data=new_data)
 
+async def update_skill_for_tag(tag: str, new_data: dict) -> SkillDB:
+    return await update_skill(filters={'tag':tag}, new_data=new_data)
+
 async def update_skill_coins_for_id(id: int, new_coins: float) -> SkillDB:
     return await update_skill_for_id(id=id, new_data={'coins':new_coins})
 

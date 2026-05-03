@@ -1,5 +1,6 @@
 from app.logic.actions.base import (BlockFreedomAction, 
-                                    ActionTags, 
+                                    ActionTags,
+                                    SkillTags, 
                                     StopAction, 
                                     add_db_obj, 
                                     ActionStateDB, 
@@ -23,3 +24,6 @@ class TrainAction(BlockFreedomAction):
     to_IKB = True
     commands_text = ['тренироваться', 'train']
 
+    @property
+    def skills_levels_up(self):
+        return {SkillTags.st: 0.0005}

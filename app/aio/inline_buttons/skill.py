@@ -3,6 +3,7 @@ from app.db.models.item import ItemDB, SkillDB
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from app.aio.msg.utils import TextHTML
 
 class SKillIKB(BotIKB):
     def back(self, where: str):
@@ -10,10 +11,12 @@ class SKillIKB(BotIKB):
 
     def skills(self, skills: list[SkillDB], page: int, max_page: int, where: str | None = None):
         for skill in skills:
+            if skill.sketch.is_hide:
+                continue
             if skill.sketch.custom_emodzi_id:
-                button_text = {'text':  f' {skill.sketch.name} - {str(skill.level)[:5]} ур.', 'icon_custom_emoji_id': skill.sketch.custom_emodzi_id}
+                button_text = {'text':  f' {skill.sketch.name} - {TextHTML.float_format(skill.level, 5)} ур.', 'icon_custom_emoji_id': skill.sketch.custom_emodzi_id}
             else:
-                button_text = {'text': f'{skill.sketch.emodzi} {skill.sketch.name} - {str(skill.level)[:5]} ур.'}
+                button_text = {'text': f'{skill.sketch.emodzi} {skill.sketch.name} - {TextHTML.float_format(skill.level, 5)} ур.'}
             self.builder.button(**button_text, callback_data=SkillCall(skill_id=skill.id, tg_id=self.tg_id))
         self.builder.adjust(1)
         pages = []

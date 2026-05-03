@@ -1,16 +1,15 @@
 from app.enum_type.tags import ActionTags, SkillTags
 from datetime import datetime, timedelta
-from app.db.metods.gets import ActionStateDB, CharacterDB, get_action_state_for_tag, get_action_states_for_block_freedom, get_skill_sketch_for_tag, get_action_state_for_id, get_action_states_for_exist_id
+from app.db.metods.gets import ActionStateDB, CharacterDB, get_exists_for_ids, get_action_state_for_tag, get_action_states_for_block_freedom, get_action_state_for_id, get_action_states_for_exist_id, SkillDB
 from app.db.metods.updates import update_skill_for_id, update_action_state_for_id, update_action_state_for_tag
 from app.db.metods.adds import add_db_obj
+from app.db.metods.unique import get_chars_for_exist_id, get_item_for_tag
 from app.db.metods.deletes import delete_action_state, delete_action_states
 from app.aio.msg.utils import TextHTML
-from app.exeption.action import SleepCoinsError
+from app.exeption.action import HaveSkillError, EnergyLessZeroError, HaveItemError
 
 class ActionBase:
     tag: str = None
-    have_start = True
-    have_end = False
     default_start = datetime.now
     default_end = None
     default_minute: int | None = None
@@ -18,6 +17,7 @@ class ActionBase:
     default_nbt: dict = {}
     default_level: int = 1
     is_block_freedom: bool = False
+    is_have_items: bool = False
     spending_time: int | float = 0
 
     name: str = None
@@ -28,11 +28,11 @@ class ActionBase:
     stop_text: str = 'Остановить'
     stop_emodzi: str = '❌'
     stop = stop_emodzi + ' ' + stop_text
-    stats_info = []
 
     msg: str = ''
     msg_kwargs: dict = {}
     result = None
+    results = None
     to_cmd = True
     to_IKB = True
     commands_text: list[str] = []
@@ -57,16 +57,44 @@ class ActionBase:
     def commands(self, to_list: bool = False):
         return [[p,c] for p in self.command_prefix for c in self.commands_text] if to_list else {p:self.commands_text for p in self.command_prefix}
 
+    @property
+    def skills_levels_up(self) -> dict[str, int | float] | None:
+        return {self.tag: 0.0005} if self.tag else None
+
+    @property
+    def have_skills(self):
+        return self.skills_levels_up.keys() if self.skills_levels_up else None
+
+    @property
+    def have_items(self):
+        return self.tag if self.is_have_items else None
+
+    def stats_info(self, **kwargs):
+        return []
+
     async def to_action(self):
         return self
     
+    async def to_skill_level_up(self, skill_levels_up: dict[str, int | float] | None):
+        if skill_levels_up:
+            for skill_tag, level_up in skill_levels_up.items():
+                skill = self.char.exist.attibute_point.skill_tags.get(skill_tag)
+                skill.level += level_up*skill.sketch.xmod
+                skill = await update_skill_for_id(skill.id, new_data={'level':skill.level})
+                if skill.sketch.up_level_formula:
+                    for tag, xmod in skill.sketch.up_level_formula.items():
+                        await update_skill_for_id(tag, new_data={'level':level_up*xmod})
+            return skill
+        
     async def to_state_action(self, action_state: ActionStateDB):
-        if self.spending_time != 0:
+        if self.energy.coins <= 0:
+                return await self.to_end(action_state)
+        if self.spending_time > 0:
             self.energy.coins -= self.spending_time
             await update_skill_for_id(self.energy.id, {'coins':self.energy.coins})
         now = datetime.now()
         if action_state.end:
-            if action_state.end <= now:
+            if action_state.end < now:
                 return await self.to_end(action_state)
         return await self.state_action(action_state)
 
@@ -86,18 +114,48 @@ class BlockFreedomAction(ActionBase):
     to_cmd = False
     to_IKB = False
 
+    @classmethod
+    def stats_info(self, char: CharacterDB, nbt: dict, **kwargs):
+        if nbt.get('start_levels'):
+            levels_info = []
+            for skill_tag, level in nbt['start_levels'].items():
+                skill = char.exist.attibute_point.skill_tags.get(skill_tag)
+                levels_info.append(f'{skill.sketch.emodzi} {skill.sketch.name}: +{TextHTML.float_format(skill.level-level, 5)} ур.')
+            return levels_info
+        return []
+
     async def to_action(self):
+        if self.energy.coins <= 0:
+            raise EnergyLessZeroError(f'This char(id={self.char.id}) havent energy for action')
+        if self.have_skills:
+            skill_levels = {}
+            for skill_tag in self.have_skills:
+                skill = self.char.exist.attibute_point.skill_tags.get(skill_tag)
+                if skill == None:
+                    raise HaveSkillError(f'This char(id={self.char.id}) havent skill for action')
+                skill_levels[skill_tag] = skill.level
+            nbt = {'start_levels':skill_levels}
+        else:
+            nbt = {}
+        if self.have_items:
+            items = await get_item_for_tag(tag=self.tag, inventory_id=self.char.exist.inventory.id)
+            if items == None or len(items) < 1:
+                raise HaveItemError(f'This char(id={self.char.id}) havent item for action')
         if self.step == 1:
             self.result = 'to_action_time'
-            self.msg = '{emodzi} {char_name} ' + f'[{str(self.energy.coins)[:7]} ⚡]' + TextHTML('\n'.join([
+            self.msg = '{emodzi} {char_name} ' + f'[{TextHTML.float_format(self.energy.coins, 7)} ⚡]' + TextHTML('\n'.join([
                 f'⏱️ Время до окончания: {self.minute} мин.' if self.minute else '⏱️ Время до окончания: Не ограничено',
-                f'⚡ Будет потрачено энергии: {str(int(self.spending_time*self.minute))[:7]}' if self.minute else f'⚡ Расход энергии: {self.spending_time if self.spending_time > 0 else '0'}'
+                f'⚡ Будет потрачено энергии: {TextHTML.float_format(self.spending_time*self.minute, 7)}' if self.minute else f'⚡ Расход энергии: {self.spending_time if self.spending_time > 0 else '0'}'
             ])).blockquote()
             return self
-        print(self.minute, self.start, self.end)
-        await add_db_obj(data=[ActionStateDB(tag=self.tag, level=self.default_level, is_block_freedom=self.is_block_freedom, reset=self.default_reset, start=self.start, end=self.end, nbt=self.default_nbt, exist_id=self.char.exist.id)])
+        await add_db_obj(data=[ActionStateDB(tag=self.tag, level=self.default_level, is_block_freedom=self.is_block_freedom, reset=self.default_reset, start=self.start, end=self.end, nbt=self.default_nbt | nbt, exist_id=self.char.exist.id)])
         self.result = 'to_action'
         self.msg = '{emodzi} {char_name} ' + self.to_action_text
+        return self
+
+    async def state_action(self, action_state: ActionStateDB):
+        self.msg = None
+        await self.to_skill_level_up(self.skills_levels_up)
         return self
 
 class StopAction(ActionBase):
@@ -136,10 +194,10 @@ class StatsAction(ActionBase):
             self.result = 'no_action'
             return self
         action = self.action_tags.get(state.tag)
-        self.msg = f'{action.emodzi} {self.char.exist.full_name} {action.action_text} '+ f'[{str(self.energy.coins)[:7]} ⚡]' + TextHTML('\n'.join([
+        self.msg = f'{action.emodzi} {self.char.exist.full_name} {action.action_text} '+ f'[{TextHTML.float_format(self.energy.coins, 7)} ⚡]' + TextHTML('\n'.join([
             f'⏱️ Время до окончания: {f'{(state.end - self.default_start()).seconds // 60} мин.' if state.end else "Не ограничено"}',
-            f'📉 Расход энергии: {action.spending_time if action.spending_time > 0 else "0"}'
-        ] + action.stats_info)).blockquote()
+            f'📉 Расход энергии: {action.spending_time if action.spending_time > 0 else "0"} ⚡'
+        ] + action.stats_info(self.char, state.nbt))).blockquote()
         self.result = 'stats'
         return self
 
@@ -170,9 +228,15 @@ class RecoveryAction(ActionBase):
     async def to_state_action(self, action_state):
         if self.energy.coins >= self.energy.max_coins:
             return await self.to_end(action_state)
-        return await super().to_state_action(action_state)
+        return await self.state_action(action_state)
 
     async def to_end(self, action_state):
+        return self
+    
+    async def state_action(self, action_state):
+        skill = self.char.exist.attibute_point.skill_tags.get(self.tag)
+        self.energy.coins -= self.spending_time*skill.level
+        await update_skill_for_id(self.energy.id, {'coins':self.energy.coins})
         return self
 
     

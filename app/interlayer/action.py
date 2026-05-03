@@ -24,7 +24,6 @@ class ActionLayer(BaseLayer):
     async def check_action(self, action_state: ActionStateDB):
         try:
             await self.get_char_info_for_exist_id(action_state.exist_id)
-            await ActionSelf.action_tags.get(ActionSelf.tags.recovery   )(self.char, action_tags=ActionSelf.tags).to_action()
             action = ActionSelf.action_tags.get(action_state.tag)
             result = await action(char=self.char, action_tags=ActionSelf.tags).to_state_action(action_state)
             if result.msg:
@@ -33,14 +32,14 @@ class ActionLayer(BaseLayer):
             else:
                 print(f'{result.emodzi} {self.char.exist.full_name} {result.action_text}')
         except Exception as e:
-            log.warning(f'CheckAction: {e}')
+            log.warning(f'CheckAction, char_id: {self.char.exist.id}, action_state_id: {action_state.id}, error: {e}')
             return True
 
     async def state_checker(self):
         while True:
             try:
                 action_states = await get_action_states_for_datetime(is_start=True, time=datetime.now())
-                results = await asyncio.gather(*[self.check_action(action_state) for action_state in action_states], return_exceptions=True)
+                results = await asyncio.gather(*[ActionLayer(0).check_action(action_state) for action_state in action_states], return_exceptions=True)
             except Exception as e:
                 print('ActionStatesRunner: ', e)
                 return True

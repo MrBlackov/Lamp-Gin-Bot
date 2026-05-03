@@ -58,6 +58,8 @@ class NewCharIKB(BotIKB):
 
     def redact_skills(self, skills: list[SkillDB], where: str):
         for skill in skills:
+            if skill.sketch.is_hide:
+                continue
             if skill.sketch.custom_emodzi_id:
                 text = f' {skill.sketch.name} - {skill.level} ур.'
                 custom_emodzi_id = skill.sketch.custom_emodzi_id
@@ -71,6 +73,8 @@ class NewCharIKB(BotIKB):
 
     def skills(self, skills: list[SkillSketchDB], page: int, max_page: int, where: str):
         for skill in skills:
+            if skill.is_hide:
+                continue
             if skill.custom_emodzi_id:
                 button_text = {'text':  f' {skill.name} - {skill.price} 💮', 'icon_custom_emoji_id': skill.custom_emodzi_id}
             else:

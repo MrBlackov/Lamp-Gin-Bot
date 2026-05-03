@@ -26,9 +26,8 @@ class AttributePointDB(Base):
     speed_value: Mapped[int] = mapped_column(default=0)
     
     def add_skills(self, skills: list[SkillDB] | None):
-        if skills:
-            self.skill_tags = {skill.sketch_tag:skill for skill in skills} if skills else {}
-            self.skills = [self.add_level(skill) for skill in skills] if skills else []
+        self.skill_tags = {skill.sketch_tag:skill for skill in skills} if skills else {}
+        self.skills = [self.add_level(skill) for skill in skills] if skills else []
         return self
 
     def add_level(self, skill: SkillDB):
@@ -70,7 +69,7 @@ class AttributePointDB(Base):
         elif tag == 'hp':
             return self.health
 
-    
+        
 class ExistenceDB(Base): 
     people_id: Mapped[int | None] = mapped_column(ForeignKey('characterdb.id', ondelete='CASCADE'), default=None)
     char: Mapped['CharacterDB'] = relationship('CharacterDB', uselist=False, lazy='select', cascade='all', back_populates='exist')
