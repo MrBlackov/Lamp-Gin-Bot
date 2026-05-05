@@ -92,6 +92,9 @@ async def get_item(sketch_id: int, inventory_id: int) -> ItemDB:
 async def get_item_sketch(sketch_id: int) -> ItemSketchDB:
     return await select_item_sketch(filters={'id':sketch_id})
 
+async def get_item_sketch_for_tag(tag: str) -> ItemSketchDB:
+    return await select_item_sketch(filters={'tag':tag})
+
 async def get_item_for_id(item_id: int) -> ItemDB:
     return await select_item(filters={'id':item_id})
 

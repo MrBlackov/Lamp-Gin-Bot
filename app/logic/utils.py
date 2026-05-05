@@ -46,3 +46,11 @@ def action_point(points: list[int | float | list]) -> float | int:
             p += action_point(point)
     
     return p/len(points)
+
+def set_to_list(kwargs: dict[str, int]):
+    results = []
+    [results.extend(k) for k in [[k for _ in range(v)] for k, v in kwargs.items()]]
+    return results
+
+def list_to_set(iterable: list):
+    return {v:iterable.count(v) for v in iterable}

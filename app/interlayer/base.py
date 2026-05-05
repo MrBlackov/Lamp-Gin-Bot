@@ -1,4 +1,4 @@
-from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
+from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, get_items_for_inventory, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
 from app.db.metods.unique import get_char_for_exist_id
 from app.logged.infolog import infolog
 from app.aio.config import admins, bot
@@ -22,6 +22,8 @@ class BaseLayer:
         self.char = await get_char_for_id(self.char_id)
         skills = await get_skills_for_attribute_point_id(self.char.exist.attibute_point.id)
         self.char.exist.attibute_point.add_skills(skills)
+        items = await get_items_for_inventory(self.char.exist.inventory.id)
+        self.char.exist.inventory.add_items(items)
         await RecoveryAction(self.char, action_tags=ActionSelf.action_tags).to_action()
         return self
     
@@ -31,6 +33,8 @@ class BaseLayer:
         self.user = await get_user_for_id(self.char.user_id)
         skills = await get_skills_for_attribute_point_id(self.char.exist.attibute_point.id)
         self.char.exist.attibute_point.add_skills(skills)
+        items = await get_items_for_inventory(self.char.exist.inventory.id)
+        self.char.exist.inventory.add_items(items)
         return self
     
     @property
