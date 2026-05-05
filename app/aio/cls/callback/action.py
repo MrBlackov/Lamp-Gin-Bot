@@ -14,6 +14,7 @@ class ActionRedactCall(BaseCall, prefix='action_redact'):
     to_time: bool = False
     tag: str
     to_stats: bool = False
+    to_del_timer: bool = False
 
 class LookAroundCall(BaseCall, prefix='look_around'):
     pass

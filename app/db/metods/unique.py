@@ -176,3 +176,40 @@ async def get_chars_for_exist_id(
             return record
         except SQLAlchemyError as e:
             raise
+
+@connection(commit=False)
+@log.decor()
+async def get_item_sketch_for_action_tag(
+                             session: AsyncSession,
+                             action_tag: str,                      
+                            ):
+        try:
+            query = select(ItemSketchDB).where(or_(ItemSketchDB.action.op('<@')([action_tag])))
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.trace(f"Select data in {TransferDB.__tablename__}, action_tag: {action_tag}, data:{[r.__dict__ for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise
+
+@connection(commit=False)
+@log.decor()
+async def get_item_for_action_tag(
+                             session: AsyncSession,
+                             action_tag: list[str],
+                             inventory_id: int                           
+                            ):
+        try:
+            query = select(ItemDB).filter_by(inventory_id=inventory_id).join(ItemSketchDB).where(ItemSketchDB.action.op('<@')([action_tag]))
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.debug(f"Select data in {ItemDB.__tablename__}, action_tag: {action_tag}, data:{[r.__dict__ for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise
+
+

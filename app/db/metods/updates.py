@@ -1,4 +1,4 @@
-from app.db.metods.base import update_obj, update_obj_for_ids, update_objs
+from app.db.metods.base import update_obj, update_obj_for_ids, update_objs, update_obj_db
 from app.db.dao.main import UserDAO, UserDB, ChatDAO, ChatDB, ChatSettingDAO, ChatSettingDB, MessageDAO, MessageDB, DonateDAO, DonateDB
 from app.db.dao.chars import ExistenceDB, CharacterDB, CharacterDAO, ExistenceDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB, SkillDAO, SkillDB, SkillSketchDAO, SkillSketchDB
@@ -89,6 +89,7 @@ async def update_craft_to_create(craft_id: int) -> CraftDB:
     return await update_craft(filters={'id':craft_id}, new_data={'is_create':True})
 
 update_skill = update_obj(SkillDAO)
+update_skill_db = update_obj_db(SkillDAO)
 update_skill_sketch = update_obj(SkillSketchDAO)
 
 async def update_skill_sketch_for_tag(tag: str, new_data: dict) -> SkillSketchDB:
@@ -97,8 +98,8 @@ async def update_skill_sketch_for_tag(tag: str, new_data: dict) -> SkillSketchDB
 async def update_skill_for_id(id: int, new_data: dict) -> SkillDB:
     return await update_skill(filters={'id':id}, new_data=new_data)
 
-async def update_skill_for_tag(tag: str, new_data: dict) -> SkillDB:
-    return await update_skill(filters={'tag':tag}, new_data=new_data)
+async def update_skill_for_tag(tag: str, attribute_point_id: int, new_data: dict) -> SkillDB:
+    return await update_skill(filters={'sketch_tag':tag, 'attribute_point_id':attribute_point_id}, new_data=new_data)
 
 async def update_skill_coins_for_id(id: int, new_coins: float) -> SkillDB:
     return await update_skill_for_id(id=id, new_data={'coins':new_coins})

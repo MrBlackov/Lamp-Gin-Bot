@@ -63,6 +63,16 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     await fsm.set_state()
     await msg0.delete()
 
+@action_router.callback_query(ActionRedactCall.filter(F.to_del_timer == True))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionRedactCall, state: FSMContext, **kwargs):
+    try:
+        msg, markup = await ActionService(callback.from_user.id, state).del_timer(callback_data.tag)
+        await callback.message.edit_text(msg, reply_markup=markup)
+    except TelegramBadRequest:
+        raise NotNewStatsError('❌ Обновлений нету', level='debug')
+    
 @action_router.callback_query(ActionRedactCall.filter(F.to_stats == True))     
 @log.decor(arg=True)
 @call_exept()

@@ -82,3 +82,8 @@ class ActionService(BaseService):
         
     async def to_stats(self, tag: str):
         return await self.to_action(tag)
+ 
+    async def del_timer(self, tag: str):
+        await self.state.update_data(tag=tag)
+        return await self.time_redact(-1)
+   
