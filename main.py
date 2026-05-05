@@ -29,8 +29,7 @@ async def main():
         await to_menu_cmds()
         await dp.start_polling(bot)
     except Exception as e:
-        asyncio.gather(loggers(), return_exceptions=True)
-        asyncio.gather(run_scheduler(), return_exceptions=True)
+        asyncio.gather(loggers(), run_scheduler(), run_state_checker(), return_exceptions=True)
         logs.critical(f"Polling failed: {e}") 
         return True
 

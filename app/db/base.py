@@ -21,3 +21,7 @@ class Base(AsyncAttrs, DeclarativeBase):
     @declared_attr.directive
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
+    
+    @property
+    def to_dict(self):
+        return {k:v for k, v in self.__dict__.items() if k != '_sa_instance_state'}

@@ -177,10 +177,19 @@ def update_obj(clsDAO: BaseDAO):
         return update
     return update_
 
+def update_obj_db(clsDAO: BaseDAO):
+    @connection()
+    @log.decor()
+    async def update_(session: AsyncSession, *, record: Base, new_data: dict):
+        update = await clsDAO.update_one(session, record=record, values=new_data)
+        return update
+    return update_
+
 def update_objs(clsDAO: BaseDAO):
     @connection()
     @log.decor()
     async def update_(session: AsyncSession, *, new_data: dict, filters: dict = {}):
+        
         update = await clsDAO.update_many(session, filters=filters, values=new_data)
         return update
     return update_

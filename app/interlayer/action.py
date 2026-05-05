@@ -2,6 +2,7 @@ from app.interlayer.base import BaseLayer
 from app.logic.action import ActionLogic, ActionSelf
 from app.db.metods.gets import get_action_states, ActionStateDB
 from app.db.metods.unique import get_action_states_for_datetime
+from app.db.metods.updates import update_action_state_for_id
 import asyncio
 from app.logged.botlog import log
 from datetime import datetime
@@ -21,16 +22,21 @@ class ActionLayer(BaseLayer):
         await self.checking_freedom(tag)
         return await self.logic.action(self.char, tag, step, minute)
 
+    @log.decor()
     async def check_action(self, action_state: ActionStateDB):
         try:
             await self.get_char_info_for_exist_id(action_state.exist_id)
             action = ActionSelf.action_tags.get(action_state.tag)
             result = await action(char=self.char, action_tags=ActionSelf.tags).to_state_action(action_state)
             if result.msg:
-                await self.bot.send_message(self.user.tg_id, result.msg.format(emodzi=result.emodzi, name=result.name, char_name=self.char.exist.full_name))
+                await self.bot.send_message(self.user.tg_id, result.msg.format(emodzi=result.emodzi, name=result.name.lower(), char_name=self.char.exist.full_name))
                 print(result.msg.format(emodzi=result.emodzi, char_name=self.char.exist.full_name))
             else:
                 print(f'{result.emodzi} {self.char.exist.full_name} {result.action_text}')
+            if result.new_action_state:
+                new_action_state = result.new_action_state.to_dict
+                new_action_state.pop('exist')
+                action_state = await update_action_state_for_id(result.new_action_state.id, new_action_state)
         except Exception as e:
             log.warning(f'CheckAction, char_id: {self.char.exist.id}, action_state_id: {action_state.id}, error: {e}')
             return True

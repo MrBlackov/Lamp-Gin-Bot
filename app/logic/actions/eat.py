@@ -4,7 +4,7 @@ from app.logic.actions.base import (ActionTags,
                                     delete_action_state, 
                                     get_action_state_for_tag,
                                     ActionBase,
-                                    get_item_for_tag)
+                                    get_item_for_action_tag)
 from app.exeption.action import HaveItemError
 
 class EatAction(ActionBase):
@@ -19,7 +19,7 @@ class EatAction(ActionBase):
     commands_text = ['сьесть', 'поесть', 'eat']
 
     async def to_action(self):
-        items = await get_item_for_tag(tag=self.tag, inventory_id=self.char.exist.inventory.id)
+        items = await get_item_for_action_tag(action_tag=self.tag, inventory_id=self.char.exist.inventory.id)
         if items == None or len(items) < 1:
             raise HaveItemError(f'This char(id={self.char.id}) havent item for action')
         return self
