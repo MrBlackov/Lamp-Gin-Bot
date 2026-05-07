@@ -29,7 +29,7 @@ class FishingAction(BlockFreedomAction):
     to_IKB = True
     commands_text = ['рыбачить', 'fishing', 'fish']
 
-    @property
+    @classmethod
     def have_items(self):
         return [self.tag, 'bait']
     

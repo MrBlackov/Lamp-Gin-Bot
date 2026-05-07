@@ -96,7 +96,13 @@ class ExistenceDB(Base):
             return self.first_name
         else:
             raise ValueError(f"This character({self.id}) hasn't first name")
-        
+
+    def add_action_state(self, action_states: list[Base]):
+        self.action_states = action_states
+        self.action_states_block_freedom = [action_state for action_state in action_states if action_state.is_block_freedom]
+        self.action_states_another = [action_state for action_state in action_states if action_state.is_block_freedom == False]
+        return self
+
 #class NpcDB(Base):
 #    exist: Mapped[ExistenceDB] = relationship(ExistenceDB, uselist=False, lazy='joined', primaryjoin="foreign(ExistenceDB.people_id) == NpcDB.id",)
 

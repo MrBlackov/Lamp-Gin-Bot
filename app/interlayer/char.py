@@ -88,15 +88,6 @@ class InfoCharacterLayer(BaseLayer):
         await self.get_char_info()
         return self.char
 
-    async def get_char_info(self, user_id: int | None = None):
-        if user_id:
-            self.user = await get_user_for_id(user_id)
-        else:
-            self.user = await get_user_for_tg_id(self.tg_id, True)
-        self.char_id = await get_main_char_for_user_id(self.user.id)
-        self.char = await get_char_for_id(self.char_id)
-        return self
-
     async def get_chat_member(self, tg_id: int | None = None):
         if tg_id:
             return await bot.get_chat_member(newspaper_id, tg_id)
@@ -117,7 +108,7 @@ class InfoCharacterLayer(BaseLayer):
         return UserChars(no_chars=True, max_chars=self.user.donates.char_quantity, use_bonus=use_bonus)
 
     async def get_char(self, char_id: int):
-        return await get_char_for_id(char_id)
+        return await self.get_char_full_info(char_id)
 
     async def char_to_main(self, char_id: int):
         user_id = await self.logic.user_id()

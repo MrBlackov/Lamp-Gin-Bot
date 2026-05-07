@@ -28,5 +28,5 @@ class SkillService(BaseService):
             skill = await self.layer.get_skill(skill_id)
         else:
             skill = skill_ids.get(skill_id)
-        return self.text.text_alert(skill), self.IKB.back(where='myskills')
+        return self.text.to_text(skill), self.IKB.skill(skill)
 
