@@ -6,7 +6,7 @@ from app.logged.infolog import infolog
 from app.validate.api.characters import CharSketchInfo
 from app.validate.newchar import CharSketch, SkillDB
 from app.validate.api.query import CreateCharSkecth
-from app.aio.msg.char import SketchInfoText, CharInfoText, InventoryItemsText, NewCharText
+from app.aio.msg.char import SketchInfoText, CharInfoText, InventoryItemsText, NewCharText, CharText
 from app.aio.msg.base import UserText
 from app.aio.msg.utils import TextHTML
 import random
@@ -289,7 +289,7 @@ class InfoCharacterService(BaseService):
 
     async def get_main_char(self):
         char = await self.layer.get_main_char()
-        return self.IKB.chouse_main_char(char.id, char.exist.id, True, char.exist.die), CharInfoText(char).text
+        return self.IKB.chouse_main_char(char.id, char.exist.id, True, char.exist.die), CharText(char).text
     
     async def get_chars(self):
         datas = await self.layer.get_chars(None)
@@ -305,20 +305,13 @@ class InfoCharacterService(BaseService):
         if data == None:
             new_data = await self.layer.get_chars(None)
             data = {char.id:char for char in new_data.chars}
-        char = data.get(char_id)
-        if char == None:
-            char = await self.layer.get_char(char_id)
-        return self.IKB.chouse_main_char(char_id, char.exist.id, (True if char_id == main_id else False), char.exist.die), CharInfoText(char).text
+        char = await self.layer.get_char(char_id)
+        return self.IKB.chouse_main_char(char_id, char.exist.id, (True if char_id == main_id else False), char.exist.die), CharText(char).text
     
     async def char_to_main(self, char_id: int):
         datas = await self.layer.char_to_main(char_id)
-        chars = {}
-        data = datas.chars
-        for d in data:
-            chars[d.id] = d
-        await self.state.update_data(chars=chars, main_id=datas.main_id)
-        chars = {char.id:char for char in data}
-        return self.IKB.get_list(datas.main_id, chars), '🪪 Ваши персонажи'
+        await self.state.update_data(main_id=datas.main_id)
+        return await self.get_char(char_id)
     
     async def to_delete_char(self, char_id: int, exist_id: int):
         return self.IKB.to_delete_char(char_id, exist_id), '🙁 Вы точно хотите прервать жизнь персонажа?'
@@ -349,7 +342,7 @@ class InventoryService(BaseService):
         items = await self.state.get_value('items')
         await self.state.update_data(item=item_id)
         if items:
-            return self.text.item(items[item_id]), self.IKB.throw('inventory')
+            return self.text.item(items[item_id]), self.IKB.action(items[item_id], 'inventory')
         
 
     async def to_throw(self, msg):

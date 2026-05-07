@@ -18,7 +18,7 @@ class ChopAction(BlockFreedomAction):
     result_item = 'wood'
     default_nbt = {'chop_woods':0, 'damage':0}
 
-    name = 'Рубить'
+    name = 'Рубить деревья'
     emodzi = '🪓'
     description = 'Рубить дерево.'
     action_text = 'рубит дерево'
@@ -28,11 +28,15 @@ class ChopAction(BlockFreedomAction):
     to_IKB = True
     commands_text = ['рубить', 'срубить', 'chop']
 
-    @property
-    def skills_levels_up(self):
-        return {SkillTags.woodcutter: 0.0005}
+    @classmethod
+    def skill_tag(self):
+        return SkillTags.woodcutter
 
     @property
+    def skills_levels_up(self):
+        return {self.skill_tag(): 0.0005}
+
+    @classmethod
     def have_items(self):
         return ['axe']
 

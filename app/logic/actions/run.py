@@ -26,4 +26,10 @@ class RunningAction(BlockFreedomAction):
 
     @property
     def skills_levels_up(self):
-        return {SkillTags.dx: 0.0005}
+        return {self.skill_tag(): 0.0005}
+    
+
+    @classmethod
+    def skill_tag(self):
+        return SkillTags.dx
+    

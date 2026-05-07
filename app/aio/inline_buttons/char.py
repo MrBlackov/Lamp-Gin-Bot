@@ -25,11 +25,13 @@ from app.aio.cls.callback.char import (
                                        NewCharSkillCall,
                                        )
 from app.aio.cls.callback.faq import FAQCall
+from app.aio.cls.callback.action import ActionCall
 from app.db.models.item import ItemDB, SkillDB, SkillSketchDB
 from app.db.models.char import CharacterDB
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from app.logic.actions import ActionSelf
 
 class NewCharIKB(BotIKB):
     def back(self, where: str):
@@ -253,7 +255,11 @@ class InventoryIKB(BotIKB):
         self.builder.button(text='🕵️ Осмотреться', callback_data=InventoryItemsActionCall(to_pick_up=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
     
-    def throw(self, where: str):
+    def action(self, item: ItemDB, where: str):
+        if item.sketch.action and len(item.sketch.action) > 0:
+            for item_action in item.sketch.action:
+                action = ActionSelf.item_action().get(item_action)
+                self.builder.button(text=action.text(), callback_data=ActionCall(tag=action.tag, tg_id=self.tg_id))
         self.builder.button(text='🚮 Выбросить', callback_data=InventoryItemsActionCall(to_throw=True, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()

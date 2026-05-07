@@ -5,7 +5,7 @@ class SkillText:
     def __init__(self, skills: list[SkillDB]):
         self.skills = skills
     
-    def text_alert(skill: SkillDB):
+    def to_text(skill: SkillDB):
         return f'{skill.sketch.emodzi} {skill.sketch.name}\n\n' + skill.sketch.description if skill.sketch.description else f'{skill.sketch.emodzi} {skill.sketch.name}\n\n'
     
     @property

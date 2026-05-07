@@ -11,7 +11,7 @@ from app.logic.item import ItemsLogic, InventaryOverFlowing
 from app.logic.utils import action_point, set_to_list, list_to_set
 
 class ActionBase:
-    tag: str = None
+    tag: str | None = None
     default_start = datetime.now
     default_end = None
     default_minute: int | None = None
@@ -59,20 +59,24 @@ class ActionBase:
         return f'{self.emodzi} {self.name}'
     
     @classmethod
+    def skill_tag(self):
+        return self.tag
+    
+    @classmethod
     def commands(self, to_list: bool = False):
         return [[p,c] for p in self.command_prefix for c in self.commands_text] if to_list else {p:self.commands_text for p in self.command_prefix}
 
     @property
     def skills_levels_up(self) -> dict[str, int | float] | None:
-        return {self.tag: 0.005} if self.tag else None
+        return {self.skill_tag(): 0.005} if self.skill_tag() else None
 
     @property
     def have_skills(self):
         return self.skills_levels_up.keys() if self.skills_levels_up else None
 
-    @property
+    @classmethod
     def have_items(self):
-        return [self.tag] if self.is_have_items else None
+        return [self.tag] if self.is_have_items else []
 
     def stats_info(self, **kwargs):
         return []
@@ -147,8 +151,8 @@ class BlockFreedomAction(ActionBase):
                     raise HaveSkillError(f'This char(id={self.char.id}) havent skill for action')
                 skill_levels[skill_tag] = skill.level
             self.default_nbt.update({'start_levels':skill_levels})
-        if self.have_items and have_items:
-            items = await get_item_for_action_tag(action_tag=self.have_items, inventory_id=self.char.exist.inventory.id)
+        if self.have_items() and have_items:
+            items = await get_item_for_action_tag(action_tag=self.have_items(), inventory_id=self.char.exist.inventory.id)
             if items == None or len(items) < 1:
                 raise HaveItemError(f'This char(id={self.char.id}) havent item for action')
         return True

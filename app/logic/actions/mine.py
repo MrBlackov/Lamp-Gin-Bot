@@ -14,6 +14,7 @@ import random
 
 class MineAction(BlockFreedomAction):
     tag = ActionTags.mine
+    skill_tag = SkillTags.miner
     is_block_freedom: bool = True
     default_minute = 60 
     spending_time = 1
@@ -21,7 +22,7 @@ class MineAction(BlockFreedomAction):
     result_item = 'mineral'
     default_nbt = {'xpos':0, 'damage':0}
 
-    name = 'Добывать'
+    name = 'Пойти в шахту'
     emodzi = '⛏️'
     description = 'Добывает камень и руду.'
     action_text = 'работает в шахте'
@@ -31,11 +32,15 @@ class MineAction(BlockFreedomAction):
     to_IKB = True
     commands_text = ['добывать', 'mine']
 
+    @classmethod
+    def skill_tag(self):
+        return SkillTags.miner
+
     @property
     def skills_levels_up(self):
-        return {SkillTags.miner: 0.0005}
+        return {self.skill_tag(): 0.0005}
     
-    @property
+    @classmethod
     def have_items(self):
         return ['pickaxe']
 

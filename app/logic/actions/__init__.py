@@ -34,8 +34,15 @@ class ActionSelf:
     tags = ActionTags
 
     action_tags = {a.tag:a for a in all_action}
+    skill_tags = {a.skill_tag():a for a in all_action if a.skill_tag()}
     cmd_actions = [a for a in all_action if a.to_cmd]
     IKB_actions = [a for a in all_action if a.to_IKB]
 
-
-
+    @classmethod
+    def item_action(cls) -> dict[str, type[ActionBase]]:
+        item_actions = {}
+        for a in cls.all_action:
+            if a.is_have_items:
+                for i in a.have_items():
+                    item_actions[i] = a
+        return item_actions

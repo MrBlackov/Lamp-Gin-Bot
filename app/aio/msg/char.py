@@ -3,6 +3,9 @@ from app.validate.info.characters import CharacterInfo
 from app.validate.newchar import CharSketch as NewCharSketch
 from app.aio.msg.utils import TextHTML
 from app.db.models.item import ItemDB, SkillDB
+from app.db.models.action import ActionStateDB
+from app.db.models.char import CharacterDB
+from app.logic.actions import ActionSelf
 from app.aio.msg.item import ItemText
 from app.aio.cls.tips.char import new_char_tips
 import random
@@ -182,9 +185,24 @@ class CharInfoText:
 
         return ''.join(texts)
     
+class CharText:
+    def __init__(self, char: CharacterDB):
+        self.char = char
+
+    def to_text(self):
+        action = self.char.exist.action_states_block_freedom[0] if len(self.char.exist.action_states_block_freedom) > 0 else None 
+        action = ActionSelf.action_tags.get(action.tag) if action else (ActionSelf.action_tags.get(self.char.exist.action_states_another[0].tag) if len(self.char.exist.action_states_another) > 0 else ActionSelf.action_tags.get('recovery'))
+        return f'👤 {self.char.exist.full_name} ({action.emodzi} {action.action_text})' + TextHTML('\n'.join(
+            [f'🪪 id: {self.char.id}'] + 
+            [f'{skill.sketch.emodzi} {skill.sketch.name} - {TextHTML.float_format(skill.level, 7)}' for skill in self.char.exist.attibute_point.skills if skill.sketch.is_hide == False])).blockquote() + "\n📜 Описание" + TextHTML(self.char.description if self.char.description else '❌ Описание отсутствует').blockquote(True)
+
+    @property
+    def text(self):
+        return self.to_text()
+
 class InventoryItemsText:
     def inventory(size: int, max_sixe: int):
-        return f'💼 Ваш инвентарь [{size}/{max_sixe}кг]'
+        return f'💼 Ваш инвентарь [{TextHTML.float_format(size, 4)}/{TextHTML.float_format(max_sixe, 4)}кг]'
     
     def no_items():
         return '🙁 Ваш инвентарь пустой'

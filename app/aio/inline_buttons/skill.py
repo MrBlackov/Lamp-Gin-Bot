@@ -1,9 +1,12 @@
 from app.aio.cls.callback.skill import SkillBackCall, SkillCall, SkillPageCall, MenuCall
+from app.aio.cls.callback.action import ActionCall
 from app.db.models.item import ItemDB, SkillDB
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from app.aio.msg.utils import TextHTML
+from app.logic.actions import ActionSelf
+from app.enum_type.tags import SkillTags
 
 class SKillIKB(BotIKB):
     def back(self, where: str):
@@ -27,10 +30,18 @@ class SKillIKB(BotIKB):
         if len(pages) > 0: 
             self.builder.row(*pages)
         if where:
-            self.builder.row(InlineKeyboardButton(text='↩️', callback_data=SkillBackCall(where=where, tg_id=self.tg_id).pack()))
+            self.builder.row(InlineKeyboardButton(text='↩️ Назад', callback_data=SkillBackCall(where=where, tg_id=self.tg_id).pack()))
         return self.builder.as_markup()     
 
-
+    def skill(self, skill: SkillDB, where: str = 'myskills'):
+        action = ActionSelf.item_action().get(skill.sketch.tag)
+        if action:
+            self.builder.button(text=action.text(), callback_data=ActionCall(tag=action.tag, tg_id=self.tg_id))
+        elif skill.sketch.tag == SkillTags.craft:
+            self.builder.button(text=f'{skill.sketch.emodzi} Скрафтить', callback_data=MenuCall(where='crafts', tg_id=self.tg_id))
+        self.builder.button(text=f'↩️ Назад', callback_data=SkillBackCall(where=where, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()
+        
 
 
 

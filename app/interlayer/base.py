@@ -1,5 +1,5 @@
-from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, get_items_for_inventory, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
-from app.db.metods.unique import get_char_for_exist_id
+from app.db.metods.gets import get_user_for_tg_id, get_action_states_for_exist_id, get_user_for_id, get_items_for_inventory, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
+from app.db.metods.unique import get_char_for_exist_id, ActionStateDB
 from app.logged.infolog import infolog
 from app.aio.config import admins, bot
 from app.exeption.action import SleepError, StopError
@@ -19,14 +19,20 @@ class BaseLayer:
         else:
             self.user = await get_user_for_tg_id(self.tg_id, True)
         self.char_id = await get_main_char_for_user_id(self.user.id)
-        self.char = await get_char_for_id(self.char_id)
-        skills = await get_skills_for_attribute_point_id(self.char.exist.attibute_point.id)
-        self.char.exist.attibute_point.add_skills(skills)
-        items = await get_items_for_inventory(self.char.exist.inventory.id)
-        self.char.exist.inventory.add_items(items)
-        await RecoveryAction(self.char, action_tags=ActionSelf.action_tags).to_action()
+        self.char = await self.get_char_full_info(self.char_id)
         return self
     
+    async def get_char_full_info(self, char_id: int):
+        char = await get_char_for_id(char_id)
+        skills = await get_skills_for_attribute_point_id(char.exist.attibute_point.id)
+        char.exist.attibute_point.add_skills(skills)
+        items = await get_items_for_inventory(char.exist.inventory.id)
+        char.exist.inventory.add_items(items)
+        action_states = await get_action_states_for_exist_id(char.exist.id)
+        char.exist.add_action_state(action_states)
+        await RecoveryAction(char, action_tags=ActionSelf.action_tags).to_action()
+        return char
+
     async def get_char_info_for_exist_id(self, exist_id: int):
         self.char = await get_char_for_exist_id(exist_id=exist_id)
         self.char_id = self.char.id
