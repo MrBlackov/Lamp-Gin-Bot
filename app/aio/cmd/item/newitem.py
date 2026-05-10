@@ -9,7 +9,8 @@ from app.exeption.decorator import exept, call_exept
 from app.aio.cls.fsm.item import NewItemState
 from app.aio.cls.callback.item import (NewItemACtionCall, 
                                        NewItemBackCall, 
-                                       NewItemAdminACtionCall)
+                                       NewItemAdminACtionCall,
+                                       NewItemSketchDeleteActionTagCall)
 from app.aio.cls.fsm.utils import ItemFSM
 
 new_item_router = Router()
@@ -56,6 +57,18 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     fsm = ItemFSM(state, 'new')
     msg0 = await fsm.get_value('msg')
+    msg, markup = await ItemService(message.from_user.id, state).add.to_tag(message.text, message)
+    msg2 = await message.answer(msg, reply_markup=markup)
+    await fsm.update_data(msg=msg2)
+    await msg0.delete()
+
+
+@new_item_router.message(NewItemState.to_tag)
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    fsm = ItemFSM(state, 'new')
+    msg0 = await fsm.get_value('msg')
     msg, markup = await ItemService(message.from_user.id, state).add.to_menu(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
@@ -66,6 +79,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemBackCall, state: FSMContext, **kwargs):
+    await ItemFSM(state, 'new').set_state()
     msg, markup = await ItemService(callback.from_user.id, state).add.menu()
     await callback.message.edit_text(msg, reply_markup=markup)
 
@@ -75,6 +89,13 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemBackCa
 async def callback_handler(callback: CallbackQuery, callback_data: NewItemBackCall, state: FSMContext, **kwargs):
     await ItemFSM(state, 'new').set_state()
     await callback.message.edit_text('🙁 Создание предмета отменено', reply_markup=None)
+
+@new_item_router.callback_query(NewItemACtionCall.filter(F.to_redact == True), NewItemACtionCall.filter(F.redact_key == 'emodzi'))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
+    msg, markup = await ItemService(callback.from_user.id, state).add.to_redact(callback_data.redact_key, callback.message)
+    await callback.message.edit_text(msg, reply_markup=markup)
 
 @new_item_router.callback_query(NewItemACtionCall.filter(F.to_redact == True))     
 @log.decor(arg=True)
@@ -89,12 +110,77 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     fsm = ItemFSM(state, 'new')
     msg0 = await fsm.get_value('msg')
-    msg, markup = await ItemService(message.from_user.id, state).add.redact(message.text)
+    msg, markup = await ItemService(message.from_user.id, state).add.redact(message)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
     await fsm.set_state()
     await msg0.delete()
     
+@new_item_router.callback_query(NewItemACtionCall.filter(F.to_delete_nbt == True))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
+    msg, markup = await ItemService(callback.from_user.id, state).add.to_delete_nbt()
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@new_item_router.callback_query(NewItemACtionCall.filter(F.delete_nbt == True))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
+    msg, markup = await ItemService(callback.from_user.id, state).add.delete_nbt()
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@new_item_router.callback_query(NewItemACtionCall.filter(F.to_nbt == True))    
+@new_item_router.callback_query(NewItemBackCall.filter(F.where == 'nbt'))    
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
+    await ItemFSM(state, 'new').set_state()
+    msg, markup = await ItemService(callback.from_user.id, state).add.nbt()
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@new_item_router.callback_query(NewItemACtionCall.filter(F.to_action_tags == True)) 
+@new_item_router.callback_query(NewItemBackCall.filter(F.where == 'action'))       
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
+    await ItemFSM(state, 'new').set_state()
+    msg, markup = await ItemService(callback.from_user.id, state).add.to_action_tag()
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@new_item_router.callback_query(NewItemACtionCall.filter(F.to_add_action == True))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtionCall, state: FSMContext, **kwargs):
+    msg, markup = await ItemService(callback.from_user.id, state).add.to_add_action_tag(callback.message)
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@new_item_router.message(NewItemState.add_action)
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    fsm = ItemFSM(state, 'new')
+    msg0 = await fsm.get_value('msg')
+    msg, markup = await ItemService(message.from_user.id, state).add.add_action_tag(message.text)
+    msg2 = await message.answer(msg, reply_markup=markup)
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
+    await msg0.delete()
+
+@new_item_router.callback_query(NewItemSketchDeleteActionTagCall.filter(F.is_delete == False))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemSketchDeleteActionTagCall, state: FSMContext, **kwargs):
+    msg, markup = await ItemService(callback.from_user.id, state).add.to_delete_action_tag(callback_data.tag)
+    await callback.message.edit_text(msg, reply_markup=markup)
+    
+@new_item_router.callback_query(NewItemSketchDeleteActionTagCall.filter())     
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemSketchDeleteActionTagCall, state: FSMContext, **kwargs):
+    msg, markup = await ItemService(callback.from_user.id, state).add.delete_action_tag(callback_data.tag)
+    await callback.message.edit_text(msg, reply_markup=markup)
+
 @new_item_router.callback_query(NewItemACtionCall.filter(F.to_send == True))     
 @log.decor(arg=True)
 @call_exept()
