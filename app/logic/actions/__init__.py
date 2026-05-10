@@ -17,7 +17,6 @@ from .look import LookAroundAction
 class ActionSelf:
     all_action: list[type[ActionBase]] = [
                   SleepAction, 
-                  EatAction, 
                   PlayAction, 
                   FishingAction, 
                   ChopAction, 

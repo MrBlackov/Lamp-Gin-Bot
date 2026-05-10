@@ -57,7 +57,7 @@ class ActionService(BaseService):
                 case 'lookaround':
                     return msg, self.IKB.lookaround(action.results)  
                 case 'to_action_time':
-                    return msg, self.IKB.time_action(tag=tag, minute=action.minute, emodzi=emodzi, action_text=action.name, where='actions')
+                    return msg, self.IKB.redact(tag=tag, minute=action.minute, emodzi=emodzi, action_text=action.name, where='actions')
         except SleepError as e:
             return e.msg, self.IKB.wake_up()
         except StopError as e:

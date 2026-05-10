@@ -78,7 +78,7 @@ class MineAction(BlockFreedomAction):
             item, is_have = await self.give_item(ItemDB(inventory_id=self.char.exist.inventory.id, sketch_id=mine_item.id, quantity=quantity))
             xpos += 1
             damage = 0
-            self.msg = f'{self.emodzi} {self.char.exist.full_name} добыл {mine_item.name} ({quantity} шт.)' + (' и положил в свой инвентраь' if is_have else ', и оставил на земле...')
+            #self.msg = f'{self.emodzi} {self.char.exist.full_name} добыл {mine_item.name} ({quantity} шт.)' + (' и положил в свой инвентраь' if is_have else ', и оставил на земле...')
         else:
             damage += skill_tags.get(SkillTags.st).level*skill_tags.get(SkillTags.miner).level
         action_state.nbt['xpos'] = xpos

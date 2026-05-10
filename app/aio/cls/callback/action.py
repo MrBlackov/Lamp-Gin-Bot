@@ -9,9 +9,11 @@ class ActionCall(BaseCall, prefix='action'):
     tag: str
     step: int = 1
     minute: int | None = None
+    item: int | None = None
 
 class ActionRedactCall(BaseCall, prefix='action_redact'):
     to_time: bool = False
+    to_item: bool = False
     tag: str
     to_stats: bool = False
     to_del_timer: bool = False

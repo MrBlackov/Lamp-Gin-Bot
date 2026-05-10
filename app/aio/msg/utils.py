@@ -1,5 +1,6 @@
 import random
 import html
+import json
 
 class TextHTML:
     def __init__(self, text: str):
@@ -75,7 +76,13 @@ class TextHTML:
         """Форматирует число без лишних нулей"""
         formatted = f"{value:.{decimals}f}"
         return formatted.rstrip('0').rstrip('.')
+    
+    def json_format(json_data: dict, indent: int = 2):
+        return json.dumps(json_data, indent=indent)
 
+    def pre(self, language: str = 'python'):
+        return f'<pre><code class="language-{language}">{self.text}</code></pre>'
 
 def get_invisibly_edited():
     return str('\u200b'*random.choice(range(10)))   
+
