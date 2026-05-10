@@ -1,10 +1,13 @@
 from app.validate.sketchs.base import SketchsBasevalidate
 from pydantic import Field, field_validator
-from app.exeption.item import NotNameItemSketchError, NameNoValideError, EmodziNoValideError, SizeNotIntItemSketchError, DropNotIntItemSketchError, DropLessZeroItemSketchError, SizeLessOneItemSketchError, RariryValideError
+from app.exeption.item import NotNameItemSketchError, NameNoValideError, NBTValiteError, TagValideError, EmodziNoValideError, SizeNotIntItemSketchError, DropNotIntItemSketchError, DropLessZeroItemSketchError, SizeLessOneItemSketchError, RariryValideError
+import json
 
 class ItemSketchValide(SketchsBasevalidate):
     name: str | None = None
-    emodzi: str | None = None
+    base_emodzi: str | None = None
+    custom_emodzi_id: str | None = None
+    tag: str | None = None
     description: str | None = None
     size: int = 500
     image_id: int | None = None
@@ -13,8 +16,13 @@ class ItemSketchValide(SketchsBasevalidate):
     rarity: float = 0.1
     min_drop: int = 1
     max_drop: int = 1
+    action: list[str] | None = ['throw']
     nbt: dict = {}
     is_hide: bool = True
+
+    @property
+    def emodzi(self):
+        return f'<tg-emoji emoji-id="{self.custom_emodzi_id}">{self.base_emodzi}</tg-emoji>' if self.custom_emodzi_id else self.base_emodzi
 
     @field_validator('name', mode='before')
     @classmethod
@@ -33,13 +41,13 @@ class ItemSketchValide(SketchsBasevalidate):
                 raise NameNoValideError('This user enter description and len(description) > 200')
         return description
     
-    @field_validator('emodzi', mode='before')
+    @field_validator('base_emodzi', mode='before')
     @classmethod
-    def emodzi_valid(cls, emodzi: str | None = None):
-        if  emodzi != None:
-            if len(emodzi) != 1:
+    def emodzi_valid(cls, base_emodzi: str | None = None):
+        if  base_emodzi != None:
+            if len(base_emodzi) != 1:
                 raise EmodziNoValideError('This user enter emodzi and len(emodzi) > 1')
-        return emodzi    
+        return base_emodzi    
     
     @field_validator('size', mode='before')
     @classmethod
@@ -83,7 +91,16 @@ class ItemSketchValide(SketchsBasevalidate):
         if max_drop < 0:
             raise DropLessZeroItemSketchError('max_drop must be a positive integer')
         return max_drop
-    
+
+    @field_validator('nbt', mode='after')
+    @classmethod
+    def emodzi_valid(cls, nbt: dict | str = '{}'):
+        if type(nbt) != dict:
+            try:
+                return json.loads(nbt.replace("'", '"'))
+            except:
+                raise NBTValiteError('NBT must be a dict')
+        return nbt
 
 
 

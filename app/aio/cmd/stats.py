@@ -16,8 +16,6 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
     if message.from_user.id == owner:
         msg = await StatsService(message.from_user.id, state).all_coins()
         await message.answer(msg)
-    elif message.from_user.id != owner:
-        await message.answer('❌ Нет доступа')
     else:
         await message.answer('⁉️ Неизввестная ошибка')
 

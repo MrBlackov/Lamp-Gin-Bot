@@ -59,7 +59,7 @@ class ChopAction(BlockFreedomAction):
             quantity = 1
             item, is_have = await self.give_item(ItemDB(inventory_id=self.char.exist.inventory.id, sketch_id=wood.id, quantity=quantity))
             chop_woods += 1 if is_have else 0
-            self.msg = f'{self.emodzi} {self.char.exist.full_name} вырубил дерерво {wood.name} ({quantity} шт.)' + (' и положил в свой инвентраь' if is_have else ', и оставил на земле...')
+            #self.msg = f'{self.emodzi} {self.char.exist.full_name} вырубил дерерво {wood.name} ({quantity} шт.)' + (' и положил в свой инвентраь' if is_have else ', и оставил на земле...')
             wood = None
             damage = 0
         else:

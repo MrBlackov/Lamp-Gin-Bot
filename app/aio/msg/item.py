@@ -37,41 +37,28 @@ class NewItemText:
     def __init__(self, sketch: ItemSketchValide):
         self.sketch = sketch
  
-    @property
-    def temperate(self):
-        if self.sketch.rarity == 0:
-            return '{EMODZI} {NAME}' + TextHTML('\n'.join([
-            '⏲️ Вес одного: {WEIGHT}кг',
-            '🎲 Шанс выпадения: {RARITY}%',
-            '📜 Описание: {DESCRIPT}',
-        ])).blockquote()
-        return '{EMODZI} {NAME}' + TextHTML('\n'.join([
-            '⏲️ Вес одного: {WEIGHT}кг',
-            '🎲 Шанс выпадения: {RARITY}%',
-            '📈 Макс. выпадения: {MAX_DROP}',
-            '📉 Мин. выпадения: {MIN_DROP}',
-            '📜 Описание: {DESCRIPT}',
-        ])).blockquote()
-    
     def text(self):
-        if self.sketch.rarity == 0:
-            return self.temperate.format(
+        return ('{EMODZI} {NAME}' + TextHTML('\n'.join([
+            '🏷️ Тэг: {TAG}',
+            '⏲️ Вес одного: {WEIGHT}кг',
+            #'🎲 Шанс выпадения: {RARITY}%'
+            #] + ([
+            #'📈 Макс. выпадения: {MAX_DROP}',
+            #'📉 Мин. выпадения: {MIN_DROP}' ] if self.sketch.rarity > 0 else []) + [
+            '🎟️ Действия: {ACTION_TAGS}',
+            '📑 NBT: {NBT}',
+        ])).blockquote()).format(
             EMODZI=self.sketch.emodzi,
             NAME=self.sketch.name,
-            DESCRIPT=self.sketch.description if self.sketch.description else '❌',
             WEIGHT=self.sketch.size/1000,
-            RARITY=str(self.sketch.rarity*100)[:6]
-        )
-        return self.temperate.format(
-            EMODZI=self.sketch.emodzi,
-            NAME=self.sketch.name,
-            DESCRIPT=self.sketch.description if self.sketch.description else '❌',
-            WEIGHT=self.sketch.size/1000,
-            RARITY=str(self.sketch.rarity*100)[:6],
+            RARITY=self.sketch.rarity*100,
             MAX_DROP=self.sketch.max_drop,
-            MIN_DROP=self.sketch.min_drop
-        )
-
+            MIN_DROP=self.sketch.min_drop,
+            TAG=self.sketch.tag,
+            ACTION_TAGS='✅' if self.sketch.action and len(self.sketch.action) > 0 else '❌',
+            NBT='✅' if self.sketch.nbt and len(self.sketch.nbt) > 0 else '❌'
+        ) + '\n📜 Описание' + TextHTML(self.sketch.description if self.sketch.description else '❌').blockquote(True)
+    
     def to_redact_text(redact_key: str):
         match redact_key:
             case 'name':
@@ -90,8 +77,16 @@ class NewItemText:
                 return '✒️ Отправьте минимальное количество предметов, которое может выпасть. Должно быть целым числом и не больше максимального количества'
             case 'creator_id':
                 return '✒️ Отправьте user_id создателя'
+            case 'tag':
+                return '✒️ Отправьте тег предмета. Тег должен быть уникальным и состоять из букв латинского алфавита в нижнем регистре'
+            case 'nbt':
+                return '✒️ Отправьте NBT-данные предмета. Данные должны быть в формате JSON. Старые данные перезапишутся!'
             case _:
                 return '✒️ Отправьте значение'
+            
+    def nbt(self, lang: str = 'python'):
+        return '\n📑 NBT' + (TextHTML(TextHTML.json_format(self.sketch.nbt)).pre(lang) if self.sketch.nbt else TextHTML('❌').blockquote())
+
 
 class ItemSketchText:
     def __init__(self, sketch: ItemSketchDB):
@@ -156,6 +151,42 @@ class ItemSketchText:
             MAX_DROP=self.sketch.max_drop,
             MIN_DROP=self.sketch.min_drop
         )
+
+    def change_text(self):
+        return ('{EMODZI} {NAME} ' + f'({'👁️ Предмет виден' if not self.sketch.is_hide else '🌫️ Предмет скрыт'})' + TextHTML('\n'.join([
+            '👤 Создатель: {USER_ID}',
+            '♣️ Эскиз ID: {ID}',
+            '🏷️ Тэг: {TAG}',
+            '⏲️ Вес одного: {WEIGHT}кг',
+            '🎲 Шанс выпадения: {RARITY}%',
+            '📈 Макс. выпадения: {MAX_DROP}',
+            '📉 Мин. выпадения: {MIN_DROP}',
+            '🎟️ Действия: {ACTION_TAGS}',
+            '📑 NBT: {NBT}',
+            
+        ])).blockquote()).format(
+            USER_ID=self.sketch.creator_id,
+            EMODZI=self.sketch.emodzi,
+            NAME=self.sketch.name,
+            WEIGHT=self.sketch.size/1000,
+            ID=self.sketch.id,
+            RARITY=self.sketch.rarity*100,
+            MAX_DROP=self.sketch.max_drop,
+            MIN_DROP=self.sketch.min_drop,
+            TAG=self.sketch.tag,
+            ACTION_TAGS='✅' if self.sketch.action and len(self.sketch.action) > 0 else '❌',
+            NBT='✅' if self.sketch.nbt and len(self.sketch.nbt) > 0 else '❌'
+        ) + '\n📜 Описание' + TextHTML(self.sketch.description if self.sketch.description else '❌').blockquote(True)
+    
+    def nbt(self, lang: str = 'json'):
+        return '\n📑 NBT' + (TextHTML(TextHTML.json_format(self.sketch.nbt)).pre(lang) if self.sketch.nbt else TextHTML('❌').blockquote())
+
+    def action(self, lang: str = 'json'):
+        return '\n🎟️ Действия' + (TextHTML(TextHTML.json_format(self.sketch.action)).pre(lang) if self.sketch.nbt else TextHTML('❌').blockquote())
+
+    def moderate_sketch(self):
+        
+        return self.change_text() + self.nbt() + self.action()
 
 class CharItemText:    
     def __init__(self, char: CharacterDB, item: ItemDB):

@@ -1,4 +1,5 @@
 from app.exeption.base import BotError
+from app.aio.msg.utils import TextHTML
 
 class ItemError(BotError):
     msg = '⁉️ Неизвестная ошибка в системе Предметов'
@@ -55,7 +56,15 @@ class MaxDropLessMinDropError(ItemError):
     code = '401.17'
     faq = ''
  
-
+class TagValideError(ItemError):
+    msg = '❌ Предмет с таким тэгом уже сущеествует'
+    code = '401.17'
+    faq = ''
+ 
+class NBTValiteError(ItemError):
+    msg = '❌ Новое NBT-данные не могут быть одобрены из-за синтакиса, отправьте значение с правильным синтаксисом'
+    code = '401.20'
+    faq = f'Правильный синтаксис: {'{"key1": "value", "key2": true, "key3":1, "key4":{"key": "value"}, "key5":["value", "value"] }'}' + '\n\n - key: nbt-ключ \n - value: nbt-значение (значение может быть строкой, числом, bool-значением, списком или словарем)'
 
 
 

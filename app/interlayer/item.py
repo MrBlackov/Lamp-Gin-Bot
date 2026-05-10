@@ -1,12 +1,13 @@
 from app.validate.sketchs.item_sketchs import ItemSketchValide
 from app.logic.item import ItemsLogic, ItemSketchsLogic
-from app.db.metods.gets import get_user_for_tg_id, get_main_char_for_user_id, get_char_for_id, get_item_for_name, get_item_sketch, get_user_for_id
+from app.db.metods.gets import get_user_for_tg_id, get_item_sketch_for_tag, get_main_char_for_user_id, get_char_for_id, get_item_for_name, get_item_sketch, get_user_for_id
 from app.exeption.item import ItemError
 from app.db.models.item import ItemDB
 from app.db.models.char import CharacterDB
-from app.exeption.item import SizeNotIntItemSketchError, RariryValideError, NameNoValideError, EmodziNoValideError, NoFindItemSketchForID, ItemNoHideCreatedError
+from app.exeption.item import SizeNotIntItemSketchError, TagValideError, NBTValiteError, RariryValideError, NameNoValideError, EmodziNoValideError, NoFindItemSketchForID, ItemNoHideCreatedError
 from app.exeption.char import NoHaveMainChar
 from app.interlayer.base import BaseLayer
+import json
 
 class ItemLayer(BaseLayer):
     def __init__(self, tg_id: int):
@@ -44,8 +45,8 @@ class ItemLayer(BaseLayer):
     async def action(self, item: ItemDB, char: CharacterDB, action: str, quantity: int = 1):
         return await self.logic.action(item, char, action, quantity)
 
-    async def get_item_sketchs(self):
-        return await self.sketch_logic.get_sketchs()
+    async def get_item_sketchs(self, is_hide: bool = False):
+        return await self.sketch_logic.get_sketchs(is_hide)
     
 
     async def get_item_sketch(self, item_id: int):
@@ -54,25 +55,35 @@ class ItemLayer(BaseLayer):
             raise NoFindItemSketchForID(f'This user(tg_id={self.tg_id}) enter item_sketch_id, but dont find item_sketch')
         return data
     
-    def change_data_valid(self, what_change: str, new_data: str):
-        if what_change == 'name':
-            if len(new_data) > 30:
-                raise NameNoValideError(f'This user(tg_id={self.tg_id}) enter name and len(name) > 30')
-        elif what_change == 'emodzi':
-            if len(new_data) > 1:
-                raise EmodziNoValideError(f'This user(tg_id={self.tg_id}) enter emodzi and len(emodzi) > 1')
-        elif what_change in ['size', 'min_drop', 'max_drop']:
-            if new_data.isdigit() == False:
-                raise SizeNotIntItemSketchError(f'This user(tg_id={self.tg_id}) enter size, but size no int')
-            return int(new_data)
-        elif what_change == 'rarity':
-            try:
-                rarity = float(new_data)
-            except (ValueError, TypeError):
-                raise RariryValideError('Rarity must be a float')
-            if not( 0 <= rarity <= 1):
-                raise RariryValideError('Rarity must be between 0 and 1')
-            return rarity
+    async def change_data_valid(self, what_change: str, new_data: str):
+        match what_change:
+            case 'name':
+                if len(new_data) > 30:
+                    raise NameNoValideError(f'This user(tg_id={self.tg_id}) enter name and len(name) > 30')
+            case '_emodzi':
+                if len(new_data) > 1:
+                    raise EmodziNoValideError(f'This user(tg_id={self.tg_id}) enter emodzi and len(emodzi) > 1')
+            case  'size' | 'min_drop' | 'max_drop':
+                if new_data.isdigit() == False:
+                    raise SizeNotIntItemSketchError(f'This user(tg_id={self.tg_id}) enter size, but size no int')
+                return int(new_data)
+            case  'rarity':
+                try:
+                    rarity = float(new_data)
+                except (ValueError, TypeError):
+                    raise RariryValideError('Rarity must be a float')
+                if not( 0 <= rarity <= 1):
+                    raise RariryValideError('Rarity must be between 0 and 1')
+                return rarity
+            case  'nbt':
+                try:
+                    return json.loads(new_data.replace("'", '"'))
+                except:
+                    raise NBTValiteError('NBT must be a dict')
+            case 'tag':
+                sketch = await get_item_sketch_for_tag(new_data)
+                if sketch:
+                    raise TagValideError(f'This user(tg_id={self.tg_id}) enter tag and this tag already exist')
         return new_data
 
     async def get_items_for_sketchs(self, sketch_id: int) -> dict[CharacterDB, ItemDB]:
@@ -95,17 +106,17 @@ class ItemLayer(BaseLayer):
 
  
     async def create_before_moder(self, sketch_id: int, to_create: bool):
+        await self.get_char_info()
         sketch = await self.sketch_logic.get_sketch(sketch_id)
         if to_create and sketch.is_hide:
             sketch = await self.sketch_logic.create_sketch_for_user(sketch_id)
             create = True
         elif sketch.is_hide:
-            sketch = await self.sketch_logic.delete_sketch_for_user(sketch_id)
             create = False
         else:
             raise ItemNoHideCreatedError(f'ItemSketch(id:{sketch_id}) created, dont to be create')
         self = await self.get_char_info(sketch.creator_id)
-        await self.give(sketch_id, user_id=self.user_id, size_except=False)
+        await self.give(sketch_id, user_id=self.user.id, size_except=False)
         return self.user, create, sketch
 
 

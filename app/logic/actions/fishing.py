@@ -52,7 +52,7 @@ class FishingAction(BlockFreedomAction):
         if fish.nbt.get('fishing').get('size') <= points:
             quantity = 1
             item, is_have = await self.give_item(ItemDB(inventory_id=self.char.exist.inventory.id, sketch_id=fish.id, quantity=quantity))
-            self.msg = f'{self.emodzi} {self.char.exist.full_name} выловил {fish.name} ({quantity} шт.)' + (' и положил в свой инвентраь' if is_have else ', но выронил...')
+            #self.msg = f'{self.emodzi} {self.char.exist.full_name} выловил {fish.name} ({quantity} шт.)' + (' и положил в свой инвентраь' if is_have else ', но выронил...')
         await self.to_skill_level_up(self.skills_levels_up)
         return self
     

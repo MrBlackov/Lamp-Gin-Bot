@@ -4,7 +4,7 @@ from app.logged.botlog import logs
 from app.enum_type.tags import ActionTags
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from app.logic.actions import ActionBase
-from app.db.models.char import ExistenceDB
+from app.db.models.char import ExistenceDB, ItemDB
 
 class ActionIKB(BotIKB):
     def back(self, where: str):
@@ -32,12 +32,13 @@ class ActionIKB(BotIKB):
         self.builder.button(text='⏸️ Остановиться', callback_data=ActionCall(tag=ActionTags.stop, tg_id=self.tg_id))
         return self.builder.as_markup()    
       
-    def time_action(self, tag: str, emodzi: str, action_text: str, where: str, minute: int | None = None):      
-        self.builder.button(text='⏱️ Изменить время', callback_data=ActionRedactCall(tag=tag, to_time=True, tg_id=self.tg_id)).as_markup()
-        self.builder.button(text='❌ Отключить таймер', callback_data=ActionRedactCall(tag=tag, to_del_timer=True, tg_id=self.tg_id)).as_markup()
+    def redact(self, tag: str, emodzi: str, action_text: str, where: str, minute: int | None = None):      
+        self.builder.button(text=('⏱️ Изменить время' if minute and minute > 0 else '➕ Добавить таймер'), callback_data=ActionRedactCall(tag=tag, to_time=True, tg_id=self.tg_id)).as_markup()
+        if minute and minute > 0:
+            self.builder.button(text='❌ Отключить таймер', callback_data=ActionRedactCall(tag=tag, to_del_timer=True, tg_id=self.tg_id)).as_markup()
         self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where=where, is_details=True, tg_id=self.tg_id)).as_markup()
         self.builder.button(text=emodzi + ' ' + action_text, callback_data=ActionCall(tag=tag, step=2, minute=minute, tg_id=self.tg_id)).as_markup()
-        return self.builder.adjust(1, 1, 2).as_markup()
+        return self.builder.adjust(*[1, 1, 2] if minute and minute > 0 else [1, 2]).as_markup()
 
     def lookaround(self, results: list[tuple[ExistenceDB | None, ActionBase | None]]):        
         for exist, action in results:

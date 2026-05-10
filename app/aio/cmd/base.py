@@ -27,8 +27,6 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
     if command.args != None and message.from_user.id == owner:
         msg = await UserService(message.from_user.id, state).get_info(command.args)
         await message.answer(msg)
-    elif message.from_user.id != owner:
-        await message.answer('❌ Нет доступа')
     elif command.args == None:
         await message.answer('⁉️ Где данные?')
     else:
