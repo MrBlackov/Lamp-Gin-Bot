@@ -77,7 +77,7 @@ class ItemLayer(BaseLayer):
                 return rarity
             case  'nbt':
                 try:
-                    return json.loads(new_data.replace("'", '"'))
+                    return json.loads(new_data.replace("'", '"').replace('True', 'true').replace('False', 'false'))
                 except:
                     raise NBTValiteError('NBT must be a dict')
             case 'tag':

@@ -97,7 +97,7 @@ class ItemSketchValide(SketchsBasevalidate):
     def emodzi_valid(cls, nbt: dict | str = '{}'):
         if type(nbt) != dict:
             try:
-                return json.loads(nbt.replace("'", '"'))
+                return json.loads(nbt.replace("'", '"').replace('True', 'true').replace('False', 'false'))
             except:
                 raise NBTValiteError('NBT must be a dict')
         return nbt

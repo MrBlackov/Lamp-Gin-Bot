@@ -4,6 +4,7 @@ from app.db.base import Base
 from app.enum_type.char import Gender
 from app.db.models.item import ItemDB, KitDB, SkillDB
 from app.db.models.map import LocationDB
+from app.db.models.main import UserSettingDB
 
 class InventoryDB(Base):
     exist_id: Mapped[int] = mapped_column(ForeignKey('existencedb.id', ondelete='CASCADE'))
@@ -113,5 +114,19 @@ class CharacterDB(Base):
                                               lazy='joined', 
                                               cascade='all, delete-orphan', primaryjoin="foreign(ExistenceDB.people_id) == CharacterDB.id")
     description: Mapped[str | None] = mapped_column(String(1000), default=None)
+
+    def add_setting(self, setting: 'CharSettingDB', parametrs: list) -> 'CharSettingDB':
+        self.setting = setting 
+        self.parametrs = parametrs
+        return self        
+
+    
+class CharSettingDB(Base):
+    char_id: Mapped[int] = mapped_column(ForeignKey('characterdb.id'))
+    user_setting_id: Mapped[int] = mapped_column(ForeignKey('usersettingdb.id'))
+    user_setting: Mapped[UserSettingDB] = relationship('UserSettingDB', uselist=False, lazy='joined')
+    settings: Mapped[dict] = mapped_column(JSON, default={}, nullable=True)
+
+
 
 
