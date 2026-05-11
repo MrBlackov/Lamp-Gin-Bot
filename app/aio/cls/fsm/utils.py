@@ -60,6 +60,9 @@ class StatsFSM(FSMUtils):
 class SkillFSM(FSMUtils):
     prefixs = ['skill']
 
+class SettingFSM(FSMUtils):
+    prefixs = ['setting']
+
 class ActionFSM(FSMUtils):
     prefixs = ['action']
     

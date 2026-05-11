@@ -1,6 +1,6 @@
 from app.db.metods.base import add_or_update_obj, add_obj, add_obj_dict, add_db_obj, update_obj
-from app.db.dao.main import TgChatDAO, TgUserDAO, DonateDAO, ChatDAO, TgChatDB, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB
-from app.db.dao.chars import CharacterDAO, ExistenceDAO, AttributePointDAO, InventoryDAO
+from app.db.dao.main import TgChatDAO, TgUserDAO, UserDB, DonateDAO, ChatDAO, TgChatDB, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB, UserSettingDAO, UserSettingDB
+from app.db.dao.chars import CharacterDAO, ExistenceDAO, AttributePointDAO, InventoryDAO, CharSettingDAO, CharSettingDB
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitSketchDB, KitDB, KitDAO, KitSketchDAO, SkillDAO, SkillDB, SkillSketchDAO, SkillSketchDB
 from app.db.dao.transfer import TransferDAO, TransferDB
 from aiogram.types import TelegramObject, User, Chat

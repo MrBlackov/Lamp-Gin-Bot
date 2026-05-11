@@ -1,6 +1,6 @@
 from app.db.metods.base import add_or_update_obj, select_objs_for_data, select_obj, select_objs, select_objs_no_valide, select_obj_no_valide, get_for_ids
-from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB, ChatDAO, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB
-from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO, ExistenceDB
+from app.db.dao.main import UserDAO, UserDB, TgUserDAO, TgUserDB, DonateDAO, DonateDB, ChatDAO, ChatSettingDAO, ChatDB, ChatSettingDB, MessageDAO, MessageDB, UserSettingDAO, UserSettingDB
+from app.db.dao.chars import CharacterDAO, CharacterDB, ExistenceDAO, ExistenceDB, CharSettingDB, CharSettingDAO
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitDAO, KitDB, KitSketchDAO, KitSketchDB, CraftDB, CraftDAO, SkillDAO, SkillDB, SkillSketchDAO, SkillSketchDB
 from app.validate.add.characters import Character_add, Existence_add
 from app.validate.add.base import Users_add
@@ -15,6 +15,7 @@ add_or_update_donate = add_or_update_obj(DonateDAO)
 
 select_user = select_obj(Users_add, UserDAO)
 select_users = select_objs(Users_add, UserDAO)
+select_user_setting = select_obj_no_valide(UserSettingDAO)
 
 select_chat = select_obj_no_valide(ChatDAO)
 select_chat_setting = select_obj_no_valide(ChatSettingDAO)
@@ -30,6 +31,12 @@ async def get_user_for_id(user_id: int) -> UserDB:
 
 async def get_users() -> list[UserDB]:
     return await select_users()
+
+async def get_user_setting_for_id(user_id: int) -> UserSettingDB | None:
+    return await select_user_setting(filters={'id':user_id})
+
+async def get_user_setting_for_user_id(user_id: int) -> UserSettingDB | None:
+    return await select_user_setting(filters={'user_id':user_id})
 
 async def get_chat_for_tg_id(tg_id: int) -> ChatDB | None:
     chat: ChatDB = await select_chat(filters={'tg_id':tg_id}, logger=False)
@@ -52,6 +59,7 @@ async def get_message(tg_chat_id: int, message_id: int):
     return await select_message(filters={'chat_tg_id':tg_chat_id, 'msg_id':message_id})
 
 select_char = select_obj(Character_add, CharacterDAO)
+select_char_setting = select_obj_no_valide(CharSettingDAO)
 select_chars = select_objs(Character_add, CharacterDAO)
 select_exist = select_obj(Existence_add, ExistenceDAO)
 
@@ -69,6 +77,12 @@ async def get_chars_for_user_id(user_id: int, is_die: bool | None = False) -> li
 
 async def get_all_chars() -> list[CharacterDB]:
     return await select_chars()
+
+async def get_char_setting_for_id(id: int) -> CharSettingDB | None:
+    return await select_char_setting(filters={'id':id})
+
+async def get_char_setting_for_char_id(char_id: int) -> CharSettingDB | None:
+    return await select_char_setting(filters={'char_id':char_id})
 
 select_exist = select_obj_no_valide(ExistenceDAO)
 select_exists_for_ids = get_for_ids(ExistenceDAO)

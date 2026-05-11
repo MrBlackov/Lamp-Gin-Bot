@@ -1,4 +1,4 @@
-from app.db.metods.gets import get_user_for_tg_id, get_action_states_for_exist_id, get_user_for_id, get_items_for_inventory, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
+from app.db.metods.gets import get_user_for_tg_id, get_user_setting_for_user_id, get_char_setting_for_char_id, get_action_states_for_exist_id, get_user_for_id, get_items_for_inventory, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
 from app.db.metods.unique import get_char_for_exist_id, ActionStateDB
 from app.logged.infolog import infolog
 from app.aio.config import admins, bot
@@ -6,6 +6,7 @@ from app.exeption.action import SleepError, StopError
 from app.enum_type.tags import ActionTags, SkillTags
 from app.service.utils import to_msg
 from app.logic.actions import RecoveryAction, ActionSelf
+from app.logic.settings import SettingSelf
 
 class BaseLayer:
     def __init__(self, tg_id: int):
@@ -18,6 +19,8 @@ class BaseLayer:
             self.user = await get_user_for_id(user_id)
         else:
             self.user = await get_user_for_tg_id(self.tg_id, True)
+        setting = await get_user_setting_for_user_id(self.user.id)
+        self.user.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
         self.char_id = await get_main_char_for_user_id(self.user.id)
         self.char = await self.get_char_full_info(self.char_id)
         return self
@@ -30,6 +33,8 @@ class BaseLayer:
         char.exist.inventory.add_items(items)
         action_states = await get_action_states_for_exist_id(char.exist.id)
         char.exist.add_action_state(action_states)
+        setting = await get_char_setting_for_char_id(char_id)
+        char.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
         await RecoveryAction(char, action_tags=ActionSelf.action_tags).to_action()
         return char
 

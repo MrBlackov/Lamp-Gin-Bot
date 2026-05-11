@@ -1,6 +1,6 @@
 from app.db.metods.base import update_obj, update_obj_for_ids, update_objs, update_obj_db
-from app.db.dao.main import UserDAO, UserDB, ChatDAO, ChatDB, ChatSettingDAO, ChatSettingDB, MessageDAO, MessageDB, DonateDAO, DonateDB
-from app.db.dao.chars import ExistenceDB, CharacterDB, CharacterDAO, ExistenceDAO
+from app.db.dao.main import UserDAO, UserDB, ChatDAO, ChatDB, ChatSettingDAO, ChatSettingDB, MessageDAO, MessageDB, DonateDAO, DonateDB, UserSettingDB, UserSettingDAO
+from app.db.dao.chars import ExistenceDB, CharacterDB, CharacterDAO, ExistenceDAO, CharSettingDAO, CharSettingDB
 from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, CraftDAO, CraftDB, SkillDAO, SkillDB, SkillSketchDAO, SkillSketchDB
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.db.dao.transfer import TransferDAO
@@ -9,7 +9,9 @@ from typing import Literal
 from datetime import datetime
 
 update_user = update_obj(UserDAO)
+update_user_setting = update_obj(UserSettingDAO)
 update_char = update_obj(CharacterDAO)
+update_char_setting = update_obj(CharSettingDAO)
 update_exist = update_obj(ExistenceDAO)
 update_chat = update_obj(ChatDAO)
 update_donate = update_obj(DonateDAO)

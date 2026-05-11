@@ -38,8 +38,9 @@ class UserDB(Base):
     tg_user: Mapped[TgUserDB | None] = relationship(TgUserDB, uselist=False, lazy='joined', primaryjoin="foreign(TgUserDB.tg_id) == UserDB.tg_id")
     setting_id: Mapped[int] = mapped_column(ForeignKey('usersettingdb.id'), nullable=True)
 
-    def add_setting(self, setting: 'UserSettingDB') -> 'UserDB':
+    def add_setting(self, setting: 'UserSettingDB', parametrs: list) -> 'UserDB':
         self.setting = setting
+        self.parametrs = parametrs
         return self
 
 class ChatDB(Base):
@@ -59,6 +60,7 @@ class ChatSettingDB(Base):
 
 class UserSettingDB(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('userdb.id'))
+    settings: Mapped[dict] = mapped_column(JSON, default={})
 
 class MessageDB(Base):
     chat_tg_id: Mapped[int] = mapped_column(BigInteger)
