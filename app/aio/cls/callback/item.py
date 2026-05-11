@@ -19,6 +19,7 @@ class NewItemAdminACtionCall(BaseCall, prefix='new_item_admin_action'):
     sketch_id: int
     to_redact: bool = False
     to_create: bool | None = None    
+    redact_item: bool = False
 
 class NewItemBackCall(BaseCall, prefix='new_item_back'):
     where: str

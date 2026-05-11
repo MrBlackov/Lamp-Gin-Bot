@@ -13,7 +13,8 @@ from app.aio.cmd.transfer.transfer import transfer_router
 from app.aio.cls.callback.char import (
                                        InfoCharChooseCall, 
                                        InfoCharListCall,
-                                       InfoCharDeleteCall
+                                       InfoCharDeleteCall,
+                                       MenuCall
                                        )
 from app.exeption.decorator import exept, call_exept
 
@@ -27,6 +28,13 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     markup, text = await Character(message.from_user.id, state).info.get_main_char()
     await message.answer(text, reply_markup=markup)
 
+@char_router.callback_query(MenuCall.filter(F.where == 'mychar'))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: MenuCall, state: FSMContext, **kwargs):
+    markup, msg = await Character(callback.from_user.id, state).info.get_main_char()
+    await callback.message.edit_text(msg, reply_markup=markup)
+
 @char_router.message(Command('mychars'))
 @log.decor(arg=True)
 @exept
@@ -34,6 +42,13 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     markup, text = await Character(message.from_user.id, state).info.get_chars()
     await message.answer(text, reply_markup=markup)
     
+@char_router.callback_query(MenuCall.filter(F.where == 'mychars'))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: MenuCall, state: FSMContext, **kwargs):
+    markup, msg = await Character(callback.from_user.id, state).info.get_chars()
+    await callback.message.edit_text(msg, reply_markup=markup)
+
 @char_router.callback_query(InfoCharChooseCall.filter(F.back == True))   
 @log.decor(arg=True)
 @call_exept()

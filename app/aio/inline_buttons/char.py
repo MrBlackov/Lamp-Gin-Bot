@@ -223,18 +223,21 @@ class InfoCharIKB(BotIKB):
         return self.builder.adjust(1).as_markup()
             
     def chouse_main_char(self, char_id: int, exist_id: int, main: bool = False, is_die: bool = False):  
+        adjust = [1]
         if main == False and is_die == False:
             self.builder.button(text='🕹️ Выбрать', callback_data=InfoCharChooseCall(char_id=char_id, tg_id=self.tg_id)) 
         if main:
-            self.builder.button(text='💡 Навыки', callback_data=MenuCall(where='myskills', tg_id=self.tg_id)) 
             self.builder.button(text='💼 Инвентарь', callback_data=MenuCall(where='inventory', tg_id=self.tg_id)) 
             self.builder.button(text='⚗️ Крафты', callback_data=MenuCall(where='crafts', tg_id=self.tg_id)) 
+            self.builder.button(text='💡 Навыки', callback_data=MenuCall(where='myskills', tg_id=self.tg_id)) 
+            self.builder.button(text='🎮 Доействия', callback_data=MenuCall(where='actions', tg_id=self.tg_id)) 
             self.builder.button(text='✉️ Сделки', callback_data=MenuCall(where='transfers', tg_id=self.tg_id)) 
-            self.builder.button(text='⚙️ Настройки персонажа', callback_data=MenuCall(where='char_setting', tg_id=self.tg_id)) 
+            self.builder.button(text='⚙️ Настройки персонажа', callback_data=MenuCall(where='char_setting', tg_id=self.tg_id))
+            adjust = [2, 2, 1]
         if is_die == False:  
             self.builder.button(text='☠️ Повеситься', callback_data=InfoCharDeleteCall(char_id=char_id, exist_id=exist_id, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=InfoCharChooseCall(back=True, tg_id=self.tg_id)) 
-        return self.builder.adjust(1).as_markup()
+        return self.builder.adjust(*adjust).as_markup()
     
     def to_delete_char(self, char_id: int, exist_id: int):
         self.builder.button(text='❌ Нет', callback_data=InfoCharDeleteCall(char_id=char_id, back=True, tg_id=self.tg_id)) 
@@ -260,7 +263,8 @@ class InventoryIKB(BotIKB):
         if item.sketch.action and len(item.sketch.action) > 0:
             for item_action in item.sketch.action:
                 action = ActionSelf.item_action().get(item_action)
-                self.builder.button(text=action.text(), callback_data=ActionCall(tag=action.tag, tg_id=self.tg_id))
+                if action:
+                    self.builder.button(text=action.text(), callback_data=ActionCall(tag=action.tag, tg_id=self.tg_id))
         self.builder.button(text='🚮 Выбросить', callback_data=InventoryItemsActionCall(to_throw=True, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()

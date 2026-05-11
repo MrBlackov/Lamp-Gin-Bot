@@ -6,7 +6,7 @@ from app.aio.msg.utils import TextHTML
 from app.service.base import BaseService 
 from app.interlayer.main import ChatLayer, UserLayer
 from app.aio.cls.fsm.utils import UserFSM, ChatFSM
-from app.aio.inline_buttons.main import ChatIKB
+from app.aio.inline_buttons.main import ChatIKB, MenuIKB
 from app.aio.cls.fsm.main import ChatState
 from app.exeption.main import MainQuantityLessSixTeen, MainQuantityMaxTime
 
@@ -16,8 +16,13 @@ class UserService(BaseService):
         self.layer = UserLayer(tg_id)
         self.state = UserFSM(state)
         self.text = UserText
+        self.menu_ikb = MenuIKB(tg_id)
+
+    def menu(self):
+        return '🏠 Главное меню',  self.menu_ikb.menu()
 
     async def get_info(self, user_id: int | None = None):
+        
         layer = await self.layer.get_char_info()
         text = self.text(layer.user.tg_user, layer.user).text
         return text
