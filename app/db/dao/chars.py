@@ -1,4 +1,4 @@
-from app.db.models.char import CharacterDB, ExistenceDB, InventoryDB, AttributePointDB
+from app.db.models.char import CharacterDB, ExistenceDB, InventoryDB, AttributePointDB, CharSettingDB
 from app.db.dao.base import BaseDAO
 
 class CharacterDAO(BaseDAO):
@@ -12,3 +12,6 @@ class InventoryDAO(BaseDAO):
 
 class AttributePointDAO(BaseDAO):
     model = AttributePointDB
+
+class CharSettingDAO(BaseDAO):
+    model = CharSettingDB

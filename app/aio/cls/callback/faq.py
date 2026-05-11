@@ -12,4 +12,4 @@ class MenuFAQCall(BaseCall, prefix='menu_faq'):
 
 class FAQCall(BaseCall, prefix='faq'):
     faq: str    
-    
+    to_answer_callback: bool = True

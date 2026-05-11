@@ -7,6 +7,7 @@ from app.aio.inline_buttons.faq import FaqIKB
 from app.aio.msg.utils import TextHTML
 from app.aio.cls.callback.base import BaseCall, MenuCall
 import random
+from aiogram.exceptions import TelegramBadRequest
 
 def exept(func):
     @wraps(func)
@@ -23,6 +24,8 @@ def exept(func):
             log.warning(f'AioPartPath: {bote}')
             markup = FaqIKB(message.from_user.id).to_error_faq(bote.code) if len(bote.faq) > 0 else None
             await message.answer((TextHTML(bote.to_msg).escape)[:4000], reply_markup=markup)
+        except TelegramBadRequest as e:
+            pass
         except Exception as e:
             str_e = str(e)
             log.error(f'AioPartPath: {e}')
@@ -54,6 +57,8 @@ def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity
                 log.warning(f'AioPartPath: {bote}')
                 show_alert=True
                 answer_text = (TextHTML(bote.to_msg).escape)[:4000]
+            except TelegramBadRequest as e:
+                pass
             except Exception as e:
                 str_e = str(e)
                 log.error(f'AioPartPath: {e}')

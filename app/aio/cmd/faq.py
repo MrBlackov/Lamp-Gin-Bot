@@ -24,7 +24,9 @@ async def callback_to_error_faq(callback: CallbackQuery, callback_data: ToErrorF
 @call_exept()
 async def callback_to_faq(callback: CallbackQuery, callback_data: FAQCall, state: FSMContext, **kwargs):
     msg = FaqService(callback.from_user.id, state).to_faq(callback_data.faq)
-    await callback.answer(msg, show_alert=True)
+    if callback_data.to_answer_callback:
+        await callback.answer(msg, show_alert=True)
+    await callback.message.answer(msg)
 
 @faq_router.callback_query(NewItemACtionCall.filter(F.to_read_rules == True))     
 @log.decor(arg=True)
