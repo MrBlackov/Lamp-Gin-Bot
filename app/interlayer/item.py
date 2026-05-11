@@ -24,7 +24,7 @@ class ItemLayer(BaseLayer):
         is_hide = item.get('is_hide')
         if is_hide:
             return self.user, new_sketch
-        new_item = await self.logic.give(new_sketch.id, self.char.exist.inventory.id, self.char.id, size_except=False)
+        new_item = await self.logic.give(new_sketch.id, self.char.exist.inventory.id, self.char, size_except=False)
         if new_item:
             return self.user, new_item.sketch
         return self.user, new_sketch
