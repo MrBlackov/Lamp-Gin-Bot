@@ -195,6 +195,13 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
     msg, markup = await ItemService(callback.from_user.id, state).add.create()
     await callback.message.edit_text(msg, reply_markup=markup)
 
+@new_item_router.callback_query(NewItemAdminACtionCall.filter(F.redact_item == True))     
+@log.decor(arg=True)
+@call_exept(False)
+async def callback_handler(callback: CallbackQuery, callback_data: NewItemAdminACtionCall, state: FSMContext, **kwargs):
+    msg, markup = await ItemService(callback.from_user.id, state).change.info(callback_data.sketch_id)
+    await callback.message.answer(msg, reply_markup=markup)
+
 @new_item_router.callback_query(NewItemAdminACtionCall.filter(F.to_create == True))     
 @new_item_router.callback_query(NewItemAdminACtionCall.filter(F.to_create == False))     
 @log.decor(arg=True)

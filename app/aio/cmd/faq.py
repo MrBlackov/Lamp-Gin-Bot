@@ -7,7 +7,7 @@ from app.aio.config import owner
 from app.service.faq import FaqService
 from app.exeption.decorator import exept, call_exept
 from app.exeption.faq import FaqErrorNoEnterError, FaqErrorNoFindError
-from app.aio.cls.callback.faq import ToErrorFAQCall, FAQCall
+from app.aio.cls.callback.faq import ToErrorFAQCall, FAQCall, MenuCall
 from app.aio.cls.callback.item import NewItemACtionCall
 
 faq_router = Router()   
@@ -96,6 +96,13 @@ async def cmd_help(message: Message, state: FSMContext, **kwargs):
 async def cmd_help(message: Message, state: FSMContext, **kwargs):
     msg, markup = FaqService(message.from_user.id, state).help()
     await message.answer(msg, reply_markup=markup)
+
+@faq_router.callback_query(MenuCall.filter(F.where == 'help'))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: MenuCall, state: FSMContext, **kwargs):
+    msg, markup = FaqService(callback.from_user.id, state).help()
+    await callback.message.edit_text(msg, reply_markup=markup)
 
 @faq_router.message(Command('start'))
 @log.decor(arg=True)

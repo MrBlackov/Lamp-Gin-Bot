@@ -13,7 +13,8 @@ from app.aio.cls.callback.item import (ListItemSketchBackCall,
                                        ListItemSketchToListCall, 
                                        ListItemSketchToPageCall, 
                                        ListItemSketchToQueryCall,
-                                       ListItemSketchItemCall)
+                                       ListItemSketchItemCall,
+                                       MenuCall)
 from app.aio.cls.fsm.utils import ItemFSM
 
 item_router = Router()
@@ -28,10 +29,11 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     msg, markup = await ItemService(message.from_user.id, state).list.get_item_sketchs()
     await message.answer(msg, reply_markup=markup)
 
-@item_router.callback_query(ListItemSketchBackCall.filter(F.where == 'cmd'))     
+@item_router.callback_query(ListItemSketchBackCall.filter(F.where == 'cmd'))    
+@item_router.callback_query(MenuCall.filter(F.where == 'items'))   
 @log.decor(arg=True)
 @call_exept()
-async def callback_handler(callback: CallbackQuery, callback_data: ListItemSketchToListCall, state: FSMContext, **kwargs):
+async def callback_handler(callback: CallbackQuery, callback_data: ListItemSketchToListCall | MenuCall, state: FSMContext, **kwargs):
     await ItemFSM(state, 'list').set_state()
     msg, markup = await ItemService(callback.from_user.id, state).list.get_item_sketchs()
     await callback.message.edit_text(msg, reply_markup=markup)

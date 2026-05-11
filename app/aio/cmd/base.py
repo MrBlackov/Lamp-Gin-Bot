@@ -21,6 +21,13 @@ base_router = Router()
 base_router.include_routers(setting_router, char_router, action_router, skill_router, faq_router, chat_router, stats_router)
 base_router.message.middleware(MessageCleanDpMiddleware())
 
+@base_router.message(Command('menu'))
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
+    msg, markup = UserService(message.from_user.id, state).menu()
+    await message.answer(msg, reply_markup=markup)
+
 @base_router.message(Command('user'))
 @log.decor(arg=True)
 @exept

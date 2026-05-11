@@ -64,7 +64,7 @@ class NewItemIKB(BotIKB):
     def moderator_menu(self, sketch_id: int):
         self.builder.button(text='❌ Отказать', callback_data=NewItemAdminACtionCall(sketch_id=sketch_id, to_create=False, tg_id=self.tg_id))
         self.builder.button(text='✅ Создать', callback_data=NewItemAdminACtionCall(sketch_id=sketch_id, to_create=True, tg_id=self.tg_id))
-        self.builder.button(text='✏️ Редактировать', callback_data=ChangeItemSketchIDCall(sketch_id=sketch_id, tg_id=self.tg_id))
+        self.builder.button(text='✏️ Редактировать', callback_data=NewItemAdminACtionCall(redact_item=True, sketch_id=sketch_id, tg_id=self.tg_id))
         return self.builder.adjust(2, 1).as_markup()
 
     def action_list(self, action_tags: list[str]):
