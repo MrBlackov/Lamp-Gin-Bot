@@ -1,6 +1,7 @@
 from app.aio.msg.utils import TextHTML
 from app.exeption import BotError
 from app.logic.settings import SettingSelf
+from app.aio.config import owner
 
 class FaqText:
     def __init__(self, error: BotError):
@@ -54,6 +55,8 @@ class FaqText:
             '/setting':' - Открыть настройки аккаунта',
             '/chat':' - Открыть настройки чата',
             '/menu':' - Открыть меню',
+            '/tops':' - Посмотреть топы по разным категориям',
+            '/topskills':' - Посмотреть топы по навыкам',
             '\n/newchar ':' - Создать нового персонажа',
             '/newtransfer ':' - Заключить новую сделку',
             '/newitem':' - Создать новый предмет',
@@ -85,14 +88,12 @@ class FaqText:
             'Здесь вы можете создавать персонажей, управлять инвентарем, заключать сделки и создавать свои предметы. \n\n'
             '📜 Команды ' +
             TextHTML(
-            ' /mychar - Посмотреть список ваших персонажей и выбрать действующего \n'
-            ' /inventory - Открыть инвентарь действующего персонажа \n'  
-            ' /transfer - Посмотреть свои сделки \n'
-            ' /craft - Посмотреть доступные крафты \n'
+            ' /mychar - Посмотреть меню персонажа \n'
+            ' /menu - Открыть меню \n'
             ' /help - Получить общую справку \n'
             ' /helpcmd - Получить справку по командам'
-            ).blockquote() + '\n'
-            'Если у вас возникнут вопросы или проблемы, не стесняйтесь обращаться за помощью к @mr_blackov.'
+            ).blockquote() + '\n\n'
+            f'❗ Если у вас возникнут вопросы или проблемы, не стесняйтесь обращаться за помощью к {TextHTML('mr_blackov').openmessage(owner)}.\n\n❗ Также все актуальные новости в {TextHTML('Газете').href('https://t.me/oldneal')}.'
         )
 
     def item_rules():

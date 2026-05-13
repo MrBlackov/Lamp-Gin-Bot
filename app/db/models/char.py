@@ -118,6 +118,7 @@ class CharacterDB(Base):
     def add_setting(self, setting: 'CharSettingDB', parametrs: list) -> 'CharSettingDB':
         self.setting = setting 
         self.parametrs = parametrs
+        self.parametr_tags = {p.tag:p for p in parametrs}
         return self        
 
     

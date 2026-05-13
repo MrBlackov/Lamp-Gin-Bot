@@ -53,7 +53,7 @@ class TextHTML:
         return f'<tg-spoiler>{self.text}</tg-spoiler>'
     
     @classmethod
-    def to_list(cls, items: list[str], type: str = 'num', sep: str = '\n'):
+    def to_list(cls, items: list[str], type: str = 'num', sep: str = '\n', type_list: list[str] | None = None):
         ''' Нумерованный список
             - items: Список элементов 
             - type: Тип списка (num - нумерованный, любой другой - кастомный символ)
@@ -62,6 +62,8 @@ class TextHTML:
             return cls(sep.join([f'{i+1}. {item}' for i, item in enumerate(items)]))
         elif type == 'bullet':
             return cls(sep.join([f'• {item}' for item in items]))
+        elif type == 'list' and type_list:
+            return cls(sep.join([f'{type_list[i]} {item}' for i, item in enumerate(items)]))
         else:
             return cls(sep.join([f'{type} {item}' for item in items]))
         

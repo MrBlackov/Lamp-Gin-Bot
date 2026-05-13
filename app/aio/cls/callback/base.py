@@ -7,3 +7,9 @@ class BaseCall(CallbackData, prefix='base'):
 class MenuCall(BaseCall, prefix='menu'):
     where: str
     
+class BackCall(BaseCall, prefix='back'):
+    where: str
+
+
+
+    
