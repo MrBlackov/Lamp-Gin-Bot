@@ -54,3 +54,4 @@ def set_to_list(kwargs: dict[str, int]):
 
 def list_to_set(iterable: list):
     return {v:iterable.count(v) for v in iterable}
+

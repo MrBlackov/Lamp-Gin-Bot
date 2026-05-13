@@ -229,6 +229,9 @@ async def get_base_skills() -> list[SkillSketchDB]:
 async def get_skill_for_sketch_id(sketch_id: int) -> SkillDB:
     return await select_skill(filters={'sketch_id':sketch_id})
 
+async def get_skills_for_tag(sketch_tag: str) -> list[SkillDB]:
+    return await select_skills(filters={'sketch_tag':sketch_tag})
+
 async def get_skill_sketch_for_id(sketch_id: int) -> SkillSketchDB:
     return await select_skill_sketch(filters={'id':sketch_id})
 

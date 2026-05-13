@@ -15,19 +15,23 @@ class SettingValueBase:
     redact_values: list = [True, False, DEFAULT]
     description = None
     
-    def __init__(self, setting: CharSettingDB | UserSettingDB):
+    def __init__(self, setting: CharSettingDB | UserSettingDB | None = None):
         self.setting = setting
-        self.value = setting.settings.get(self.tag)
-        if self.value == None and type(setting) == CharSettingDB:
-            self.value = setting.user_setting.settings.get(self.tag)
-            self.is_user_default = True
-        if self.value == None:
+        if setting:
+            self.value = setting.settings.get(self.tag)
+            if self.value == None and type(setting) == CharSettingDB:
+                self.value = setting.user_setting.settings.get(self.tag)
+                self.is_user_default = True
+            if self.value == None:
+                self.value = self.default_value
+                self.is_user_default = False
+                self.is_bot_default = True
+            
+            if type(setting) == CharSettingDB: 
+                self.default_value = setting.user_setting.settings.get(self.tag) or self.default_value
+        else:
             self.value = self.default_value
-            self.is_user_default = False
             self.is_bot_default = True
-        
-        if type(setting) == CharSettingDB: 
-            self.default_value = setting.user_setting.settings.get(self.tag) or self.default_value
         
     @classmethod
     def text(self):

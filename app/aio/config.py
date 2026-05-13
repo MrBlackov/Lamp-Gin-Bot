@@ -11,7 +11,7 @@ owner = int(config('owner'))
 newspaper_id = int(config('newcpaper_id'))
 token = config('token2')
 log_groups = [int(x) for x in config('log_groups').split(',')]
-bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True))
 dp = Dispatcher(storage=MemoryStorage())
 cmds = {
     'mychar':'👑 Действующий персонаж',
@@ -25,6 +25,7 @@ cmds = {
     'setting':'⚙️ Настройки аккаунта',
     'chat':'⚙️ Настройки чата',
     'menu':'🏠 Главное меню',
+    'tops':'🏆 Топы',
 
     'newchar':'➕ Создать персонажа',
     'newtransfer':'➕ Создать сделку',
@@ -33,6 +34,7 @@ cmds = {
 
     'items':'📦 Список всех предметов в игре',
     'help':'📚 Получить справку',
+    'helpcmd':'📋 Получить список команд',
 }
 
 admin_cmds = cmds | {

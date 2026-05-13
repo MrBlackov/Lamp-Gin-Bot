@@ -27,6 +27,10 @@ class SkillSketchDB(Base):
     def emodzi(self):
         return f'<tg-emoji emoji-id="{self.custom_emodzi_id}">{self._emodzi}</tg-emoji>' if self.custom_emodzi_id else self._emodzi
 
+    @property
+    def text(self):
+        return f'{self.emodzi} {self.name}'
+
 class SkillDB(Base):
     level: Mapped[float]
     coins: Mapped[float] = mapped_column(default=0.0)

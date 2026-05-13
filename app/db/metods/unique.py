@@ -6,10 +6,11 @@ from app.logged.botlog import log
 from app.db.models.transfer import TransferDB
 from app.db.models.item import CraftDB, ItemDB, ItemSketchDB
 from app.db.models.transfer import TransferDB
-from app.db.models.char import CharacterDB, ExistenceDB
+from app.db.models.char import CharacterDB, ExistenceDB, AttributePointDB, CharSettingDB, UserSettingDB, SkillDB
 from app.db.models.main import MessageDB, TgChatDB, TgUserDB, UserDB, ChatDB
 from app.db.models.action import ActionStateDB
 from sqlalchemy import select, or_, and_
+from sqlalchemy.orm import joinedload
 from datetime import datetime
 
 @connection(commit=False)
@@ -230,3 +231,72 @@ async def get_user_for_username(
             log.error(e)
             raise
 
+
+@connection(commit=False)
+@log.decor()
+async def get_char_for_attribute_point_id(
+                             session: AsyncSession,
+                             attribute_point_id: int                      
+                            ):
+        try:
+            query = select(CharacterDB).join(ExistenceDB).filter_by(id=AttributePointDB.exist_id).join(AttributePointDB).filter_by(id=attribute_point_id).join(CharSettingDB).where()
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalar_one_or_none()
+            log.debug(f"Select data in {CharacterDB.__tablename__}, data:{record.to_dict if record else None}")
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise
+
+@connection(commit=False)
+@log.decor()
+async def get_chars_for_attribute_point_ids(
+                             session: AsyncSession,
+                             attribute_point_ids: list[int]                      
+                            ) -> list[CharacterDB]:
+        try:
+            query = select(CharacterDB).join(ExistenceDB).filter_by(id=AttributePointDB.exist_id).join(AttributePointDB).where(AttributePointDB.id.in_(attribute_point_ids))
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.debug(f"Select data in {CharacterDB.__tablename__}, data:{[r.exist.attibute_point.to_dict for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise
+
+@connection(commit=False)
+@log.decor()
+async def get_char_settings_for_char_ids(
+                             session: AsyncSession,
+                             char_ids: list[int]                      
+                            ):
+        try:
+            query = select(CharSettingDB).where(CharSettingDB.char_id.in_(char_ids))
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.debug(f"Select data in {CharSettingDB.__tablename__}, data:{[r.to_dict for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise
+
+@connection(commit=False)
+@log.decor()
+async def get_skills_for_attribute_point_ids(
+                             session: AsyncSession,
+                             skill_tag: str,
+                             attribute_point_ids: list[int]                      
+                            ):
+        try:
+            query = select(SkillDB).filter_by(sketch_tag=skill_tag).where(SkillDB.attribute_point_id.in_(attribute_point_ids))
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.debug(f"Select data in {SkillDB.__tablename__}, data:{[r.to_dict for r in record]}")
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise
