@@ -25,7 +25,7 @@ def exept(func):
             markup = FaqIKB(message.from_user.id).to_error_faq(bote.code) if len(bote.faq) > 0 else None
             await message.answer((TextHTML(bote.to_msg).escape)[:4000], reply_markup=markup)
         except TelegramBadRequest as e:
-            pass
+            log.error(f'AioPartPath: {e}')
         except Exception as e:
             str_e = str(e)
             log.error(f'AioPartPath: {e}')
@@ -43,8 +43,8 @@ def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity
         @wraps(func)
         async def wrapped(callback: CallbackQuery, callback_data: BaseCall, **kwargs): 
             try:
-                if check_is_user:
-                    if callback.from_user.id != callback_data.tg_id:
+                if check_is_user and callback_data.is_check:
+                    if callback.from_user.id != callback_data.tg_id and callback_data.is_check:
                         raise ALienCallbackError(f'This user(tg_id={callback.from_user.id}) enter is alien callback keyboard')
                 answer_text = ''
                 show_alert=None
@@ -58,7 +58,7 @@ def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity
                 show_alert=True
                 answer_text = (TextHTML(bote.to_msg).escape)[:4000]
             except TelegramBadRequest as e:
-                pass
+                log.error(f'AioPartPath: {e}')
             except Exception as e:
                 str_e = str(e)
                 log.error(f'AioPartPath: {e}')

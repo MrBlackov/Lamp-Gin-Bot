@@ -15,6 +15,7 @@ add_or_update_donate = add_or_update_obj(DonateDAO)
 
 select_user = select_obj(Users_add, UserDAO)
 select_users = select_objs(Users_add, UserDAO)
+select_users_for_ids = get_for_ids(UserDAO)
 select_user_setting = select_obj_no_valide(UserSettingDAO)
 
 select_chat = select_obj_no_valide(ChatDAO)
@@ -28,6 +29,9 @@ async def get_user_for_tg_id(tg_id: int, to_user: bool = False) -> int | UserDB:
 
 async def get_user_for_id(user_id: int) -> UserDB:
     return await select_user(filters={'id':user_id})
+
+async def get_users_for_ids(ids: list[int]) -> list[UserDB]:
+    return await select_users_for_ids(ids=ids)
 
 async def get_users() -> list[UserDB]:
     return await select_users()

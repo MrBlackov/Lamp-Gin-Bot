@@ -15,12 +15,13 @@ bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
 cmds = {
     'mychar':'👑 Действующий персонаж',
-    'mychars':'👤 Список ваших персонажей',
+    'mychars':'👥 Список ваших персонажей',
     'inventory':'💼 Инвентарь',
     'transfer':'✉️ Ваши сделки',
     'craft':'⚗️ Доступные крафты',
     'myskills':'💡 Ваши навыки',
     'actions':'🎮 Доступные действия',
+    'myfriends':'😎 Друзья',
     'setting':'⚙️ Настройки аккаунта',
     'chat':'⚙️ Настройки чата',
     'menu':'🏠 Главное меню',

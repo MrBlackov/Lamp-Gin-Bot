@@ -1,4 +1,4 @@
-from sqlalchemy import String, ARRAY, BigInteger, ForeignKey, JSON
+from sqlalchemy import String, ARRAY, BigInteger, ForeignKey, JSON, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from typing import List
@@ -37,12 +37,18 @@ class UserDB(Base):
     main_char: Mapped[int | None] = mapped_column(ForeignKey("characterdb.id", ondelete='SET NULL'), default=None)
     tg_user: Mapped[TgUserDB | None] = relationship(TgUserDB, uselist=False, lazy='joined', primaryjoin="foreign(TgUserDB.tg_id) == UserDB.tg_id")
     setting_id: Mapped[int] = mapped_column(ForeignKey('usersettingdb.id'), nullable=True)
+    friend_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('userdb.id')), default=None)
+
+    def add_friends(self, friends: list['UserDB']) -> 'UserDB':
+        self.friends = friends
+        return self
 
     def add_setting(self, setting: 'UserSettingDB', parametrs: list) -> 'UserDB':
         self.setting = setting
         self.parametrs = parametrs
+        self.parametrs_tag = {p.tag:p for p in parametrs}
         return self
-
+    
 class ChatDB(Base):
     tg_id: Mapped[int | None] = mapped_column(BigInteger, unique=True, default=None)
     tg_chat: Mapped[TgChatDB | None] = relationship(TgChatDB, uselist=False, lazy='joined', primaryjoin="foreign(TgChatDB.tg_id) == ChatDB.tg_id")

@@ -11,6 +11,8 @@ from .transfer import TransferError, TransferEnoughError, TransferNoFindError, T
 from .char import CharError, CharHastNameError, BonusCharSubError, NoHaveMainChar
 from .faq import FaqError, FaqErrorNoEnterError, FaqErrorNoFindError
 from .action import ActionError, SleepError
+from .setting import SettingError, SettingTagError, SettingValueError
+from .social import SocialError, NoFindUserError, UserFriendError, NotReceiveFriendshipRequestError, EnterUserNameError
 
 error_faq: dict[str, BotError] = get_error_faq()
 #print('\n'.join([f'{code}: {error}' for code, error in error_faq.items()]))

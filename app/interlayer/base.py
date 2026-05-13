@@ -1,4 +1,4 @@
-from app.db.metods.gets import get_user_for_tg_id, get_user_setting_for_user_id, get_char_setting_for_char_id, get_action_states_for_exist_id, get_user_for_id, get_items_for_inventory, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
+from app.db.metods.gets import get_user_for_tg_id, get_users_for_ids, get_user_setting_for_user_id, get_char_setting_for_char_id, get_action_states_for_exist_id, get_user_for_id, get_items_for_inventory, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
 from app.db.metods.unique import get_char_for_exist_id, ActionStateDB
 from app.logged.infolog import infolog
 from app.aio.config import admins, bot
@@ -14,17 +14,24 @@ class BaseLayer:
         self.logic = None
         self.bot = bot
 
-    async def get_char_info(self, user_id: int | None = None):
-        if user_id:
-            self.user = await get_user_for_id(user_id)
-        else:
-            self.user = await get_user_for_tg_id(self.tg_id, True)
-        setting = await get_user_setting_for_user_id(self.user.id)
-        self.user.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
-        self.char_id = await get_main_char_for_user_id(self.user.id)
-        self.char = await self.get_char_full_info(self.char_id)
+    async def get_char_info(self, user_id: int | None = None, and_char: bool = True):
+        self.user = await self.get_user_full_info(user_id)
+        if and_char:
+            self.char_id = await get_main_char_for_user_id(self.user.id)
+            self.char = await self.get_char_full_info(self.char_id)
         return self
     
+    async def get_user_full_info(self, user_id: int | None = None):
+        if user_id:
+            user = await get_user_for_id(user_id)
+        else:
+            user = await get_user_for_tg_id(self.tg_id, True)
+        setting = await get_user_setting_for_user_id(user.id)
+        user.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
+        friends = (await get_users_for_ids(ids=user.friend_ids)) if user.friend_ids and len(user.friend_ids) > 0 else []
+        user.add_friends(friends)
+        return user
+
     async def get_char_full_info(self, char_id: int):
         char = await get_char_for_id(char_id)
         skills = await get_skills_for_attribute_point_id(char.exist.attibute_point.id)

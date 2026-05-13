@@ -83,6 +83,9 @@ class TextHTML:
     def pre(self, language: str = 'python'):
         return f'<pre><code class="language-{language}">{self.text}</code></pre>'
 
+    def openmessage(self, user_id: int):
+        return f'<a href="tg://openmessage?user_id={user_id}">{self.text}</a>'
+
 def get_invisibly_edited():
     return str('\u200b'*random.choice(range(10)))   
 
