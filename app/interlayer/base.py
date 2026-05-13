@@ -14,45 +14,48 @@ class BaseLayer:
         self.logic = None
         self.bot = bot
 
-    async def get_char_info(self, user_id: int | None = None, and_char: bool = True):
+    async def get_char_info(self, user_id: int | None = None, and_char: bool = True, **kwargs):
         self.user = await self.get_user_full_info(user_id)
         if and_char:
-            self.char_id = await get_main_char_for_user_id(self.user.id)
-            self.char = await self.get_char_full_info(self.char_id)
+            self.char_id = await get_main_char_for_user_id(self.user.id, **kwargs)
+            self.char = await self.get_char_full_info(self.char_id, **kwargs)
         return self
     
-    async def get_user_full_info(self, user_id: int | None = None):
+    async def get_user_full_info(self, user_id: int | None = None, and_setting: bool = True, and_frinends: bool = True, **kwargs):
         if user_id:
             user = await get_user_for_id(user_id)
         else:
             user = await get_user_for_tg_id(self.tg_id, True)
-        setting = await get_user_setting_for_user_id(user.id)
-        user.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
-        friends = (await get_users_for_ids(ids=user.friend_ids)) if user.friend_ids and len(user.friend_ids) > 0 else []
-        user.add_friends(friends)
+        if and_setting:
+            setting = await get_user_setting_for_user_id(user.id)
+            user.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
+        if and_frinends:
+            friends = (await get_users_for_ids(ids=user.friend_ids)) if user.friend_ids and len(user.friend_ids) > 0 else []
+            user.add_friends(friends)
         return user
 
-    async def get_char_full_info(self, char_id: int):
+    async def get_char_full_info(self, char_id: int, and_skills: bool = True, and_items: bool = True, and_action: bool = True, and_setting: bool = True, and_recovery: bool = True, **kwargs):
         char = await get_char_for_id(char_id)
-        skills = await get_skills_for_attribute_point_id(char.exist.attibute_point.id)
-        char.exist.attibute_point.add_skills(skills)
-        items = await get_items_for_inventory(char.exist.inventory.id)
-        char.exist.inventory.add_items(items)
-        action_states = await get_action_states_for_exist_id(char.exist.id)
-        char.exist.add_action_state(action_states)
-        setting = await get_char_setting_for_char_id(char_id)
-        char.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
-        await RecoveryAction(char, action_tags=ActionSelf.action_tags).to_action()
+        if and_skills:
+            skills = await get_skills_for_attribute_point_id(char.exist.attibute_point.id)
+            char.exist.attibute_point.add_skills(skills)
+        if and_items:
+            items = await get_items_for_inventory(char.exist.inventory.id)
+            char.exist.inventory.add_items(items)
+        if and_action:
+            action_states = await get_action_states_for_exist_id(char.exist.id)
+            char.exist.add_action_state(action_states)
+        if and_setting:
+            setting = await get_char_setting_for_char_id(char_id)
+            char.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
+        if and_recovery:
+            await RecoveryAction(char, action_tags=ActionSelf.action_tags).to_action()
         return char
 
     async def get_char_info_for_exist_id(self, exist_id: int):
         self.char = await get_char_for_exist_id(exist_id=exist_id)
-        self.char_id = self.char.id
-        self.user = await get_user_for_id(self.char.user_id)
-        skills = await get_skills_for_attribute_point_id(self.char.exist.attibute_point.id)
-        self.char.exist.attibute_point.add_skills(skills)
-        items = await get_items_for_inventory(self.char.exist.inventory.id)
-        self.char.exist.inventory.add_items(items)
+        self.user = await self.get_user_full_info(self.char.user_id, and_frinends=False)
+        self.char = await self.get_char_full_info(self.char.id, and_recovery=False)
         return self
     
     @property
