@@ -18,6 +18,9 @@ update_donate = update_obj(DonateDAO)
 update_chat_setting = update_obj(ChatSettingDAO)
 update_message = update_obj(MessageDAO)
 
+async def update_user_for_id(user_id: int, new_data: dict) -> UserDB:
+    return await update_user(filters={'id':user_id}, new_data=new_data)
+
 async def update_chat_by_setting(chat_id: int, setting_id: int) -> ChatDB:
     return await update_chat(filters={'id':chat_id}, new_data={'setting_id':setting_id})
 
