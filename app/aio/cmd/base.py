@@ -4,6 +4,7 @@ from app.aio.cmd.faq import faq_router
 from app.aio.cmd.kit.kit import kit_router
 from app.aio.cmd.stats import stats_router
 from app.aio.cmd.setting import setting_router
+from app.aio.cmd.social import social_router
 from app.aio.cmd.skill import skill_router
 from app.aio.cmd.action.action import action_router
 from app.aio.cmd.main.chat import chat_router
@@ -18,7 +19,7 @@ from aiogram.methods import CreateForumTopic
 from app.aio.middlewares.message_clean import MessageCleanDpMiddleware
 
 base_router = Router()
-base_router.include_routers(setting_router, char_router, action_router, skill_router, faq_router, chat_router, stats_router)
+base_router.include_routers(setting_router, char_router, action_router, social_router, skill_router, faq_router, chat_router, stats_router)
 base_router.message.middleware(MessageCleanDpMiddleware())
 
 @base_router.message(Command('menu'))

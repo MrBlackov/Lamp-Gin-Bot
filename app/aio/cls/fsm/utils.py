@@ -69,4 +69,6 @@ class ActionFSM(FSMUtils):
 class TransferFSM(FSMUtils):
     prefixs = ['transfer']
     
-
+class SocialFSM(FSMUtils):
+    prefixs = ['social']
+    

@@ -213,3 +213,20 @@ async def get_item_for_action_tag(
             raise
 
 
+@connection(commit=False)
+@log.decor()
+async def get_user_for_username(
+                             session: AsyncSession,
+                             username: str                          
+                            ):
+        try:
+            query = select(UserDB).join(UserDB.tg_user).filter_by(username=username)
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalar_one_or_none()
+            log.debug(f"Select data in {UserDB.__tablename__}, data:{record.to_dict if record else None}")
+            return record
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise
+
