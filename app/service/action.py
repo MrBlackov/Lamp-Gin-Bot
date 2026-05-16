@@ -6,6 +6,7 @@ from app.exeption.action import SleepError, StopError
 from app.aio.cls.fsm.utils import ActionFSM
 from app.aio.cls.fsm.action import ActionState
 from app.exeption.action import ActionError
+from app.service.utils import is_natural_int
 
 class ActionService(BaseService):
     actions = ActionSelf
@@ -34,9 +35,9 @@ class ActionService(BaseService):
         except StopError as e:
             return e.msg, self.IKB.stop()
     
-    async def to_action(self, tag: str, step: int = 1, minute: int | None = None):
+    async def to_action(self, tag: str, step: int = 1, minute: int | None = None, **kwargs):
         try:
-            action = await self.layer.action(tag, step, minute)
+            action = await self.layer.action(tag, step, minute, **kwargs)
             emodzi = action.emodzi
             result = action.result
             msg_format = {
@@ -48,8 +49,11 @@ class ActionService(BaseService):
             match result:
                 case 'is_sleep' | 'to_sleep':
                     return msg, self.IKB.wake_up()
-                case 'wake_up' | 'no_sleep' | 'stop' | 'no_action' | 'recovery' | 'no_lookaround':
-                    return msg, self.IKB.back('actions')   
+                case 'wake_up' | 'no_sleep' | 'stop' | 'no_action' | 'recovery' | 'no_lookaround' | 'no_throw':
+                    return msg, self.IKB.back('actions')  
+                case 'to_throw':
+                    await self.bot.send_message(action.purpose_user.tg_id, action.purpose_msg)
+                    return msg, self.IKB.back('actions')    
                 case 'is_action' | 'to_action':
                     return msg, self.IKB.stop()     
                 case 'stats':
@@ -58,6 +62,17 @@ class ActionService(BaseService):
                     return msg, self.IKB.lookaround(action.results)  
                 case 'to_action_time':
                     return msg, self.IKB.redact(tag=tag, minute=action.minute, emodzi=emodzi, action_text=action.name, where='actions')
+                case 'item_throw':
+                    return msg, self.IKB.item_throw(action.char, action.kwargs, 'actions')
+                case 'char_throw':
+                    values_in_page = 10
+                    char_pages = [tuple(action.chars[i:i+values_in_page]) for i in range(0, len(action.chars), values_in_page)]
+                    await self.state.update_data(char_pages=char_pages, msg_text=msg, throw_kwargs=action.kwargs)
+                    return msg + f'{f' [1/{len(char_pages)}стр]' if len(char_pages) > 1 else ''}', self.IKB.char_throw(char_pages[0], action.kwargs, page=0, max_page=len(char_pages), where='actions')
+                case 'throw_menu':
+                    return msg, self.IKB.throw_menu(action.kwargs, 'actions')
+                case _:
+                    return '💻 Скоро', self.IKB.back('actions')
         except SleepError as e:
             return e.msg, self.IKB.wake_up()
         except StopError as e:
@@ -87,3 +102,19 @@ class ActionService(BaseService):
         await self.state.update_data(tag=tag)
         return await self.time_redact(-1)
    
+    async def to_throw_quantity(self, msg, **kwargs: dict):
+        await self.state.update_data(throw_kwargs=kwargs, msg=msg)
+        await self.state.set_state(ActionState.throw_quantity)
+        return '✏️ Отправьте количество, которое хотите бросить', self.IKB.back('throw_menu')
+
+    async def throw_quantity(self, quantity: str):
+        kwargs = await self.state.get_value('throw_kwargs')
+        quantity = is_natural_int(quantity)
+        return await self.to_action('throw', **(kwargs | {'quantity':quantity}))
+
+    async def char_throw(self, page: int):
+        char_pages = await self.state.get_value('char_pages')
+        msg_text = await self.state.get_value('msg_text')
+        throw_kwargs = await self.state.get_value('throw_kwargs')
+        return msg_text + f'{f' [{page + 1}/{len(char_pages)}стр]' if len(char_pages) > 1 else ''}', self.IKB.char_throw(char_pages[page], throw_kwargs, page=page, max_page=len(char_pages), where='actions')
+

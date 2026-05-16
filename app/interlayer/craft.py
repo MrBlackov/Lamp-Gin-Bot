@@ -42,6 +42,7 @@ class CraftLayer(BaseLayer):
 
     async def use_craft(self, craft_id: int, quantity: int):
         await self.get_char_info()
+        await self.checking_freedom()
         craft = await self.logic.get_craft(craft_id=craft_id)
         await self.check_inventory(self.char, craft.ingredients, quantity)
         await self.check_inventory(self.char, craft.tools, is_tools=True)

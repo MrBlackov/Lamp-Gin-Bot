@@ -1,10 +1,11 @@
-from app.aio.cls.callback.action import ActionBackCall, MenuCall, ActionCall, ActionRedactCall, LookAroundCall
+from app.aio.cls.callback.action import ActionBackCall, MenuCall, ActionCall, ActionRedactCall, LookAroundCall, ActionPageCall, ThrowItemCall, ThrowItemQuantityCall
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from app.enum_type.tags import ActionTags
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from app.logic.actions import ActionBase
-from app.db.models.char import ExistenceDB, ItemDB
+from app.db.models.char import ExistenceDB, ItemDB, CharacterDB
+from app.db.models.main import UserDB
 
 class ActionIKB(BotIKB):
     def back(self, where: str):
@@ -44,7 +45,35 @@ class ActionIKB(BotIKB):
         for exist, action in results:
             self.builder.button(text=f'{action.emodzi} {exist.full_name} {action.action_text}', callback_data=LookAroundCall(tg_id=self.tg_id))
         self.builder.button(text='👁️ Посмотреть ещё раз', callback_data=ActionCall(tag=ActionTags.lookaround, tg_id=self.tg_id))
-        self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where='actions', is_details=True, tg_id=self.tg_id)).as_markup()
+        self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where='actions', is_details=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
 
+    def item_throw(self, char: CharacterDB, kwargs: dict = {}, where: str | None = None):
+        print(kwargs)
+        for item in char.exist.inventory.items:
+            self.builder.button(text=item.text, callback_data=ThrowItemCall(tag='throw', **(kwargs | {'item_id': item.id, 'quantity':1}), tg_id=self.tg_id))
+        if where:
+            self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where='actions', is_details=True, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()     
 
+    def char_throw(self, chars: list[CharacterDB], kwargs: dict = {}, page: int = 0, max_page: int = 0, where: str | None = None):
+        for char in chars:
+            self.builder.button(text=f'💠 {char.exist.full_name}', callback_data=ThrowItemCall(tag='throw', **(kwargs | {'purpose_char_id': char.id}), tg_id=self.tg_id))
+        self.builder.adjust(2)
+        arrows_page = []
+        if page > 0:
+            arrows_page.append(InlineKeyboardButton(text='⬅️', callback_data=ActionPageCall(page=page-1, tag='throw', tg_id=self.tg_id).pack()))
+        if page != max_page - 1:
+            arrows_page.append(InlineKeyboardButton(text='➡️', callback_data=ActionPageCall(page=page+1, tag='throw', tg_id=self.tg_id).pack()))
+            
+        if len(arrows_page) > 0: 
+            self.builder.row(*arrows_page)
+        self.builder.row(InlineKeyboardButton(text='↩️ Назад', callback_data=ActionBackCall(where='actions', is_details=True, tg_id=self.tg_id).pack()))
+            
+        return self.builder.as_markup() 
+
+    def throw_menu(self, kwargs: dict = {}, where: str = 'actions'):
+        self.builder.button(text='🥏 Кинуть', callback_data=ThrowItemCall(tag='throw', step=2, **kwargs, tg_id=self.tg_id))
+        self.builder.button(text='✏️ Изменить количество', callback_data=ThrowItemQuantityCall(tag='throw', **kwargs, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where=where, is_details=True, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()     

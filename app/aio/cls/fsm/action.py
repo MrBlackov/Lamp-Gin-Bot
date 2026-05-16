@@ -5,5 +5,6 @@ class ActionState(StatesGroup):
     tag: str
     msg = None
     minute = State()
+    throw_quantity = State()
 
 

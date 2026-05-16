@@ -1,6 +1,6 @@
 from app.enum_type.tags import ActionTags, SkillTags
 from datetime import datetime, timedelta
-from app.db.metods.gets import ActionStateDB, CharacterDB, ItemDB, ItemSketchDB, get_item_sketch, get_item_sketch_for_tag, get_exists_for_ids, get_action_state_for_tag, get_action_states_for_block_freedom, get_action_state_for_id, get_action_states_for_exist_id, SkillDB
+from app.db.metods.gets import get_all_chars, get_char_for_id, ActionStateDB, UserDB, CharacterDB, ItemDB, ItemSketchDB, get_item_sketch, get_item_sketch_for_tag, get_exists_for_ids, get_action_state_for_tag, get_action_states_for_block_freedom, get_action_state_for_id, get_action_states_for_exist_id, SkillDB
 from app.db.metods.updates import update_skill_for_id, update_skill_for_tag, update_action_state_for_id, update_action_state_for_tag
 from app.db.metods.adds import add_db_obj
 from app.db.metods.unique import get_chars_for_exist_id, get_item_for_tag, get_item_sketch_for_action_tag, get_item_for_action_tag
@@ -9,6 +9,10 @@ from app.aio.msg.utils import TextHTML
 from app.exeption.action import HaveSkillError, EnergyLessZeroError, HaveItemError
 from app.logic.item import ItemsLogic, InventaryOverFlowing
 from app.logic.utils import action_point, set_to_list, list_to_set
+from app.logic.settings import SettingSelf
+
+class Logic:
+    item = ItemsLogic()
 
 class ActionBase:
     tag: str | None = None
@@ -42,8 +46,11 @@ class ActionBase:
     command_prefix: list[str] = ['!', '/']
     IKB = True
 
-    def __init__(self, char: CharacterDB, step: int = 1, minute: int | None = None, action_tags: dict[str, 'ActionBase'] = {}):
+    logic = Logic
+
+    def __init__(self, char: CharacterDB, user: UserDB | None = None, step: int = 1, minute: int | None = None, action_tags: dict[str, 'ActionBase'] = {}, **kwargs):
         self.char = char
+        self.user = user
         self.skills = char.exist.attibute_point.skills
         self.energy = char.exist.attibute_point.skill_tags.get(SkillTags.energy)
         self.items = char.exist.inventory.items
@@ -53,6 +60,7 @@ class ActionBase:
         self.end = self.start + timedelta(minutes=self.minute) if self.minute and self.minute > 0 else None
         self.action_tags = action_tags
         self.new_action_state: ActionStateDB | None = None
+        self.kwargs = kwargs
 
     @classmethod
     def text(self):
@@ -78,6 +86,13 @@ class ActionBase:
     def have_items(self):
         return [self.tag] if self.is_have_items else []
 
+    async def get_chars(self, freiends_the_first: bool = False):        
+        chars = await get_all_chars()
+        if freiends_the_first:
+            return [c for c in chars if c.user_id == self.user.id] + [c for c in chars if c.user_id in self.user.friend_ids and c.user_id != self.user.id] + [c for c in chars if c.user_id not in self.user.friend_ids and c.user_id != self.user.id]
+        else:
+            return [c for c in chars if c.user_id == self.user.id] + [c for c in chars if c.user_id != self.user.id]
+ 
     def stats_info(self, **kwargs):
         return []
 
@@ -178,9 +193,8 @@ class BlockFreedomAction(ActionBase):
         return self
     
     async def give_item(self, item: ItemDB):
-        
         try:
-            return await ItemsLogic().give(item.sketch_id, self.char.exist.inventory.id, self.char, item.quantity), True
+            return await self.logic.item.give(item.sketch_id, self.char.exist.inventory.id, self.char, item.quantity), True
         except InventaryOverFlowing:
             return await add_db_obj(data=[ItemDB(location_id=1, sketch_id=item.sketch_id, quantity=item.quantity, nbt={"is_pick_up": False})]), False
 

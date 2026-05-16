@@ -28,6 +28,10 @@ class ItemSketchDB(Base):
     def emodzi(self):
         return f'<tg-emoji emoji-id="{self.custom_emodzi_id}">{self._emodzi}</tg-emoji>' if self.custom_emodzi_id else self._emodzi
 
+    @property
+    def text(self):
+        return f'{self.emodzi} {self.name}'
+
 class ItemDB(Base):
     inventory_id: Mapped[int | None] = mapped_column(ForeignKey('inventorydb.id'), nullable=True)
     transfer_id: Mapped[int | None] = mapped_column(ForeignKey('transferdb.id'), nullable=True)
@@ -53,6 +57,13 @@ class ItemDB(Base):
     def to_char_transfer(self):
         return False if self.from_char_transfers else True
 
+    def to_text(self, quantity: int | None = None):
+        return f'{self.sketch.text}{f' ({quantity}шт.)' if quantity and quantity > 1 else ''}'
+    
+    @property
+    def text(self):
+        return self.to_text(self.quantity)
+    
 class CraftDB(Base):
     ingredient_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
     result_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
