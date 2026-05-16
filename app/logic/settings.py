@@ -96,7 +96,7 @@ class is_hide_char(SettingValueBase):
     
 class allowed_sender_item(SettingValueBase):
     tag = 'allowed_sender_item'
-    name = 'Кто может кидать вам предметы'
+    name = 'Кто может кидать вам'
     emodzi = '📩'
     default_value = 'all'
     default_value_type = Literal['all', 'friends', 'none']

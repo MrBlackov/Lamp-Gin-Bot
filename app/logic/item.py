@@ -17,7 +17,7 @@ from app.db.metods.deletes import delete_item_for_id, delete_item_sketch_for_id,
 from app.db.metods.another import get_items_and_chars_for_sketch
 from app.logged.botlog import log
 from app.exeption.item import ThrowAwayQuantityLessOne, ThrowAwayQuantityMoreItemQuantity, MaxDropLessMinDropError, ItemError
-from app.exeption.char import InventaryOverFlowing
+from app.exeption.char import InventaryOverFlowing, InventaryNoHaveError
 from app.db.models.char import CharacterDB
 from app.exeption.transfer import TransferNoHaventItemError
 
@@ -141,6 +141,12 @@ class ItemsLogic:
                 raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
         return True
       
+    def check_have_item(self, char: CharacterDB, item_id :int, quantity: int):
+        item = char.exist.inventory.item_ids.get(item_id)
+        if item.quantity < quantity:
+            raise InventaryNoHaveError(f'This char(id={char.id}) not have quantity by item')
+        return True
+
     @log.decor(arg=True)
     async def action_for_items(self, items: list[ItemDB], char: CharacterDB, action: str, quantity: int | None = None, is_pick_up: bool = False):
         inventory_items = await get_items_for_inventory(char.exist.inventory.id)
@@ -185,20 +191,20 @@ class ItemsLogic:
         await delete_items(delete_item)
         return True
 
-    async def throw_away(self, item_id: int, quantity: int = 1, location_id: int = 1) -> bool:
+    async def throw_away(self, item_id: int | None = None, quantity: int = 1, location_id: int = 1, item: ItemDB | None = None) -> bool:
         if quantity < 1:
             raise ThrowAwayQuantityLessOne('User enter quantity < 1')
-        item = await get_item_for_id(item_id)
+        item = await get_item_for_id(item_id) if item == None else item
         if item.quantity < quantity:
             raise ThrowAwayQuantityMoreItemQuantity('User enter quantity > item.quantity')
         elif item.quantity > 1 and item.quantity - quantity > 0:
-            update = await update_quantity_item(item_id, item.quantity - quantity)
+            update = await update_quantity_item(item.id, item.quantity - quantity)
             if update:
                 return await add_db_obj(data=[ItemDB(sketch_id=update.sketch_id, 
                                                quantity=quantity, 
                                                location_id=location_id, 
                                                nbt=update.nbt | {'is_pick_up':False})])
-        return await update_item_throw_away(item_id, location_id)
+        return await update_item_throw_away(item.id, location_id)
 
     async def delete_items(self, sketch_id: int) -> bool:
         return await delete_items_for_sketch_id(sketch_id)

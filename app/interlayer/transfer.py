@@ -19,6 +19,7 @@ class TransferLayer(BaseLayer):
 
     async def locator(self):
         await self.get_char_info()
+        await self.checking_freedom()
         chars = await self.char.get_all_chars()
         if self.char == None:
             raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
@@ -43,6 +44,7 @@ class TransferLayer(BaseLayer):
                        items2: list, 
                        status: str):
         self = await self.get_char_info()
+        await self.checking_freedom()
         if status == 'confirmed':
             inventory = await get_items_for_inventory(char1.exist.inventory.id)
             self.item.check_size_inventory(char1, inventory, items2, '+')

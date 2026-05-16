@@ -148,23 +148,28 @@ class InventoryCharacterLayer(BaseLayer):
         return self
 
     async def throw_away(self, item_id: int, quantity: int = 1):
+        await self.checking_freedom()
         return await self.item_logic.throw_away(item_id, quantity)
 
     async def look_location_items(self):
         await self.get_char_info()
         await update_char_location_default(self.char_id)
+        await self.checking_freedom()
         return await self.item_logic.look_location_items(self.char.exist.location_id, self.char.exist.inventory.id)
     
     async def look_location_item(self, item_id: int):
         await self.get_char_info()
+        await self.checking_freedom()
         return await self.item_logic.look_location_item(item_id, self.char.exist.inventory.id)
     
     async def throw_back(self, item_id: int):
         await self.get_char_info()
+        await self.checking_freedom()
         return await self.item_logic.throw_back(item_id, self.char.exist.inventory.id)
      
     async def pick_up(self, item_id: int, quantity: int):
         await self.get_char_info()
+        await self.checking_freedom()
         item = await self.item_logic.get_item_id(item_id)
         if item.quantity < quantity:
             raise PickUpQuantityMoreItemQuantity(f'This user(user_id:{self.user_id}) enter quantity, but quantity({quantity}) > item.quantity({item.quantity})')

@@ -3,9 +3,9 @@ from app.db.metods.gets import get_skills_for_attribute_point_id, get_skill_for_
 from app.logic.actions import ActionSelf, ActionTags, ActionBase
 
 class ActionLogic:
-    async def action(self, char, tag: str, step: int = 1, minute: int | None = None):
+    async def action(self, char, user, tag: str, step: int = 1, minute: int | None = None, **kwargs):
         action = ActionSelf.action_tags.get(tag)
-        return await action(char=char, step=step, minute=minute, action_tags=ActionSelf.action_tags).to_action()
+        return await action(char=char, user=user, step=step, minute=minute, action_tags=ActionSelf.action_tags, **kwargs).to_action()
 
     
  

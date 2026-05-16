@@ -14,6 +14,7 @@ class InventoryDB(Base):
 
     def add_items(self, items: list[ItemDB]):
         self.items = items
+        self.item_ids = {i.id:i for i in items}
         return self 
 
 #class LocationDB(Base):
