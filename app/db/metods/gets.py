@@ -75,12 +75,13 @@ async def get_main_char_for_user_id(user_id: int) -> int | None:
 async def get_char_for_id(char_id: int) -> CharacterDB:
     return await select_char(filters={'id':char_id})
 
-async def get_chars_for_user_id(user_id: int, is_die: bool | None = False) -> list[CharacterDB]:
+async def get_chars_for_user_id(user_id: int, is_die: bool = False) -> list[CharacterDB]:
     chars = await select_chars(filters={"user_id":user_id})
-    return [c for c in chars if c.exist.die == is_die] if type(is_die) == bool else chars
+    return [c for c in chars if c.exist.die == is_die] 
 
-async def get_all_chars() -> list[CharacterDB]:
-    return await select_chars()
+async def get_all_chars(is_die: bool = False) -> list[CharacterDB]:
+    chars = await select_chars()
+    return [c for c in chars if c.exist.die == is_die]
 
 async def get_char_setting_for_id(id: int) -> CharSettingDB | None:
     return await select_char_setting(filters={'id':id})

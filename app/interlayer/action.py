@@ -17,10 +17,22 @@ class ActionLayer(BaseLayer):
         await self.checking_freedom()
         return self.energy
 
-    async def action(self, tag: str, step: int = 1, minute: int | None = None):
+    async def action(self, tag: str, step: int = 1, minute: int | None = None, **kwargs):
         await self.get_char_info()
         await self.checking_freedom(tag)
-        return await self.logic.action(self.char, tag, step, minute)
+        kwargs = await self.get_info_for_action(**kwargs)
+        return await self.logic.action(self.char, self.user, tag, step, minute, **kwargs)
+
+    async def get_info_for_action(self, **kwargs):
+        match kwargs:
+            case {'purpose_char_id':None}:
+                return kwargs
+            case {'purpose_char_id':char_id}:
+                purpose_char = await self.get_char_full_info(char_id, False, False, False, True, False)
+                purpose_user = await self.get_user_full_info(purpose_char.user_id, False)
+                return kwargs | {'purpose_char':purpose_char, 'purpose_user':purpose_user}
+            case _:
+                return kwargs
 
     @log.decor()
     async def check_action(self, action_state: ActionStateDB):

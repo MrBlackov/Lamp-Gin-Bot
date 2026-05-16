@@ -32,6 +32,10 @@ class InventaryOverFlowing(CharError):
     msg = '❌ Инвентарь будет переполнен, предмет невозможно получить'
     code = '402.7'
 
+class InventaryNoHaveError(CharError):
+    msg = '❌ Такова количества этого предмета нет у вас'
+    code = '402.8'
+
 class NoDeleteCharError(CharError):
     msg = '❌ У вас кончилась веревка'
     code = '505.1'
