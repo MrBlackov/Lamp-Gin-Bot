@@ -55,3 +55,17 @@ class EnergyLessZeroError(ActionError):
     code = '510.11'
     faq = 'Ваша энергия упала ниже 0, отдохните'    
 
+class DiceCmdNoValideError(ActionError):
+    msg = '❌ В команде присуствуют лишние знаки'
+    code = '510.12'
+    faq = 'Ваша команда не валидна, синтаксис: kdn + m'    
+
+class DiceCmdDontHaveDError(ActionError):
+    msg = '❌ В команде отсуствует "d"'
+    code = '510.13'
+    faq = 'Ваша команда не валидна, символа "d" нет в команде'    
+
+class DiceCmdLongError(ActionError):
+    msg = '❌ Результат команды слишком большой, сделайте выборку меньше'
+    code = '510.14'
+    faq = 'Сообщение слишком большое'    

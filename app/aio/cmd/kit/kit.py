@@ -15,28 +15,28 @@ kit_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg, markup = await KitService(message.from_user.id, state).kits()
+    msg, markup = await KitService(message.from_user.id, state, message).kits()
     await message.answer(msg, reply_markup=markup)
 
 @kit_router.callback_query(KitBackCall.filter(F.where == 'cmd')) 
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: KitBackCall, state: FSMContext, **kwargs):
-    msg, markup = await KitService(callback.from_user.id, state).kits()
+    msg, markup = await KitService(callback.from_user.id, state, callback.message).kits()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @kit_router.callback_query(KitIdCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: KitIdCall, state: FSMContext, **kwargs):
-    msg, markup = await KitService(callback.from_user.id, state).kit(callback_data.kit_id, callback_data.is_new)
+    msg, markup = await KitService(callback.from_user.id, state, callback.message).kit(callback_data.kit_id, callback_data.is_new)
     await callback.message.edit_text(msg, reply_markup=markup)  
  
 @kit_router.callback_query(KitActionCall.filter(F.to_enter_code == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: KitActionCall, state: FSMContext, **kwargs):
-    msg, markup = await KitService(callback.from_user.id, state).to_enter_code(callback.message)
+    msg, markup = await KitService(callback.from_user.id, state, callback.message).to_enter_code(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)  
  
 @kit_router.message(KitState.code)
@@ -44,7 +44,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: KitActionCall
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     msg0 = await KitFSM(state).get_value('msg')
-    msg, markup = await KitService(message.from_user.id, state).enter_code(message.text)
+    msg, markup = await KitService(message.from_user.id, state, message).enter_code(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
     await state.set_state()

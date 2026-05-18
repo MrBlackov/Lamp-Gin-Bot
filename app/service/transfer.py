@@ -19,8 +19,8 @@ from app.aio.msg.base import UserText
 from app.aio.cls.fsm.utils import TransferFSM
 
 class NewItemTransferService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.IKB = ItemTransferIKB(tg_id)
         self.layer = TransferLayer(tg_id)
         self.text = ItemTransferText
@@ -183,8 +183,8 @@ class NewItemTransferService(BaseService):
 
 
 class InfoTransferService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.IKB = InfoTransferIKB(tg_id)
         self.layer = TransferLayer(tg_id)
         self.text = ItemTransferText
@@ -308,9 +308,9 @@ class InfoTransferService(BaseService):
 
 
 class TransferService:
-    def __init__(self, tg_id: int, state = None):
-        self.new = NewItemTransferService(tg_id, state)
-        self.info = InfoTransferService(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        self.new = NewItemTransferService(tg_id, state, message, **kwargs)
+        self.info = InfoTransferService(tg_id, state, message, **kwargs)
         
 
 

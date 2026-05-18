@@ -11,8 +11,8 @@ from app.service.utils import is_natural_int
 class ActionService(BaseService):
     actions = ActionSelf
 
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.layer = ActionLayer(tg_id)
         self.text = ActionText
         self.state = ActionFSM(state)
@@ -64,6 +64,12 @@ class ActionService(BaseService):
                     return msg, self.IKB.redact(tag=tag, minute=action.minute, emodzi=emodzi, action_text=action.name, where='actions')
                 case 'item_throw':
                     return msg, self.IKB.item_throw(action.char, action.kwargs, 'actions')
+                case 'dice':
+                    return msg, self.IKB.dice(action.kwargs)
+                case 'to_dice':
+                    await self.state.set_state(ActionState.dice_command)
+                    await self.state.update_data(msg=self.message)
+                    return msg, self.IKB.dice_command()
                 case 'char_throw':
                     values_in_page = 10
                     char_pages = [tuple(action.chars[i:i+values_in_page]) for i in range(0, len(action.chars), values_in_page)]
@@ -78,9 +84,9 @@ class ActionService(BaseService):
         except StopError as e:
             return e.msg, self.IKB.stop()
 
-    async def cmd_action(self, cmd: str, minute: str | None =  None):
+    async def cmd_action(self, cmd: str, minute: str | None =  None, args: str | None =  None, **kwargs):
         cmds = self.cmds_and_tags
-        return await self.to_action(cmds.get(cmd), minute=int(minute) if minute else None)
+        return await self.to_action(cmds.get(cmd), minute=int(minute) if minute and minute.isdigit() else None, args=args, kwargs=kwargs)
     
     async def to_time_redact(self, tag: str, msg):
         await self.state.update_data(tag=tag, msg=msg)
@@ -118,3 +124,6 @@ class ActionService(BaseService):
         throw_kwargs = await self.state.get_value('throw_kwargs')
         return msg_text + f'{f' [{page + 1}/{len(char_pages)}стр]' if len(char_pages) > 1 else ''}', self.IKB.char_throw(char_pages[page], throw_kwargs, page=page, max_page=len(char_pages), where='actions')
 
+    async def dice_command(self, cmd: str):
+        return await self.to_action('dice', args=cmd)
+ 

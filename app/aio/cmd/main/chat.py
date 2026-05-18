@@ -20,7 +20,7 @@ chat_router = Router()
 @exept
 @permisiion_check(False)
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
-    msg, markup = await ChatService(message.from_user.id, state).menu(message.chat.id)
+    msg, markup = await ChatService(message.from_user.id, state, message).menu(message.chat.id)
     await message.answer(msg, reply_markup=markup)
 
 @chat_router.message(Command('chat'))
@@ -28,7 +28,7 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
 @exept
 @permisiion_check(False)
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
-    msg, markup = await ChatService(message.from_user.id, state).menu(message.chat.id)
+    msg, markup = await ChatService(message.from_user.id, state, message).menu(message.chat.id)
     await message.answer(msg, reply_markup=markup)
 
 @chat_router.callback_query(ChatBackCall.filter(F.where == 'menu'))     
@@ -36,7 +36,7 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
 @call_exept()
 @permisiion_check(True, True)
 async def callback_handler(callback: CallbackQuery, callback_data: ChatBackCall, state: FSMContext, **kwargs):
-    msg, markup = await ChatService(callback.from_user.id, state).menu(callback.message.chat.id)
+    msg, markup = await ChatService(callback.from_user.id, state, callback.message).menu(callback.message.chat.id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @chat_router.callback_query(ChatSettingActionCall.filter(F.to_msg_delete_time == True))     
@@ -44,7 +44,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: ChatBackCall,
 @call_exept()
 @permisiion_check(True, True)
 async def callback_handler(callback: CallbackQuery, callback_data: ChatSettingActionCall, state: FSMContext, **kwargs):
-    msg, markup = await ChatService(callback.from_user.id, state).redact_msg_delete_time(callback_data.chat_id, callback.message)
+    msg, markup = await ChatService(callback.from_user.id, state, callback.message).redact_msg_delete_time(callback_data.chat_id, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @chat_router.message(ChatState.msg_delete_time)
@@ -59,7 +59,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
                           MainQuantityLessSixTeen,
                           MainQuantityFloat,
                           MainQuantityNoInt)
-    msg, markup = await ChatService(message.from_user.id, state).new_msg_delete_time(quan)
+    msg, markup = await ChatService(message.from_user.id, state, message).new_msg_delete_time(quan)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
     await fsm.set_state()
@@ -71,7 +71,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 @call_exept()
 @permisiion_check(True, True)
 async def callback_handler(callback: CallbackQuery, callback_data: ChatSettingActionCall, state: FSMContext, **kwargs):
-    msg, markup = await ChatService(callback.from_user.id, state).redact_is_msg_delete(callback_data.chat_id, callback_data.is_msg_delete)
+    msg, markup = await ChatService(callback.from_user.id, state, callback.message).redact_is_msg_delete(callback_data.chat_id, callback_data.is_msg_delete)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 

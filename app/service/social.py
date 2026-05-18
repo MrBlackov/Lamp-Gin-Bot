@@ -12,8 +12,8 @@ from app.exeption.social import SocialError
 from app.aio.config import bot
 
 class SocialService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.layer = SocialLayer(tg_id)
         self.text = SocialText
         self.state = SocialFSM(state)

@@ -25,35 +25,35 @@ char_router.include_routers(new_char_router, item_router, inventory_router, tran
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    markup, text = await Character(message.from_user.id, state).info.get_main_char()
+    markup, text = await Character(message.from_user.id, state, message).info.get_main_char()
     await message.answer(text, reply_markup=markup)
 
 @char_router.callback_query(MenuCall.filter(F.where == 'mychar'))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: MenuCall, state: FSMContext, **kwargs):
-    markup, msg = await Character(callback.from_user.id, state).info.get_main_char()
+    markup, msg = await Character(callback.from_user.id, state, callback.message).info.get_main_char()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @char_router.message(Command('mychars'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    markup, text = await Character(message.from_user.id, state).info.get_chars()
+    markup, text = await Character(message.from_user.id, state, message).info.get_chars()
     await message.answer(text, reply_markup=markup)
     
 @char_router.callback_query(MenuCall.filter(F.where == 'mychars'))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: MenuCall, state: FSMContext, **kwargs):
-    markup, msg = await Character(callback.from_user.id, state).info.get_chars()
+    markup, msg = await Character(callback.from_user.id, state, callback.message).info.get_chars()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @char_router.callback_query(InfoCharChooseCall.filter(F.back == True))   
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharChooseCall, state: FSMContext, **kwargs):
-    markup, text = await Character(callback.from_user.id, state).info.get_chars()
+    markup, text = await Character(callback.from_user.id, state, callback.message).info.get_chars()
     await callback.message.edit_text(text, reply_markup=markup)
 
 @char_router.callback_query(InfoCharListCall.filter()) 
@@ -61,28 +61,28 @@ async def callback_handler(callback: CallbackQuery, callback_data: InfoCharChoos
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharListCall | InfoCharDeleteCall, state: FSMContext, **kwargs):
-    markup, text = await Character(callback.from_user.id, state).info.get_char(callback_data.char_id)
+    markup, text = await Character(callback.from_user.id, state, callback.message).info.get_char(callback_data.char_id)
     await callback.message.edit_text(text, reply_markup=markup)
 
 @char_router.callback_query(InfoCharChooseCall.filter())         
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharChooseCall, state: FSMContext, **kwargs):
-    markup, text = await Character(callback.from_user.id, state).info.char_to_main(callback_data.char_id)
+    markup, text = await Character(callback.from_user.id, state, callback.message).info.char_to_main(callback_data.char_id)
     await callback.message.edit_text(text, reply_markup=markup)    
 
 @char_router.callback_query(InfoCharDeleteCall.filter(F.is_delete == False))         
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharDeleteCall, state: FSMContext, **kwargs):
-    markup, text = await Character(callback.from_user.id, state).info.to_delete_char(callback_data.char_id, callback_data.exist_id)
+    markup, text = await Character(callback.from_user.id, state, callback.message).info.to_delete_char(callback_data.char_id, callback_data.exist_id)
     await callback.message.edit_text(text, reply_markup=markup)   
 
 @char_router.callback_query(InfoCharDeleteCall.filter(F.is_delete == True))         
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoCharDeleteCall, state: FSMContext, **kwargs):
-    markup, text = await Character(callback.from_user.id, state).info.delete_char(callback_data.exist_id)
+    markup, text = await Character(callback.from_user.id, state, callback.message).info.delete_char(callback_data.exist_id)
     await callback.message.edit_text(text, reply_markup=markup)   
 
 

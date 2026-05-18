@@ -11,6 +11,7 @@ class ActionCall(BaseCall, prefix='action'):
     step: int = 1
     minute: int | None = None
     item_id: int | None = None
+    args: str | None = None
 
 class ThrowItemCall(ActionCall, prefix='throw_item'):
     quantity: int = 1

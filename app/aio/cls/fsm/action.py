@@ -6,5 +6,6 @@ class ActionState(StatesGroup):
     msg = None
     minute = State()
     throw_quantity = State()
+    dice_command = State()
 
 

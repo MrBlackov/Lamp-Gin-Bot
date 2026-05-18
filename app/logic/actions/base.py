@@ -61,6 +61,8 @@ class ActionBase:
         self.action_tags = action_tags
         self.new_action_state: ActionStateDB | None = None
         self.kwargs = kwargs
+        self.item_id: int | None = kwargs.get('item_id')
+        self.args: str | None = kwargs.get('args')
 
     @classmethod
     def text(self):
