@@ -74,7 +74,7 @@ class TextHTML:
             - sep: Разделитель между элементами списка '''
         return cls.to_list(items, type='num', sep=sep)
     
-    def float_format(value, decimals=2):
+    def float_format(value: float | int, decimals=2):
         """Форматирует число без лишних нулей"""
         formatted = f"{value:.{decimals}f}"
         return formatted.rstrip('0').rstrip('.')

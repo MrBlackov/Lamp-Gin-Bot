@@ -10,8 +10,8 @@ from app.interlayer.skill import SkillLayer
 from app.aio.cls.fsm.utils import SkillFSM
 
 class SkillService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.layer = SkillLayer(tg_id)
         self.text = SkillText
         self.state = SkillFSM(state)

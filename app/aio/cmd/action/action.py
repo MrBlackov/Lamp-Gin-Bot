@@ -19,49 +19,49 @@ action_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg, markup = await ActionService(message.from_user.id, state).get_actions()
+    msg, markup = await ActionService(message.from_user.id, state, message).get_actions()
     await message.answer(msg, reply_markup=markup)
 
 @action_router.callback_query(ActionBackCall.filter(F.where == 'actions'))   
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionBackCall, state: FSMContext, **kwargs):
-    msg, markup = await ActionService(callback.from_user.id, state).get_actions(callback_data.is_details)
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message, callback.message).get_actions(callback_data.is_details)
     await callback.message.edit_text(msg, reply_markup=markup)
       
 @action_router.callback_query(MenuCall.filter(F.where == 'actions'))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionBackCall | MenuCall, state: FSMContext, **kwargs):
-    msg, markup = await ActionService(callback.from_user.id, state).get_actions()
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message, callback.message).get_actions()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @action_router.callback_query(ActionCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionCall, state: FSMContext, **kwargs):
-    msg, markup = await ActionService(callback.from_user.id, state).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id)
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message, callback.message).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id, args=callback_data.args)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @action_router.callback_query(ThrowItemCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ThrowItemCall, state: FSMContext, **kwargs):
-    msg, markup = await ActionService(callback.from_user.id, state).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id, quantity=callback_data.quantity, purpose_char_id=callback_data.purpose_char_id)
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message, callback.message).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id, quantity=callback_data.quantity, purpose_char_id=callback_data.purpose_char_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @action_router.callback_query(ActionPageCall.filter(F.tag == 'throw'))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionPageCall, state: FSMContext, **kwargs):
-    msg, markup = await ActionService(callback.from_user.id, state).char_throw(callback_data.page)
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message, callback.message).char_throw(callback_data.page)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @action_router.callback_query(ThrowItemQuantityCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ThrowItemQuantityCall, state: FSMContext, **kwargs):
-    msg, markup = await ActionService(callback.from_user.id, state).to_throw_quantity(callback.message, item_id=callback_data.item_id, quantity=callback_data.quantity, purpose_char_id=callback_data.purpose_char_id)
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message, callback.message).to_throw_quantity(callback.message, item_id=callback_data.item_id, quantity=callback_data.quantity, purpose_char_id=callback_data.purpose_char_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @action_router.message(ActionState.throw_quantity, F.content_type == 'text')
@@ -70,17 +70,30 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Throw
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     fsm = ActionFSM(state)
     msg0 = await fsm.get_value('msg')
-    msg, markup = await ActionService(message.from_user.id, state).throw_quantity(message.text)
+    msg, markup = await ActionService(message.from_user.id, state, message).throw_quantity(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
     await fsm.set_state()
     await msg0.delete()
 
+@action_router.message(ActionState.dice_command, F.content_type == 'text')
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    fsm = ActionFSM(state)
+    msg0 = await fsm.get_value('msg')
+    msg, markup = await ActionService(message.from_user.id, state, message).dice_command(message.text)
+    msg2 = await message.answer(msg, reply_markup=markup)
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
+    if msg0:
+        await msg0.delete()
+
 @action_router.callback_query(ActionRedactCall.filter(F.to_time == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionRedactCall, state: FSMContext, **kwargs):
-    msg, markup = await ActionService(callback.from_user.id, state).to_time_redact(callback_data.tag, callback.message)
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message, callback.message).to_time_redact(callback_data.tag, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @action_router.message(ActionState.minute, F.content_type == 'text')
@@ -90,18 +103,19 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     fsm = ActionFSM(state)
     msg0 = await fsm.get_value('msg')
     quan = is_natural_int(message.text, message.from_user.id, ActionQuantityLessOne, ActionQuantityFloat, ActionQuantityNoInt, ActionError)
-    msg, markup = await ActionService(message.from_user.id, state).time_redact(quan)
+    msg, markup = await ActionService(message.from_user.id, state, message).time_redact(quan)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
     await fsm.set_state()
-    await msg0.delete()
+    if msg0:
+        await msg0.delete()
 
 @action_router.callback_query(ActionRedactCall.filter(F.to_del_timer == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionRedactCall, state: FSMContext, **kwargs):
     try:
-        msg, markup = await ActionService(callback.from_user.id, state).del_timer(callback_data.tag)
+        msg, markup = await ActionService(callback.from_user.id, state, callback.message, callback.message).del_timer(callback_data.tag)
         await callback.message.edit_text(msg, reply_markup=markup)
     except TelegramBadRequest:
         raise NotNewStatsError('❌ Обновлений нету', level='debug')
@@ -111,7 +125,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Actio
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionRedactCall, state: FSMContext, **kwargs):
     try:
-        msg, markup = await ActionService(callback.from_user.id, state).to_stats(callback_data.tag)
+        msg, markup = await ActionService(callback.from_user.id, state, callback.message, callback.message).to_stats(callback_data.tag)
         await callback.message.edit_text(msg, reply_markup=markup)
     except TelegramBadRequest:
         raise NotNewStatsError('❌ Обновлений нету', level='debug')
@@ -130,7 +144,7 @@ for action in ActionSelf.cmd_actions:
         @exept
         async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
             print(command.command, command.args)
-            msg, markup = await ActionService(message.from_user.id, state).cmd_action(command.prefix + command.command, command.args)
+            msg, markup = await ActionService(message.from_user.id, state, message).cmd_action(command.prefix + command.command, command.args, command.args)
             await message.answer(msg, reply_markup=markup)
 
 

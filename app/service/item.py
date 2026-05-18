@@ -20,14 +20,14 @@ from app.aio.cls.fsm.utils import ItemFSM
 from aiogram.types import Message
 
 class ItemBaseService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.layer = ItemLayer(tg_id)
         self.state = ItemFSM(state)
 
 class AddItemService(ItemBaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = ItemFSM(state, 'new')
         self.IKB = NewItemIKB(tg_id)
         self.text = NewItemText
@@ -199,8 +199,8 @@ class AddItemService(ItemBaseService):
     
 
 class ChangeItemService(ItemBaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = ItemFSM(state, 'change')
         self.IKB = ChangeItemSketchIKB(tg_id)
         self.text = ItemSketchText
@@ -367,8 +367,8 @@ class ChangeItemService(ItemBaseService):
         return ('🗑️ Предметы былы удалены' if is_delete else '❌ Предметы не былы удалены'), self.IKB.back(back_where)
 
 class GiveItemService(ItemBaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = ItemFSM(state, 'give')
         self.IKB = GiveItemSketchIKB(tg_id)
 
@@ -425,8 +425,8 @@ class GiveItemService(ItemBaseService):
         
 
 class ListItemService(ItemBaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.IKB = ListItemSketchIKB(tg_id)
         self.state = ItemFSM(state, 'list')
 
@@ -484,11 +484,11 @@ class ListItemService(ItemBaseService):
 
 
 class ItemService:
-    def __init__(self, tg_id, state = None):
-        self.add = AddItemService(tg_id, state)
-        self.change = ChangeItemService(tg_id, state)
-        self.give = GiveItemService(tg_id, state)
-        self.list =  ListItemService(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        self.add = AddItemService(tg_id, state, message, **kwargs)
+        self.change = ChangeItemService(tg_id, state, message, **kwargs)
+        self.give = GiveItemService(tg_id, state, message, **kwargs)
+        self.list =  ListItemService(tg_id, state, message, **kwargs)
         
 
 

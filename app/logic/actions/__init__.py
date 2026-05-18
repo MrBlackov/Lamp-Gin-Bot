@@ -13,6 +13,7 @@ from .throw import ThrowAction
 from .train import TrainAction
 from .run import RunningAction
 from .look import LookAroundAction
+from .items import DiceAction
 
 class ActionSelf:
     all_action: list[type[ActionBase]] = [
@@ -28,7 +29,8 @@ class ActionSelf:
                   WakeUpAction, 
                   StopAction, 
                   StatsAction,
-                  RecoveryAction
+                  RecoveryAction,
+                  DiceAction
                   ]
     tags = ActionTags
 

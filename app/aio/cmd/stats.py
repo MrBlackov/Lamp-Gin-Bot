@@ -14,21 +14,21 @@ stats_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
-    msg = await StatsService(message.from_user.id, state).all_coins()
+    msg = await StatsService(message.from_user.id, state, message).all_coins()
     await message.answer(msg)
 
 @stats_router.callback_query(StatsBackCall.filter(F.where == 'tops'))  
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: TopActionCall, state: FSMContext, **kwargs):
-    msg, markup = await StatsService(callback.from_user.id, state).tops()
+    msg, markup = await StatsService(callback.from_user.id, state, callback.message).tops()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @stats_router.message(Command('tops'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
-    msg, markup = await StatsService(message.from_user.id, state).tops()
+    msg, markup = await StatsService(message.from_user.id, state, message).tops()
     await message.answer(msg, reply_markup=markup)
 
 @stats_router.callback_query(TopActionCall.filter(F.to_skill == True))  
@@ -36,19 +36,19 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: TopActionCall, state: FSMContext, **kwargs):
-    msg, markup = await StatsService(callback.from_user.id, state).topskills()
+    msg, markup = await StatsService(callback.from_user.id, state, callback.message).topskills()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @stats_router.message(Command('topskills'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
-    msg, markup = await StatsService(message.from_user.id, state).topskills()
+    msg, markup = await StatsService(message.from_user.id, state, message).topskills()
     await message.answer(msg, reply_markup=markup)
 
 @stats_router.callback_query(TopSkillCall.filter())  
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: TopSkillCall, state: FSMContext, **kwargs):
-    msg, markup = await StatsService(callback.from_user.id, state).topskill(callback_data.skill_tag)
+    msg, markup = await StatsService(callback.from_user.id, state, callback.message).topskill(callback_data.skill_tag)
     await callback.message.edit_text(msg, reply_markup=markup)

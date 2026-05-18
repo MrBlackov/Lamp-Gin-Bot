@@ -10,6 +10,7 @@ from app.validate.add.characters import Points
 from collections import OrderedDict
 from app.enum_type.char import Gender
 from app.exeption.another import DiceError
+from app.exeption.action import DiceCmdNoValideError
 from app.validate.add.characters import ItemValide
 from app.db.models.item import SkillDB, SkillSketchDB, ItemSketchDB
 import random
@@ -68,14 +69,16 @@ class dices:
             self.throw = tuple(throw)
         return self
         
-    def _roll_dice(command: str, d: list[int] = [1, 20]):
+    def roll_dice(self, command: str, d: list[int] = [1, 20]):
         k_dice = 1
         mod = 0
         try:
             if 'd' in command:
                 d_index = command.index('d')
+                probel = command.index(' ') if ' ' in command else len(command)
                 if d_index > 0:
                     k_dice = int(command[:d_index])
+                    d = (d[0], int(command[d_index+1:probel]) or d[1])
                 command = command.replace(command[0:d_index+1] + ' ', '')
             parts = command.split(' ')
             for c in parts:
@@ -88,16 +91,15 @@ class dices:
                     if mod_index > 0:
                         mod -= float(parts[mod_index+1])
         except ValueError as e:
-            raise
+            raise DiceCmdNoValideError(f'This dice-cmd dont valid')
         
-        dices_throw = dice(d[1], d[0]).to_throw(k_dice)
-        self = dices()
+        dices_throw = dice(d[1], d[0])._to_throw(k_dice)._throw
         self.throw = dices_throw
+        self.mod = mod
+        self.d = d
+        self.d_text = f'{k_dice}d{d[1]}'
         self.result = self.medium + mod
         return self
-    
-    def roll_dice(command: str, d: list[int] = [1, 20]):
-        return dices._roll_dice(command, d).result
 
     @property
     def sum(self):

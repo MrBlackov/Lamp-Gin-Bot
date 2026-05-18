@@ -1,4 +1,5 @@
 from app.aio.cls.callback.action import ActionBackCall, MenuCall, ActionCall, ActionRedactCall, LookAroundCall, ActionPageCall, ThrowItemCall, ThrowItemQuantityCall
+from app.aio.cls.callback.faq import FAQCall
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from app.enum_type.tags import ActionTags
@@ -77,3 +78,13 @@ class ActionIKB(BotIKB):
         self.builder.button(text='✏️ Изменить количество', callback_data=ThrowItemQuantityCall(tag='throw', **kwargs, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where=where, is_details=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()     
+ 
+    def dice(self, kwargs: dict = {}):
+        self.builder.button(text='🥏 Перебросить', callback_data=ActionCall(tag='dice', **kwargs, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()     
+ 
+    def dice_command(self):
+        self.builder.button(text='ℹ️ Помощь', callback_data=FAQCall(faq='dice', tg_id=self.tg_id, to_answer_callback=False))
+        self.builder.button(text='❌ Отменить', callback_data=MenuCall(where='cancel', is_details=True, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()   
+

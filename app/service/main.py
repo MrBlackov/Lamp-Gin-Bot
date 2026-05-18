@@ -11,8 +11,8 @@ from app.aio.cls.fsm.main import ChatState
 from app.exeption.main import MainQuantityLessSixTeen, MainQuantityMaxTime
 
 class UserService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.layer = UserLayer(tg_id)
         self.state = UserFSM(state)
         self.text = UserText
@@ -28,8 +28,8 @@ class UserService(BaseService):
         return text
 
 class ChatService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.layer = ChatLayer(tg_id)
         self.state = ChatFSM(state)
         self.text = ChatText

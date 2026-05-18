@@ -23,7 +23,6 @@ class ThrowAction(ActionBase):
 
     def __init__(self, char, user = None, step = 1, minute = None, action_tags = ..., **kwargs):
         super().__init__(char, user, step, minute, action_tags, **kwargs)
-        self.item_id: int = kwargs.get('item_id')
         self.quantity: int = kwargs.get('quantity')
         self.purpose_char_id: int = kwargs.get('purpose_char_id')
         self.purpose_char: CharacterDB = kwargs.pop('purpose_char') if kwargs.get('purpose_char') else None

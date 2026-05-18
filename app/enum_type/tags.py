@@ -33,6 +33,7 @@ class ActionTags:
     lookaround = 'lookaround'
     stats = 'stats'
     recovery = 'recovery'
+    dice = 'dice'
 
 
 

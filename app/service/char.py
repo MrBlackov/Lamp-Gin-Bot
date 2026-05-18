@@ -20,8 +20,8 @@ from app.aio.cls.fsm.utils import CharFSM
 from app.logic.query import LetterSearch
 
 class NewCharacterService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = CharFSM(state, 'new')
         self.IKB = NewCharIKB(tg_id)
         self.layer = NewCharLayer(tg_id)
@@ -165,8 +165,8 @@ class NewCharacterService(BaseService):
 
 
 class AddCharacterService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = CharFSM(state, 'add')
         self.IKB = AddCharIKB(tg_id)
 
@@ -281,8 +281,8 @@ class AddCharacterService(BaseService):
         return True
 
 class InfoCharacterService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = CharFSM(state, 'info')
         self.IKB = InfoCharIKB(tg_id)
         self.layer = InfoCharacterLayer(self.tg_id)
@@ -321,8 +321,8 @@ class InfoCharacterService(BaseService):
         return await self.get_chars()
     
 class InventoryService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = CharFSM(state, 'inventory')
         self.IKB = InventoryIKB(tg_id)
         self.text = InventoryItemsText
@@ -391,11 +391,11 @@ class InventoryService(BaseService):
     
 
 class Character:
-    def __init__(self, tg_id: int, state: FSMContext | None = None):
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
         self.tg_id = tg_id
         self.state = state
-        self.to_create = AddCharacterService(tg_id, state)
-        self.new = NewCharacterService(tg_id, state)
-        self.info = InfoCharacterService(tg_id, state)
-        self.inventory = InventoryService(tg_id, state)
+        self.to_create = AddCharacterService(tg_id, state, message, **kwargs)
+        self.new = NewCharacterService(tg_id, state, message, **kwargs)
+        self.info = InfoCharacterService(tg_id, state, message, **kwargs)
+        self.inventory = InventoryService(tg_id, state, message, **kwargs)
         
