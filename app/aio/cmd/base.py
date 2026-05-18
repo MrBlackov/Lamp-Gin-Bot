@@ -17,6 +17,7 @@ from app.service.main import UserService
 from app.exeption.decorator import exept
 from aiogram.methods import CreateForumTopic
 from app.aio.middlewares.message_clean import MessageCleanDpMiddleware
+from app.aio.cls.callback.base import MenuCall
 
 base_router = Router()
 base_router.include_routers(setting_router, char_router, action_router, social_router, skill_router, faq_router, chat_router, stats_router)
@@ -26,7 +27,7 @@ base_router.message.middleware(MessageCleanDpMiddleware())
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
-    msg, markup = UserService(message.from_user.id, state).menu()
+    msg, markup = UserService(message.from_user.id, state, message).menu()
     await message.answer(msg, reply_markup=markup)
 
 @base_router.message(Command('user'))
@@ -34,7 +35,7 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
 @exept
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
     if command.args != None and message.from_user.id == owner:
-        msg = await UserService(message.from_user.id, state).get_info(command.args)
+        msg = await UserService(message.from_user.id, state, message).get_info(command.args)
         await message.answer(msg)
     elif command.args == None:
         await message.answer('⁉️ Где данные?')
@@ -65,7 +66,13 @@ async def cmd_start(message: Message, **kwargs):
 @exept
 async def cmd_start(message: Message, state: FSMContext, **kwargs):
     await state.set_state()
-    await message.answer('Отмена произошла успешно')
+    await message.answer('✅ Отмена произошла успешно')
+
+@faq_router.callback_query(MenuCall.filter(F.where == 'cancel'))     
+@log.decor(arg=True)
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: MenuCall, state: FSMContext, **kwargs):
+    await state.set_state()
+    await callback.message.edit_text('✅ Отмена произошла успешно')
 
 @base_router.message(Command('emodzi'))
 @log.decor(arg=True)

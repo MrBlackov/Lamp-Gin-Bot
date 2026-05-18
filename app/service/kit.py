@@ -13,8 +13,8 @@ from app.aio.msg.kit import KitText
 from app.aio.cls.fsm.utils import KitFSM
 
 class KitService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = KitFSM(state)
         self.layer = KitLayer(tg_id)
         self.IKB = KitIKB(tg_id)

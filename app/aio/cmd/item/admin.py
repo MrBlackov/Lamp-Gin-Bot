@@ -39,7 +39,7 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: GiveItemCall, state: FSMContext, **kwargs):
-    msg, markup = await ItemService(callback.from_user.id, state).give.to_give_menu(callback_data.sketch_id)
+    msg, markup = await ItemService(callback.from_user.id, state, callback.message).give.to_give_menu(callback_data.sketch_id)
     await callback.message.answer(msg, reply_markup=markup)
 
 @admin_router.callback_query(GiveItemBackCall.filter(F.where == 'menu'))     
@@ -47,14 +47,14 @@ async def callback_handler(callback: CallbackQuery, callback_data: GiveItemCall,
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: GiveItemCall, state: FSMContext, **kwargs):
     await ItemFSM(state, 'give').set_state()
-    msg, markup = await ItemService(callback.from_user.id, state).give.give_menu()
+    msg, markup = await ItemService(callback.from_user.id, state, callback.message).give.give_menu()
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @admin_router.callback_query(GiveItemActionCall.filter(F.to_quantity == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: GiveItemCall, state: FSMContext, **kwargs):
-    msg, markup = await ItemService(callback.from_user.id, state).give.to_change_quantity(callback.message)
+    msg, markup = await ItemService(callback.from_user.id, state, callback.message).give.to_change_quantity(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @admin_router.message(GiveItemState.change_quantity)
@@ -63,7 +63,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: GiveItemCall,
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     fsm = ItemFSM(state, 'give')
     msg0 = await fsm.get_value('msg')
-    msg, markup = await ItemService(message.from_user.id, state).give.change_quantity(message.text)
+    msg, markup = await ItemService(message.from_user.id, state, message).give.change_quantity(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
     await fsm.set_state()
@@ -73,7 +73,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: GiveItemCall, state: FSMContext, **kwargs):
-    msg = await ItemService(callback.from_user.id, state).give.to_give()
+    msg = await ItemService(callback.from_user.id, state, callback.message).give.to_give()
     await callback.message.edit_text(msg)
 
 

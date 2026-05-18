@@ -18,7 +18,7 @@ inventory_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg, markup = await Character(message.from_user.id, state).inventory.inventory()
+    msg, markup = await Character(message.from_user.id, state, message).inventory.inventory()
     await message.answer(msg, reply_markup=markup)
 
 @inventory_router.callback_query(InventoryItemsGoCall.filter(F.where == 'inventory'))     
@@ -26,14 +26,14 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsCall | MenuCall, state: FSMContext, **kwargs):
-    msg, markup = await Character(callback.from_user.id, state).inventory.inventory()
+    msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.inventory()
     await callback.message.edit_text(msg, reply_markup=markup)
     
 @inventory_router.callback_query(InventoryItemsCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsCall, state: FSMContext, **kwargs):
-    msg, markup = await Character(callback.from_user.id, state).inventory.get_item_info(callback_data.item)
+    msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.get_item_info(callback_data.item)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.callback_query(InventoryItemsGoCall.filter(F.where == 'item'))     
@@ -41,14 +41,14 @@ async def callback_handler(callback: CallbackQuery, callback_data: InventoryItem
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsGoCall, state: FSMContext, **kwargs):
     item_id = await CharFSM(state, 'inventory').get_value('item')
-    msg, markup = await Character(callback.from_user.id, state).inventory.get_item_info(item_id)
+    msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.get_item_info(item_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.callback_query(InventoryItemsActionCall.filter(F.to_throw == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsActionCall, state: FSMContext, **kwargs):
-    msg, markup = await Character(callback.from_user.id, state).inventory.to_throw(callback.message)
+    msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.to_throw(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.message(InventoryState.throw_quantity, F.content_type == 'text')
@@ -59,7 +59,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     msg0 = await fsm.get_value('msg')
     item_id = await fsm.get_value('item')
     quan = is_natural_int(message.text, message.from_user.id)
-    msg, markup = await Character(message.from_user.id, state).inventory.throw_away(item_id, quan)
+    msg, markup = await Character(message.from_user.id, state, message).inventory.throw_away(item_id, quan)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
     await fsm.set_state()
@@ -71,42 +71,42 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg, markup = await Character(message.from_user.id, state).inventory.cmd_pick_up()
+    msg, markup = await Character(message.from_user.id, state, message).inventory.cmd_pick_up()
     await message.answer(msg, reply_markup=markup)
                          
 @inventory_router.callback_query(InventoryItemsActionCall.filter(F.to_pick_up == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsGoCall, state: FSMContext, **kwargs):
-    msg, markup = await Character(callback.from_user.id, state).inventory.cmd_pick_up()
+    msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.cmd_pick_up()
     await callback.message.edit_text(msg, reply_markup=markup) 
 
 @inventory_router.callback_query(InventoryItemsGoCall.filter(F.where == 'location_items'))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsGoCall, state: FSMContext, **kwargs):
-    msg, markup = await Character(callback.from_user.id, state).inventory.cmd_pick_up(callback_data.item_id)
+    msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.cmd_pick_up(callback_data.item_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.callback_query(InventoryItemsGoCall.filter(F.where == 'location_item'))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsGoCall, state: FSMContext, **kwargs):
-    msg, markup = await Character(callback.from_user.id, state).inventory.look_location_item(callback_data.item_id)
+    msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.look_location_item(callback_data.item_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.callback_query(InventoryItemsPickUpCall.filter(F.to_pick_up == False))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsPickUpCall, state: FSMContext, **kwargs):
-    msg, markup = await Character(callback.from_user.id, state).inventory.look_location_item(callback_data.item_id)
+    msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.look_location_item(callback_data.item_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.callback_query(InventoryItemsPickUpCall.filter(F.to_pick_up == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsPickUpCall, state: FSMContext, **kwargs):
-    msg, markup = await Character(callback.from_user.id, state).inventory.to_pick_up(callback_data.item_id, callback.message)
+    msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.to_pick_up(callback_data.item_id, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @inventory_router.message(InventoryState.pick_up_quantity)
@@ -120,7 +120,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
                           PickUpQuantityLessOne,
                           PickUpQuantityFloat,
                           PickUpQuantityNoInt)
-    msg, markup = await Character(message.from_user.id, state).inventory.pick_up(quan)
+    msg, markup = await Character(message.from_user.id, state, message).inventory.pick_up(quan)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
     await fsm.set_state()

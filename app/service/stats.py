@@ -10,8 +10,8 @@ from app.interlayer.stats import StatsLayer
 from app.aio.cls.fsm.utils import StatsFSM
 
 class StatsService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.layer = StatsLayer(tg_id)
         self.text = StatsText
         self.state = StatsFSM(state)

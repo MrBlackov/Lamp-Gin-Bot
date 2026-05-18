@@ -15,7 +15,7 @@ skill_router = Router()
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg, markup = await SkillService(message.from_user.id, state).get_my_skills()
+    msg, markup = await SkillService(message.from_user.id, state, message).get_my_skills()
     await message.answer(msg, reply_markup=markup)
 
 @skill_router.callback_query(SkillBackCall.filter(F.where == 'myskills'))     
@@ -23,12 +23,12 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: SkillBackCall | MenuCall, state: FSMContext, **kwargs):
-    msg, markup = await SkillService(callback.from_user.id, state).get_my_skills()
+    msg, markup = await SkillService(callback.from_user.id, state, callback.message).get_my_skills()
     await callback.message.edit_text(msg, reply_markup=markup)
     
 @skill_router.callback_query(SkillCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: SkillCall, state: FSMContext, **kwargs):
-    msg, markup = await SkillService(callback.from_user.id, state).skill(callback_data.skill_id)
+    msg, markup = await SkillService(callback.from_user.id, state, callback.message).skill(callback_data.skill_id)
     await callback.message.edit_text(msg, reply_markup=markup)

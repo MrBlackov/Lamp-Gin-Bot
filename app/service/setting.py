@@ -13,8 +13,8 @@ from app.aio.cls.fsm.setting import SettingState
 from app.exeption.setting import SettingTagError, SettingValueError
 
 class SettingService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.layer = SettingLayer(tg_id)
         self.text = SettingText
         self.state = SettingFSM(state)

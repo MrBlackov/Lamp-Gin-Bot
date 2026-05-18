@@ -16,8 +16,8 @@ from app.logged.infolog import infolog
 from app.aio.msg.base import UserText
 
 class AddCraftService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = CraftFSM(state, 'add')
         self.layer = CraftLayer(tg_id)
         self.IKB = AddCraftIKB(tg_id)
@@ -162,8 +162,8 @@ class AddCraftService(BaseService):
 
 
 class InfoCraftService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = CraftFSM(state)
         self.layer = CraftLayer(tg_id)
         self.IKB = CraftIKB(tg_id)
@@ -212,7 +212,7 @@ class InfoCraftService(BaseService):
 
 
 class CraftService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.add = AddCraftService(tg_id, state)
         self.info = InfoCraftService(tg_id, state)
