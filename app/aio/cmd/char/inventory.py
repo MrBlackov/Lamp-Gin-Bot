@@ -40,7 +40,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: InventoryItem
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InventoryItemsGoCall, state: FSMContext, **kwargs):
-    item_id = await CharFSM(state, 'inventory').get_value('item')
+    item_id = await CharFSM(state, 'inventory').get_value('item') or callback_data.item_id
     msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.get_item_info(item_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 

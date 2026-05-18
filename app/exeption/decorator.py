@@ -23,14 +23,14 @@ def exept(func):
         except BotError as bote:
             log.warning(f'AioPartPath: {bote}')
             markup = FaqIKB(message.from_user.id).to_error_faq(bote.code) if len(bote.faq) > 0 else None
-            await message.answer((TextHTML(bote.to_msg).escape)[:4000], reply_markup=markup)
+            await message.answer((TextHTML(bote.to_msg).escape())[:4000], reply_markup=markup)
         except TelegramBadRequest as e:
             log.error(f'AioPartPath: {e}')
         except Exception as e:
             str_e = str(e)
             log.error(f'AioPartPath: {e}')
             if message.from_user.id == owner:
-                await message.answer(f'⚠️ Непредвиденная ошибка: {(TextHTML(str_e).escape)[:4000]} (500.0)')
+                await message.answer(f'⚠️ Непредвиденная ошибка: {(TextHTML(str_e).escape())[:4000]} (500.0)')
             else:
                 await message.answer(f'⚠️ Непредвиденная ошибка (500.0)')
             raise e
@@ -56,7 +56,7 @@ def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity
             except BotError as bote:
                 log.warning(f'AioPartPath: {bote}')
                 show_alert=True
-                answer_text = (TextHTML(bote.to_msg).escape)[:4000]
+                answer_text = (TextHTML(bote.to_msg).escape())[:4000]
             except TelegramBadRequest as e:
                 log.error(f'AioPartPath: {e}')
             except Exception as e:
@@ -64,7 +64,7 @@ def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity
                 log.error(f'AioPartPath: {e}')
                 show_alert=True
                 if callback.from_user.id == owner:
-                    answer_text = f'⚠️ Непредвиденная ошибка: {(TextHTML(str_e).escape)[:4000]} (500.0)'
+                    answer_text = f'⚠️ Непредвиденная ошибка: {(TextHTML(str_e).escape())[:4000]} (500.0)'
                 else:
                     answer_text = f'⚠️ Непредвиденная ошибка (500.0)'
                 raise e
@@ -74,7 +74,7 @@ def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity
                 except Exception as e:
                     log.error(f'AioPartPath: {e}')
                     if callback.from_user.id == owner:
-                        await callback.message.answer(f'⚠️ {(TextHTML(e).escape)[:4000]} (500.0) \n \n {answer_text}')
+                        await callback.message.answer(f'⚠️ {(TextHTML(e).escape())[:4000]} (500.0) \n \n {answer_text}')
                     else:
                         await callback.answer(f'⚠️ Непредвиденная ошибка (500.0)', show_alert=True)
     

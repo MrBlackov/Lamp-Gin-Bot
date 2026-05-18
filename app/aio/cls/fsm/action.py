@@ -7,5 +7,6 @@ class ActionState(StatesGroup):
     minute = State()
     throw_quantity = State()
     dice_command = State()
+    redact_paper = State()
 
 
