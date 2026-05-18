@@ -63,6 +63,9 @@ update_item_sketch = update_obj(ItemSketchDAO)
 async def update_quantity_item(item_id: int, quantity: int) -> ItemDB:
     return await update_item(filters={'id':item_id}, new_data={'quantity':quantity})
 
+async def update_item_for_id(item_id: int, new_data: dict) -> ItemDB:
+    return await update_item(filters={'id':item_id}, new_data=new_data)
+
 async def update_look_location_item(item_id: int, inventory_id: int, is_pick_up: bool) -> ItemDB:
     if is_pick_up:
         return await update_item(filters={'id':item_id}, new_data={'inventory_id':inventory_id, 'nbt': {'is_pick_up': is_pick_up}})

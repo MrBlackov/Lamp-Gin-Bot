@@ -2,12 +2,36 @@ from app.db.models.item import ItemDB, ItemSketchDB
 from app.db.models.char import CharacterDB
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.aio.msg.utils import TextHTML
+from app.logic.actions import ActionTags
+from app.validate.item import BookValide
 
 class ItemText:
     def __init__(self, item: ItemDB):
         self.sketch = item.sketch
         self.item = item
  
+    @property
+    def dop_text(self):
+        texts = []
+        if ActionTags.paper in self.sketch.action:
+            text = self.item.nbt.get('text')
+            print(text)
+            texts.append(f'📄 Надпись (отсуствует)' if type(text) != str else f'📄 Надпись \n\n' + text.replace('emoji_id', 'emoji-id'))
+        if ActionTags.book in self.sketch.action:
+            text: dict = self.item.nbt.get('book')
+            if text:
+                book = BookValide.model_validate(text)
+                texts.append(
+                    f'{book.name}' + '\n'.join([
+                        f'👤 Автор: {book.author}',
+                        f'📊 Кол-во страниц: {book.pages}',
+                        f'📜 Описание: {book.description if book.description and len(book.description) > 0 else "❌"}'
+                    ])
+                )
+            else:
+                texts.append(f'❗ Вы можете написать книгу')
+        return '\n' + '\n'.join(texts)
+
     @property
     def temperate(self):
         return '{EMODZI} {NAME}' + TextHTML('\n'.join([
@@ -17,7 +41,7 @@ class ItemText:
             '⏲️ Вес одного: {WEIGHT}кг',
             '🧳 Общий вес: {ALLWEIGHT}кг',
             '📜 Описание: {DESCRIPT}',
-        ])).blockquote()    
+        ])).blockquote() + '\n{DOP}'
  
     @property    
     def text(self):
@@ -29,7 +53,8 @@ class ItemText:
             WEIGHT=self.sketch.size/1000,
             ALLWEIGHT=self.sketch.size*self.item.quantity/1000,
             ITEMID=self.item.id,
-            SKETCHID=self.sketch.id
+            SKETCHID=self.sketch.id,
+            DOP=self.dop_text
         )
         return value
 

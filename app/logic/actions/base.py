@@ -1,7 +1,7 @@
 from app.enum_type.tags import ActionTags, SkillTags
 from datetime import datetime, timedelta
 from app.db.metods.gets import get_all_chars, get_char_for_id, ActionStateDB, UserDB, CharacterDB, ItemDB, ItemSketchDB, get_item_sketch, get_item_sketch_for_tag, get_exists_for_ids, get_action_state_for_tag, get_action_states_for_block_freedom, get_action_state_for_id, get_action_states_for_exist_id, SkillDB
-from app.db.metods.updates import update_skill_for_id, update_skill_for_tag, update_action_state_for_id, update_action_state_for_tag
+from app.db.metods.updates import update_skill_for_id, update_item_for_id, update_skill_for_tag, update_action_state_for_id, update_action_state_for_tag
 from app.db.metods.adds import add_db_obj
 from app.db.metods.unique import get_chars_for_exist_id, get_item_for_tag, get_item_sketch_for_action_tag, get_item_for_action_tag
 from app.db.metods.deletes import delete_action_state, delete_action_states
