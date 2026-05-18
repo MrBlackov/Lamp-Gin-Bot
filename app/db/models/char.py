@@ -15,6 +15,12 @@ class InventoryDB(Base):
     def add_items(self, items: list[ItemDB]):
         self.items = items
         self.item_ids = {i.id:i for i in items}
+        #self.item_tags = {i.sketch.tag:i for i in items}
+        #self.item_action_tags = {}
+        #for item in items:
+        #    for tag in item.sketch.action:
+        #        tag_action = self.item_action_tags.get(tag, [])
+        #        self.item_action_tags[tag] = tag_action + [item]
         return self 
 
 #class LocationDB(Base):

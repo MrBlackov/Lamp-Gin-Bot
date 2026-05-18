@@ -199,7 +199,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
         return 
     msg = await CharFSM(state, 'add').get_value('msg')
     await msg.delete()
-    char = await Character(message.from_user.id, state, message).to_create.get_info(TextHTML(message.html_text).escape)
+    char = await Character(message.from_user.id, state, message).to_create.get_info(TextHTML(message.html_text).escape())
     await message.answer(char.info_to_str, reply_markup=await char.markup_to_info())
 
 @add_char_router.callback_query(AddCharFinishCall.filter(F.go == True))

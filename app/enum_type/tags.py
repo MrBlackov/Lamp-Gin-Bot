@@ -34,6 +34,8 @@ class ActionTags:
     stats = 'stats'
     recovery = 'recovery'
     dice = 'dice'
+    paper = 'paper' 
+    book = 'book'
 
 
 

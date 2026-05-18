@@ -57,7 +57,13 @@ class ActionService(BaseService):
                 case 'is_action' | 'to_action':
                     return msg, self.IKB.stop()     
                 case 'stats':
-                    return msg, self.IKB.stats()    
+                    return msg, self.IKB.stats()       
+                case 'paper':
+                    return msg, self.IKB.redact_paper(action.item_id, action.is_have_text)   
+                case 'redact_paper':
+                    await self.state.set_state(ActionState.redact_paper)
+                    await self.state.update_data(msg=self.message, item_id=action.item_id)
+                    return msg, self.IKB.paper_back(action.item_id)   
                 case 'lookaround':
                     return msg, self.IKB.lookaround(action.results)  
                 case 'to_action_time':
@@ -127,3 +133,6 @@ class ActionService(BaseService):
     async def dice_command(self, cmd: str):
         return await self.to_action('dice', args=cmd)
  
+    async def redact_paper(self, text: str):
+        item_id = await self.state.get_value('item_id')
+        return await self.to_action('paper', step=3, item_id=item_id, args=text)

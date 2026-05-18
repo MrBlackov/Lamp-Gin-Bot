@@ -50,11 +50,11 @@ class FaqText:
             f'💬 Сообщение: ': self.error.msg,
             f'📖 Справка: ': self.error.faq 
         }
-        return '📚 Информация по ошибке' + TextHTML('\n'.join([TextHTML(e).bold + v for e, v in error_faq_dict.items()])).blockquote()
+        return '📚 Информация по ошибке' + TextHTML('\n'.join([TextHTML(e).bold() + v for e, v in error_faq_dict.items()])).blockquote()
     
     def to_start(name: str):
         return (
-            f'👋 Приветствую вас, {TextHTML(name).bold}! Что сделаем для начала? \n\n'
+            f'👋 Приветствую вас, {TextHTML(name).bold()}! Что сделаем для начала? \n\n'
             'Создать персонажа - /newchar \n'
             'Войти в меню - /menu \n'
             'Получить справку - /help \n'
@@ -93,8 +93,8 @@ class FaqText:
             '\n {} ':' - обязательные аргументы',
             ' [] ':' - не обязательные аргументы',
         }
-        text = '\n'.join(TextHTML(k).bold + v for k, v in text_dict.items())
-        admin_text = '\n \n 📟 Команды для админа \n \n' + '\n'.join(TextHTML(k).bold + v for k, v in admin_text_dict.items())
+        text = '\n'.join(TextHTML(k).bold() + v for k, v in text_dict.items())
+        admin_text = '\n \n 📟 Команды для админа \n \n' + '\n'.join(TextHTML(k).bold() + v for k, v in admin_text_dict.items())
         return  '📜 Список доступных команд \n\n' + text + (admin_text if is_admin else '')
   
     def help_char_faq():
@@ -103,7 +103,7 @@ class FaqText:
     def help():
         return (
             '📚 Краткая справка по боту \n\n'
-            f'Бот создан по мотивам {TextHTML('Lord of the Mysteries').bold}. '
+            f'Бот создан по мотивам {TextHTML('Lord of the Mysteries').bold()}. '
             'Здесь вы можете создавать персонажей, управлять инвентарем, заключать сделки и создавать свои предметы. \n\n'
             '📜 Команды ' +
             TextHTML(
@@ -124,7 +124,7 @@ class FaqText:
         )
 
     def help_items():
-        return '📚 Справка по предметам' + TextHTML('\n'.join([TextHTML(k).bold + v for k, v in {
+        return '📚 Справка по предметам' + TextHTML('\n'.join([TextHTML(k).bold() + v for k, v in {
             '🏷️ Тэг':' - уникальный именной id',
             '⏲️ Вес одного':' - сколько весит один предмет',
             #'🎲 Шанс выпадения':' - шанс присуствия этого предмета в инвентаре создаваемого персонажа',

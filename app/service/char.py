@@ -266,7 +266,7 @@ class AddCharacterService(BaseService):
     @property
     def info_to_str(self):
         text = [f'🪪 {self.char.full_name}', f'\n{SketchInfoText(self.char.sketch).to_text(True)}']
-        if self.char.description: text.append(f'\n 📜 Описание \n{TextHTML(TextHTML(self.char.description).blockquote(True)).unescape}')
+        if self.char.description: text.append(f'\n 📜 Описание \n{TextHTML(TextHTML(self.char.description).blockquote(True)).unescape()}')
         return ''.join(text)
     
     async def markup_to_info(self):
@@ -340,9 +340,16 @@ class InventoryService(BaseService):
         
     async def get_item_info(self, item_id: int):
         items = await self.state.get_value('items')
-        await self.state.update_data(item=item_id)
-        if items:
-            return self.text.item(items[item_id]), self.IKB.action(items[item_id], 'inventory')
+        if items == None:
+            items = {}
+            inventory = await self.layer.inventory()
+            if inventory.items:
+                for item in inventory.items:
+                    items |= {item.id: item}
+                await self.state.update_data(items=items)
+            await self.state.update_data(item=item_id)
+        print( self.text.item(items[item_id]))
+        return self.text.item(items[item_id]), self.IKB.action(items[item_id], 'inventory')
         
 
     async def to_throw(self, msg):

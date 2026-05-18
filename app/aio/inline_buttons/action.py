@@ -1,5 +1,6 @@
 from app.aio.cls.callback.action import ActionBackCall, MenuCall, ActionCall, ActionRedactCall, LookAroundCall, ActionPageCall, ThrowItemCall, ThrowItemQuantityCall
 from app.aio.cls.callback.faq import FAQCall
+from app.aio.cls.callback.char import InventoryItemsGoCall
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
 from app.enum_type.tags import ActionTags
@@ -87,4 +88,16 @@ class ActionIKB(BotIKB):
         self.builder.button(text='ℹ️ Помощь', callback_data=FAQCall(faq='dice', tg_id=self.tg_id, to_answer_callback=False))
         self.builder.button(text='❌ Отменить', callback_data=MenuCall(where='cancel', is_details=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()   
+ 
+    def redact_paper(self, item_id: int, is_have_text: bool, where: str = 'item'):
+        if is_have_text:
+            self.builder.button(text='✏️ Изменить надпись', callback_data=ActionCall(tag='paper', item_id=item_id, step=2, tg_id=self.tg_id))
+            self.builder.button(text='🗑️ Убрать надпись', callback_data=ActionCall(tag='paper', item_id=item_id, step=4, tg_id=self.tg_id))
+        else:
+            self.builder.button(text='✏️ Добавить надпись', callback_data=ActionCall(tag='paper', item_id=item_id, step=2, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()
 
+    def paper_back(self, item_id: int):
+        self.builder.button(text='↩️ Назад', callback_data=ActionCall(tag='paper', item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()    
