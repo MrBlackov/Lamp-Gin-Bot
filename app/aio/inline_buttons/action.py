@@ -1,4 +1,14 @@
-from app.aio.cls.callback.action import ActionBackCall, MenuCall, ActionCall, ActionRedactCall, LookAroundCall, ActionPageCall, ThrowItemCall, ThrowItemQuantityCall
+from app.aio.cls.callback.action import (ActionBackCall, 
+                                         MenuCall, 
+                                         ActionCall, 
+                                         ActionRedactCall, 
+                                         LookAroundCall, 
+                                         ActionPageCall, 
+                                         ThrowItemCall, 
+                                         ThrowItemQuantityCall, 
+                                         PaperCall,
+                                         BookCall,
+                                         BookSettingCall)
 from app.aio.cls.callback.faq import FAQCall
 from app.aio.cls.callback.char import InventoryItemsGoCall
 from app.aio.inline_buttons.base import BotIKB
@@ -53,20 +63,20 @@ class ActionIKB(BotIKB):
     def item_throw(self, char: CharacterDB, kwargs: dict = {}, where: str | None = None):
         print(kwargs)
         for item in char.exist.inventory.items:
-            self.builder.button(text=item.text, callback_data=ThrowItemCall(tag='throw', **(kwargs | {'item_id': item.id, 'quantity':1}), tg_id=self.tg_id))
+            self.builder.button(text=item.text, callback_data=ThrowItemCall(tag=ActionTags.throw, **(kwargs | {'item_id': item.id, 'quantity':1}), tg_id=self.tg_id))
         if where:
             self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where='actions', is_details=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()     
 
     def char_throw(self, chars: list[CharacterDB], kwargs: dict = {}, page: int = 0, max_page: int = 0, where: str | None = None):
         for char in chars:
-            self.builder.button(text=f'💠 {char.exist.full_name}', callback_data=ThrowItemCall(tag='throw', **(kwargs | {'purpose_char_id': char.id}), tg_id=self.tg_id))
+            self.builder.button(text=f'💠 {char.exist.full_name}', callback_data=ThrowItemCall(tag=ActionTags.throw, **(kwargs | {'purpose_char_id': char.id}), tg_id=self.tg_id))
         self.builder.adjust(2)
         arrows_page = []
         if page > 0:
-            arrows_page.append(InlineKeyboardButton(text='⬅️', callback_data=ActionPageCall(page=page-1, tag='throw', tg_id=self.tg_id).pack()))
+            arrows_page.append(InlineKeyboardButton(text='⬅️', callback_data=ActionPageCall(page=page-1, tag=ActionTags.throw, tg_id=self.tg_id).pack()))
         if page != max_page - 1:
-            arrows_page.append(InlineKeyboardButton(text='➡️', callback_data=ActionPageCall(page=page+1, tag='throw', tg_id=self.tg_id).pack()))
+            arrows_page.append(InlineKeyboardButton(text='➡️', callback_data=ActionPageCall(page=page+1, tag=ActionTags.throw, tg_id=self.tg_id).pack()))
             
         if len(arrows_page) > 0: 
             self.builder.row(*arrows_page)
@@ -75,29 +85,80 @@ class ActionIKB(BotIKB):
         return self.builder.as_markup() 
 
     def throw_menu(self, kwargs: dict = {}, where: str = 'actions'):
-        self.builder.button(text='🥏 Кинуть', callback_data=ThrowItemCall(tag='throw', step=2, **kwargs, tg_id=self.tg_id))
-        self.builder.button(text='✏️ Изменить количество', callback_data=ThrowItemQuantityCall(tag='throw', **kwargs, tg_id=self.tg_id))
+        self.builder.button(text='🥏 Кинуть', callback_data=ThrowItemCall(tag=ActionTags.throw, step=2, **kwargs, tg_id=self.tg_id))
+        self.builder.button(text='✏️ Изменить количество', callback_data=ThrowItemQuantityCall(tag=ActionTags.throw, **kwargs, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where=where, is_details=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()     
  
     def dice(self, kwargs: dict = {}):
-        self.builder.button(text='🥏 Перебросить', callback_data=ActionCall(tag='dice', **kwargs, tg_id=self.tg_id))
+        self.builder.button(text='🥏 Перебросить', callback_data=ActionCall(tag=ActionTags.dice, **kwargs, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()     
  
     def dice_command(self):
-        self.builder.button(text='ℹ️ Помощь', callback_data=FAQCall(faq='dice', tg_id=self.tg_id, to_answer_callback=False))
+        self.builder.button(text='ℹ️ Помощь', callback_data=FAQCall(faq=ActionTags.dice, tg_id=self.tg_id, to_answer_callback=False))
         self.builder.button(text='❌ Отменить', callback_data=MenuCall(where='cancel', is_details=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()   
  
-    def redact_paper(self, item_id: int, is_have_text: bool, where: str = 'item'):
+    def redact_paper(self, item_id: int, is_have_text: bool, is_escape: bool, where: str = 'item'):
         if is_have_text:
-            self.builder.button(text='✏️ Изменить надпись', callback_data=ActionCall(tag='paper', item_id=item_id, step=2, tg_id=self.tg_id))
-            self.builder.button(text='🗑️ Убрать надпись', callback_data=ActionCall(tag='paper', item_id=item_id, step=4, tg_id=self.tg_id))
+            self.builder.button(text='✏️ Изменить надпись', callback_data=PaperCall(tag=ActionTags.paper, item_id=item_id, step=2, tg_id=self.tg_id))
+            self.builder.button(text='🗑️ Убрать надпись', callback_data=PaperCall(tag=ActionTags.paper, item_id=item_id, step=4, tg_id=self.tg_id))
+            self.builder.button(text='👁️ Показать HTML-теги' if not(is_escape) else '🌫️ Скрыть HTML-теги', callback_data=PaperCall(tag=ActionTags.paper, item_id=item_id, is_escape=not(is_escape), tg_id=self.tg_id))
         else:
-            self.builder.button(text='✏️ Добавить надпись', callback_data=ActionCall(tag='paper', item_id=item_id, step=2, tg_id=self.tg_id))
+            self.builder.button(text='✏️ Добавить надпись', callback_data=PaperCall(tag=ActionTags.paper, item_id=item_id, step=2, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
 
     def paper_back(self, item_id: int):
-        self.builder.button(text='↩️ Назад', callback_data=ActionCall(tag='paper', item_id=item_id, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=ActionCall(tag=ActionTags.paper, item_id=item_id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()    
+    
+    def book(self, item_id: int, page: int, max_page: int, book_info: bool, where: str = 'item'):
+        arrow = 0
+        if page > 0:
+            self.builder.button(text='⬅️', callback_data=BookCall(tag=ActionTags.book, page=page-1, item_id=item_id, tg_id=self.tg_id))
+            arrow += 1
+        if page != max_page - 1:
+            self.builder.button(text='➡️', callback_data=BookCall(tag=ActionTags.book, page=page+1, item_id=item_id, tg_id=self.tg_id))
+            arrow += 1
+        if max_page > 2:
+            self.builder.button(text=f'{page + 1}/{max_page} стр', callback_data=BookCall(tag=ActionTags.book, page=page, step=2, item_id=item_id, tg_id=self.tg_id))
+        if book_info:
+            self.builder.button(text='➕ Добавить страницу', callback_data=BookCall(tag=ActionTags.book, page=page, step=3, item_id=item_id, tg_id=self.tg_id))
+            if max_page > 0:
+                self.builder.button(text='➖ Удалить страницу', callback_data=BookCall(tag=ActionTags.book, page=page, step=5, item_id=item_id, tg_id=self.tg_id))
+        else:
+            self.builder.button(text='✏️ Назвать книгу', callback_data=BookSettingCall(tag=ActionTags.book_setting, step=0, item_id=item_id, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(arrow or 1, 1).as_markup()
+
+    def book_pages(self, page: int, item_id: int, text_pages: list[str]):
+        k = 0
+        for text_page in text_pages:
+            k += 1
+            self.builder.button(text=f'{text_page}... ({k} стр.)', callback_data=BookCall(tag=ActionTags.book, page=page, item_id=item_id, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=BookCall(tag=ActionTags.book, page=page, item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()
+
+    def new_book_back(self, item_id: int, where: str = 'item'):
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()    
+    
+    def book_back(self, page: int, item_id: int):
+        self.builder.button(text='↩️ Назад', callback_data=BookCall(tag=ActionTags.book, page=page, item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()    
+
+    def book_setting(self, item_id: int, is_redact: bool, where: str = 'item'):             
+        self.builder.button(text='🏷️ Изменить название', callback_data=BookSettingCall(tag=ActionTags.book_setting, step=0, item_id=item_id, tg_id=self.tg_id))
+        self.builder.button(text='🎭 Изменить псевдоним', callback_data=BookSettingCall(tag=ActionTags.book_setting, step=2, item_id=item_id, tg_id=self.tg_id))
+        self.builder.button(text='📃 Изменить описание', callback_data=BookSettingCall(tag=ActionTags.book_setting, step=3, item_id=item_id, tg_id=self.tg_id))
+        self.builder.button(text='🔏 Запретить редактирование' if is_redact else ' 🔓 Разрешить редактирование', callback_data=BookSettingCall(tag=ActionTags.book_setting, step=4, item_id=item_id, tg_id=self.tg_id))
+        self.builder.button(text='🗑️ Очистить книгу', callback_data=BookSettingCall(tag=ActionTags.book_setting, step=5, item_id=item_id, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()  
+
+    def book_setting_back(self, item_id: int):
+        self.builder.button(text='↩️ Назад', callback_data=BookSettingCall(tag=ActionTags.book_setting, item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()    
+
+

@@ -348,7 +348,6 @@ class InventoryService(BaseService):
                     items |= {item.id: item}
                 await self.state.update_data(items=items)
             await self.state.update_data(item=item_id)
-        print( self.text.item(items[item_id]))
         return self.text.item(items[item_id]), self.IKB.action(items[item_id], 'inventory')
         
 
