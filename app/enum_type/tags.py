@@ -36,6 +36,8 @@ class ActionTags:
     dice = 'dice'
     paper = 'paper' 
     book = 'book'
+    book_setting = 'book_setting'
+    radio = 'radio'
 
 
 

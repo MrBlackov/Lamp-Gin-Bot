@@ -10,9 +10,9 @@ class TransferLogic:
     async def new_transfer(self, char1_id: int, char2_id: int, items1: list[ItemDB], items2: list[ItemDB], status: str) -> TransferDB:
         transfer = await add_transfer_dict(data={'seller_id':char1_id, 'buyer_id':char2_id, 'type':'trade', 'status':status})
         if items1:
-            new_items1 = await add_items_db(data=[ItemDB(transfer_id=transfer.id, sketch_id=item.sketch_id, quantity=item.quantity, nbt={'from_char_transfers':True}) for item in items1])
+            new_items1 = await add_items_db(data=[ItemDB(transfer_id=transfer.id, sketch_id=item.sketch_id, quantity=item.quantity, nbt=item.nbt | {'from_char_transfers':True}) for item in items1])
         if items2:
-            new_items2 = await add_items_db(data=[ItemDB(transfer_id=transfer.id, sketch_id=item.sketch_id, quantity=item.quantity, nbt={'from_char_transfers':False}) for item in items2])
+            new_items2 = await add_items_db(data=[ItemDB(transfer_id=transfer.id, sketch_id=item.sketch_id, quantity=item.quantity, nbt=item.nbt | {'from_char_transfers':False}) for item in items2])
         transfer = await update_transfer(filters={'id': transfer.id}, 
                               new_data={'seller_items': [item.id for item in new_items1] if items1 else None, 
                                         'buyer_items': [item.id for item in new_items2] if items2 else None})
@@ -59,8 +59,8 @@ class TransferLogic:
         return True
 
     async def update_items_for_char(self, inventory1_id: int, inventory2_id: int, items1: list[ItemDB], items2: list[ItemDB]):
-        await add_items_db(data=[ItemDB(inventory_id=inventory1_id, sketch_id=item.sketch_id, quantity=item.quantity) for item in items2])
-        await add_items_db(data=[ItemDB(inventory_id=inventory2_id, sketch_id=item.sketch_id, quantity=item.quantity) for item in items1])
+        await add_items_db(data=[ItemDB(inventory_id=inventory1_id, sketch_id=item.sketch_id, quantity=item.quantity, nbt=item.nbt) for item in items2])
+        await add_items_db(data=[ItemDB(inventory_id=inventory2_id, sketch_id=item.sketch_id, quantity=item.quantity, nbt=item.nbt) for item in items1])
         return True
 
     async def delete_transfer(self, transfer_id: int):

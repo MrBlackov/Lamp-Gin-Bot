@@ -72,5 +72,15 @@ class DiceCmdLongError(ActionError):
 
 class PaperLongError(ActionError):
     msg = '❌ Надпись сликом большая, сделайте поменьше'
-    code = '510.14'
+    code = '510.15'
     faq = 'Длина вашеей надписи должна быть меньше 2000' 
+
+class BookDontHaveInfoError(ActionError):
+    msg = '❌ Сначало назовите книгу через ее настройки'
+    code = '510.16'
+    faq = '' 
+
+class BookSettingCloseError(ActionError):
+    msg = '❌ Эту книгу нельзя редактировать'
+    code = '510.16'
+    faq = '' 

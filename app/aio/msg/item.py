@@ -15,18 +15,18 @@ class ItemText:
         texts = []
         if ActionTags.paper in self.sketch.action:
             text = self.item.nbt.get('text')
-            print(text)
             texts.append(f'📄 Надпись (отсуствует)' if type(text) != str else f'📄 Надпись \n\n' + text.replace('emoji_id', 'emoji-id'))
         if ActionTags.book in self.sketch.action:
             text: dict = self.item.nbt.get('book')
             if text:
                 book = BookValide.model_validate(text)
                 texts.append(
-                    f'{book.name}' + '\n'.join([
+                    f'🏷️ {book.name}' + TextHTML('\n'.join([
                         f'👤 Автор: {book.author}',
-                        f'📊 Кол-во страниц: {book.pages}',
+                        f'✏️ Можно редактировать: {'✅' if not(book.is_close_setting) else '❌'}',
+                        (f'📊 Кол-во страниц: {len(book.pages)}' if book.pages and len(book.pages) > 0 else '❌ Страниц нету'),
                         f'📜 Описание: {book.description if book.description and len(book.description) > 0 else "❌"}'
-                    ])
+                    ])).blockquote()
                 )
             else:
                 texts.append(f'❗ Вы можете написать книгу')

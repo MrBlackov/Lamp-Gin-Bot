@@ -51,31 +51,27 @@ class ActionService(BaseService):
                     return msg, self.IKB.wake_up()
                 case 'wake_up' | 'no_sleep' | 'stop' | 'no_action' | 'recovery' | 'no_lookaround' | 'no_throw':
                     return msg, self.IKB.back('actions')  
-                case 'to_throw':
-                    await self.bot.send_message(action.purpose_user.tg_id, action.purpose_msg)
-                    return msg, self.IKB.back('actions')    
                 case 'is_action' | 'to_action':
-                    return msg, self.IKB.stop()     
-                case 'stats':
-                    return msg, self.IKB.stats()       
-                case 'paper':
-                    return msg, self.IKB.redact_paper(action.item_id, action.is_have_text)   
-                case 'redact_paper':
-                    await self.state.set_state(ActionState.redact_paper)
-                    await self.state.update_data(msg=self.message, item_id=action.item_id)
-                    return msg, self.IKB.paper_back(action.item_id)   
+                    return msg, self.IKB.stop()   
                 case 'lookaround':
                     return msg, self.IKB.lookaround(action.results)  
                 case 'to_action_time':
                     return msg, self.IKB.redact(tag=tag, minute=action.minute, emodzi=emodzi, action_text=action.name, where='actions')
+                case 'stats':
+                    return msg, self.IKB.stats()    
+                   
+                case 'paper':
+                    return msg, self.IKB.redact_paper(action.item_id, action.is_have_text, action.is_escape)   
+                case 'redact_paper':
+                    await self.state.set_state(ActionState.redact_paper)
+                    await self.state.update_data(msg=self.message, item_id=action.item_id)
+                    return msg, self.IKB.paper_back(action.item_id)  
+                 
+                case 'to_throw':
+                    await self.bot.send_message(action.purpose_user.tg_id, action.purpose_msg)
+                    return msg, self.IKB.back('actions')    
                 case 'item_throw':
                     return msg, self.IKB.item_throw(action.char, action.kwargs, 'actions')
-                case 'dice':
-                    return msg, self.IKB.dice(action.kwargs)
-                case 'to_dice':
-                    await self.state.set_state(ActionState.dice_command)
-                    await self.state.update_data(msg=self.message)
-                    return msg, self.IKB.dice_command()
                 case 'char_throw':
                     values_in_page = 10
                     char_pages = [tuple(action.chars[i:i+values_in_page]) for i in range(0, len(action.chars), values_in_page)]
@@ -83,8 +79,37 @@ class ActionService(BaseService):
                     return msg + f'{f' [1/{len(char_pages)}стр]' if len(char_pages) > 1 else ''}', self.IKB.char_throw(char_pages[0], action.kwargs, page=0, max_page=len(char_pages), where='actions')
                 case 'throw_menu':
                     return msg, self.IKB.throw_menu(action.kwargs, 'actions')
+                
+                case 'dice':
+                    return msg, self.IKB.dice(action.kwargs)
+                case 'to_dice':
+                    await self.state.set_state(ActionState.dice_command)
+                    await self.state.update_data(msg=self.message)
+                    return msg, self.IKB.dice_command()
+                
+                case 'book_setting':
+                    return msg, self.IKB.book_setting(action.item_id, action.is_close_setting)
+                case 'new_book':
+                    await self.state.set_state(ActionState.book_setting)
+                    await self.state.update_data(msg=self.message, parametr='book_name', item_id=action.item_id)
+                    return msg, self.IKB.new_book_back(action.item_id)
+                case 'book_name' | 'book_author_name' | 'book_description':
+                    await self.state.set_state(ActionState.book_setting)
+                    await self.state.update_data(msg=self.message, parametr=result, item_id=action.item_id)
+                    return msg, self.IKB.book_setting_back(action.item_id)
+                case 'book_delete':
+                    return msg, self.IKB.new_book_back(action.item_id)
+                
+                case 'book_page':
+                    return msg, self.IKB.book(action.item_id, action.page, action.max_page, action.book_info)
+                case 'book_pages':
+                    return msg, self.IKB.book_pages(action.page, action.item_id, action.pages)
+                case 'new_book_page':
+                    await self.state.set_state(ActionState.book_new_page)
+                    await self.state.update_data(msg=self.message, item_id=action.item_id)
+                    return msg, self.IKB.book_back(action.page, action.item_id)
                 case _:
-                    return '💻 Скоро', self.IKB.back('actions')
+                    return '💻 Скоро', self.IKB.back('actions') 
         except SleepError as e:
             return e.msg, self.IKB.wake_up()
         except StopError as e:
@@ -133,6 +158,6 @@ class ActionService(BaseService):
     async def dice_command(self, cmd: str):
         return await self.to_action('dice', args=cmd)
  
-    async def redact_paper(self, text: str):
+    async def redact_text(self, tag: str, step: int, text: str):
         item_id = await self.state.get_value('item_id')
-        return await self.to_action('paper', step=3, item_id=item_id, args=text)
+        return await self.to_action(tag, step=step, item_id=item_id, args=text)
