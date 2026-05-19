@@ -171,7 +171,10 @@ class ItemsLogic:
                 if inventory_item:
                     update_item[inventory_item.id] = inventory_item.quantity + item_quantity
                 else:
-                    new_item.append(ItemDB(inventory_id=char.exist.inventory.id, sketch_id=item.sketch_id, quantity=item_quantity))
+                    new_item.append(ItemDB(sketch_id=item.sketch_id, 
+                                               quantity=quantity, 
+                                               inventory_id=char.exist.inventory.id, 
+                                               nbt=item.nbt))
             elif action == '-':
                 if inventory_item:
                     if inventory_item.quantity - item_quantity <= 0:

@@ -3,6 +3,18 @@ import html
 import json
 import markdown
 from typing import Any
+from html.parser import HTMLParser
+class HTMLStripper(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.text = []
+    
+    def handle_data(self, data):
+        self.text.append(data)
+    
+    def get_data(self):
+        return ''.join(self.text)
 
 class TextHTMLBase(str):
     def blockquote(self, expandable: bool = False) -> "TextHTML":
@@ -94,6 +106,12 @@ class TextHTMLBase(str):
     def to_html(self) -> "TextHTML":
         """Преобразует markdown в html"""
         return TextHTML(markdown.markdown(self))
+
+    def strip_html(self) -> "TextHTML":
+        """Удаляет HTML теги"""
+        stripper = HTMLStripper()
+        stripper.feed(self)
+        return stripper.get_data()
 
 class TextHTML(TextHTMLBase):
     # ─── Методы изменения регистра ──────────────────────────────────

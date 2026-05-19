@@ -7,7 +7,17 @@ from app.logged.botlog import log
 from app.aio.config import owner
 from app.exeption.decorator import exept, call_exept
 from app.service.action import ActionService, ActionFSM, ActionSelf
-from app.aio.cls.callback.action import ActionBackCall, ActionCall, MenuCall, ActionRedactCall, ActionPageCall, LookAroundCall, ThrowItemCall, ThrowItemQuantityCall
+from app.aio.cls.callback.action import (ActionBackCall, 
+                                         MenuCall, 
+                                         ActionCall, 
+                                         ActionRedactCall, 
+                                         LookAroundCall, 
+                                         ActionPageCall, 
+                                         ThrowItemCall, 
+                                         ThrowItemQuantityCall, 
+                                         PaperCall,
+                                         BookCall,
+                                         BookSettingCall)
 from app.aio.cls.fsm.action import ActionState
 from app.service.utils import is_natural_int
 from app.exeption.action import ActionError, ActionQuantityFloat, ActionQuantityLessOne, ActionQuantityNoInt, NotNewStatsError
@@ -37,10 +47,25 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Actio
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @action_router.callback_query(ActionCall.filter())     
+@action_router.callback_query(BookSettingCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionCall, state: FSMContext, **kwargs):
     msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id, args=callback_data.args)
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@action_router.callback_query(PaperCall.filter())     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: PaperCall, state: FSMContext, **kwargs):
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id, is_escape=callback_data.is_escape, args=callback_data.args)
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@action_router.callback_query(BookCall.filter())     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: BookCall, state: FSMContext, **kwargs):
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id, page=callback_data.page, is_escape=callback_data.is_escape, args=callback_data.args)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @action_router.callback_query(ThrowItemCall.filter())     
@@ -82,7 +107,37 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     fsm = ActionFSM(state)
     msg0 = await fsm.get_value('msg')
-    msg, markup = await ActionService(message.from_user.id, state, message).redact_paper(message.html_text)
+    msg, markup = await ActionService(message.from_user.id, state, message).redact_text('paper', 3, message.html_text)
+    msg2 = await message.answer(msg, reply_markup=markup)
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
+    await msg0.delete()
+
+@action_router.message(ActionState.book_setting, F.content_type == 'text')
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    fsm = ActionFSM(state)
+    msg0 = await fsm.get_value('msg')
+    parametr = await fsm.get_value('parametr')
+    pdict = {
+        'book_name':-1,
+        'book_author_name':-2,
+        'book_description':-3,
+    }
+    msg, markup = await ActionService(message.from_user.id, state, message).redact_text('book_setting', pdict.get(parametr, 1), message.text)
+    msg2 = await message.answer(msg, reply_markup=markup)
+    await fsm.update_data(msg=msg2)
+    await fsm.set_state()
+    await msg0.delete()
+
+@action_router.message(ActionState.book_new_page, F.content_type == 'text')
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    fsm = ActionFSM(state)
+    msg0 = await fsm.get_value('msg')
+    msg, markup = await ActionService(message.from_user.id, state, message).redact_text('book', 4, message.html_text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
     await fsm.set_state()

@@ -141,6 +141,13 @@ class ActionBase:
         self.msg = None
         return self
 
+    def check_have_item(self):
+        for tag in self.have_items():
+            have_item = self.char.exist.inventory.item_action_tags.get(tag)
+            if not(have_item) or len(have_item) < 1:
+                raise HaveItemError(f'This char(id={self.char.id}) havent item for action')
+        return True
+
 class BlockFreedomAction(ActionBase):
     is_block_freedom: bool = True
     to_action_text = 'начал действие'
@@ -198,7 +205,7 @@ class BlockFreedomAction(ActionBase):
         try:
             return await self.logic.item.give(item.sketch_id, self.char.exist.inventory.id, self.char, item.quantity), True
         except InventaryOverFlowing:
-            return await add_db_obj(data=[ItemDB(location_id=1, sketch_id=item.sketch_id, quantity=item.quantity, nbt={"is_pick_up": False})]), False
+            return await add_db_obj(data=[ItemDB(location_id=1, sketch_id=item.sketch_id, quantity=item.quantity, nbt=item.nbt | {"is_pick_up": False})]), False
 
 class StopAction(ActionBase):
     tag = ActionTags.stop

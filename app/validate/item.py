@@ -13,8 +13,10 @@ class CraftValide(BaseModel):
 class BookValide(BaseModel):
     name: str
     author: str 
+    author_char_id: int 
+    is_close_setting: bool = False
     description: str = ''
-    pages: list[str]
+    pages: list[str] = []
 
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 

@@ -8,5 +8,7 @@ class ActionState(StatesGroup):
     throw_quantity = State()
     dice_command = State()
     redact_paper = State()
+    book_new_page = State()
+    book_setting = State()
 
 

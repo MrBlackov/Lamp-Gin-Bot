@@ -98,7 +98,7 @@ class dices:
         self.mod = mod
         self.d = d
         self.d_text = f'{k_dice}d{d[1]}'
-        self.result = self.medium + mod
+        self.result = self.sum + mod
         return self
 
     @property
