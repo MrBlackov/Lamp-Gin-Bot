@@ -180,6 +180,21 @@ async def get_chars_for_exist_id(
 
 @connection(commit=False)
 @log.decor()
+async def get_chars_for_exist_id(
+                             session: AsyncSession,   
+                             exist_ids: list[int],
+                             logging: bool = True
+                             ) -> list[CharacterDB]:
+        try:
+            query = select(CharacterDB).join(ExistenceDB).where(ExistenceDB.id.in_(exist_ids))
+            result = await session.execute(query)
+            record = result.scalars().all()
+            return record
+        except SQLAlchemyError as e:
+            raise
+        
+@connection(commit=False)
+@log.decor()
 async def get_item_sketch_for_action_tag(
                              session: AsyncSession,
                              action_tag: str,                      

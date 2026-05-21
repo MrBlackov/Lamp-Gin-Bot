@@ -8,7 +8,8 @@ from app.aio.cls.callback.action import (ActionBackCall,
                                          ThrowItemQuantityCall, 
                                          PaperCall,
                                          BookCall,
-                                         BookSettingCall)
+                                         BookSettingCall,
+                                         RadioCall)
 from app.aio.cls.callback.faq import FAQCall
 from app.aio.cls.callback.char import InventoryItemsGoCall
 from app.aio.inline_buttons.base import BotIKB
@@ -161,4 +162,17 @@ class ActionIKB(BotIKB):
         self.builder.button(text='↩️ Назад', callback_data=BookSettingCall(tag=ActionTags.book_setting, item_id=item_id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()    
 
+    def radio(self, item_id: int, micro: bool, swoo: bool, where: str = 'item'): 
+        self.builder.button(text='✅ Включить звук' if not swoo else '❌ Отключить звук', callback_data=RadioCall(tag=ActionTags.radio, step=3, micro=micro, swoo=swoo, item_id=item_id, tg_id=self.tg_id))  
+        if swoo:
+            self.builder.button(text='✅ Включить микрофон' if not micro else '❌ Отключить микрофон', callback_data=RadioCall(tag=ActionTags.radio, step=2, micro=micro, swoo=swoo, item_id=item_id, tg_id=self.tg_id)) 
+            self.builder.button(text='🔃 Переключить канал', callback_data=RadioCall(tag=ActionTags.radio, step=4, micro=micro, swoo=swoo, item_id=item_id, tg_id=self.tg_id)) 
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()    
+ 
+    def micro(self, item_id: int):
+        self.builder.button(text='❌ Отключить микрофон', callback_data=RadioCall(tag=ActionTags.radio, micro_off=True, item_id=item_id, tg_id=self.tg_id)) 
+        return self.builder.adjust(1).as_markup()    
+       
 
+ 

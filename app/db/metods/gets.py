@@ -257,6 +257,9 @@ async def get_action_states_for_exist_id(exist_id: int) -> list[ActionStateDB]:
 async def get_action_states() -> list[ActionStateDB]:
     return await select_action_states()
 
+async def get_action_states_for_tag(tag: str) -> list[ActionStateDB]:
+    return await select_action_states(filters={'tag':tag})
+
 async def get_action_states_for_block_freedom(is_block_freedom: bool, exist_id: int | None = None) -> list[ActionStateDB]:
     filters = {'is_block_freedom':is_block_freedom}
     if exist_id != None:

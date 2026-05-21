@@ -41,7 +41,7 @@ class ItemText:
             '⏲️ Вес одного: {WEIGHT}кг',
             '🧳 Общий вес: {ALLWEIGHT}кг',
             '📜 Описание: {DESCRIPT}',
-        ])).blockquote() + '\n{DOP}'
+        ])).blockquote() #+ '\n{DOP}'
  
     @property    
     def text(self):
