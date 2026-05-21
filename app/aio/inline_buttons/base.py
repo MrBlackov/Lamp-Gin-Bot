@@ -1,4 +1,5 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from app.aio.cls.callback.base import MenuCall
 
 class BotIKB:
     def __init__(self, tg_id: int):
@@ -9,4 +10,6 @@ class BotIKB:
         self.tg_id = tg_id
         return self
         
-    
+    def to_inventory(self):
+        return self.builder.button(text='💼 Инвентарь', callback_data=MenuCall(where='inventory', tg_id=self.tg_id)).as_markup()
+

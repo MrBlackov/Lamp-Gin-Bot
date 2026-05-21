@@ -43,13 +43,16 @@ async def update_chat_setting_by_chat_id(chat_id: int, msg_delete_time: int | No
     print(new_data)
     return await update_chat_setting(filters={'chat_id':chat_id}, new_data=new_data)
 
-async def update_main_char(user_id: int, char_id: int | None = None) -> bool:
+async def update_main_char(user_id: int, char_id: int | None = None) -> UserDB:
     return await update_user(filters={'id':user_id}, new_data={'main_char':char_id})
 
-async def update_char_die(exist_id: int, is_die: bool = True) -> bool:
+async def update_char_die(exist_id: int, is_die: bool = True) -> ExistenceDB:
     return await update_exist(filters={'id':exist_id}, new_data={'die':is_die})
 
-async def update_char_location_default(char_id: int) -> bool:
+async def update_exist_for_id(exist_id: int, new_data: dict) -> ExistenceDB:
+    return await update_exist(filters={'id':exist_id}, new_data=new_data)
+
+async def update_char_location_default(char_id: int) -> CharacterDB:
     return await update_char(filters={'id':char_id}, new_data={'location_id':1})
 
 async def update_donate_delete_char_quan(donate_id: int, new_quan: int | None = None, use_delete: int = 1):

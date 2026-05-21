@@ -1,0 +1,21 @@
+site_name: Lamp Gin Bot Wiki
+nav:
+  - Home: index.md
+theme:
+  name: material
+  language: ru
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - content.code.copy
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Тёмный режим
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Светлый режим

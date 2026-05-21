@@ -1,7 +1,7 @@
 from app.enum_type.tags import ActionTags, SkillTags
 from datetime import datetime, timedelta
 from app.db.metods.gets import get_all_chars, get_char_for_id, get_action_states_for_tag, ActionStateDB, UserDB, CharacterDB, ItemDB, ItemSketchDB, get_item_sketch, get_item_sketch_for_tag, get_exists_for_ids, get_action_state_for_tag, get_action_states_for_block_freedom, get_action_state_for_id, get_action_states_for_exist_id, SkillDB
-from app.db.metods.updates import update_skill_for_id, update_item_for_id, update_skill_for_tag, update_action_state_for_id, update_action_state_for_tag
+from app.db.metods.updates import update_skill_for_id, update_exist_for_id, update_item_for_id, update_skill_for_tag, update_action_state_for_id, update_action_state_for_tag
 from app.db.metods.adds import add_db_obj
 from app.db.metods.unique import get_chars_for_exist_id, get_item_for_tag, get_item_sketch_for_action_tag, get_item_for_action_tag
 from app.db.metods.deletes import delete_action_state, delete_action_states
@@ -38,10 +38,11 @@ class ActionBase:
 
     msg: str = ''
     msg_kwargs: dict = {}
-    result = None
-    results = None
-    to_cmd = True
-    to_IKB = True
+    result: str | None = None
+    results: str | None = None
+    to_cmd: bool = True
+    to_IKB: bool = True
+    to_item_button: bool = True
     commands_text: list[str] = []
     command_prefix: list[str] = ['!', '/']
     IKB = True
@@ -88,6 +89,15 @@ class ActionBase:
     @classmethod
     def have_items(self):
         return [self.tag] if self.is_have_items else []
+
+    @classmethod
+    def have_items_prices(self) -> dict[str, int] | None:
+        return None
+    
+    async def pay_item_price(self, payments: dict[ItemDB, int]):
+        for item, quantity in payments.items():
+            await self.logic.item.action_for_items([item], self.char, action='-', quantity=quantity, is_pick_up=True)
+        return True
 
     async def get_chars(self, freiends_the_first: bool = False):        
         chars = await get_all_chars()

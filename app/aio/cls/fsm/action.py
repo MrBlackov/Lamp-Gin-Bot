@@ -11,4 +11,5 @@ class ActionState(StatesGroup):
     book_new_page = State()
     book_setting = State()
     micro = State()
+    new_name = State()
 

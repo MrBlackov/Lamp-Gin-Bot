@@ -11,10 +11,11 @@ from app.logic.actions.base import (ActionBase,
                                     update_action_state_for_id,
                                     update_item_for_id,
                                     get_chars_for_exist_id,
+                                    update_exist_for_id,
                                     action_point,
                                     TextHTML)
 from app.logic.dnd import dices, dice
-from app.exeption.action import DiceCmdNoValideError, RadioMsgLongError, BookDontHaveInfoError, BookSettingCloseError, DiceCmdDontHaveDError, DiceCmdLongError, PaperLongError
+from app.exeption.action import DiceCmdNoValideError, NameLongError, BookDontHaveInfoError, BookSettingCloseError, DiceCmdDontHaveDError, DiceCmdLongError, PaperLongError
 from app.validate.item import BookValide
 
 class ItemsAction(ActionBase):
@@ -271,3 +272,44 @@ class RadioAction(ItemsAction):
         self.purpose_tg_ids = [c.user.tg_id for c in radio_chars if self.char.user.id != c.user.id]
         return self
   
+
+class TagAction(ItemsAction):
+    tag = ActionTags.tag
+
+    name = 'Сменить имя персонажа'
+    emodzi = '✏️'
+    description = 'Меняет имя перса на желаемый.'
+
+    @classmethod
+    def have_items(self):
+        return [self.tag]
+
+    def __init__(self, char, user = None, step = 1, minute = None, action_tags = ..., **kwargs):
+        super().__init__(char, user, step, minute, action_tags, **kwargs)
+        self.names = self.args.split(' ', 1) if self.args else [None, None]
+        self.first_name, self.last_name = self.names if len(self.names) > 1 else (self.names[0], None)
+        self.full_name = f'{self.first_name} {self.last_name if self.last_name else ''}' if self.first_name else None
+
+    async def to_action(self):
+        self.check_have_item()
+        tag = self.char.exist.inventory.item_ids.get(self.item_id)
+        if self.first_name and len(self.first_name) > 50:
+            raise NameLongError('Name is long')
+        if self.last_name and len(self.last_name) > 50:
+            raise NameLongError('Name is long')
+        if self.step == 1:
+            self.result = 'input_name'
+            self.msg = '✏️ Введите новое имя и фамилию через пробел'
+            return self
+        if self.step == 2:
+            self.result = 'rename_menu'
+            self.msg = f'❔ Вы хотите поменять имя персонажа с {self.char.exist.full_name} на {self.full_name}' if self.full_name else '❌ Вы не ввели имя'
+            return self
+        print(self.first_name, self.last_name)
+        exist = await update_exist_for_id(self.char.exist.id, {'first_name':self.first_name, 'last_name':self.last_name if self.last_name else ''})
+        await self.pay_item_price({tag:1})
+        self.result = 'rename'
+        self.msg = f'✅ Персонаж переименован. Новое имя: {exist.full_name}'
+        return self
+        
+

@@ -99,7 +99,7 @@ class ActionService(BaseService):
                     await self.state.update_data(msg=self.message, parametr=result, item_id=action.item_id)
                     return msg, self.IKB.book_setting_back(action.item_id)
                 case 'book_delete':
-                    return msg, self.IKB.new_book_back(action.item_id)
+                    return msg, self.IKB.item_back(action.item_id)
                 
                 case 'book_page':
                     return msg, self.IKB.book(action.item_id, action.page, action.max_page, action.book_info)
@@ -120,6 +120,14 @@ class ActionService(BaseService):
                     await self.text_boardcast(action.purpose_tg_ids, action.purpose_msg)
                     return msg, self.IKB.micro(action.item_id)
                 
+                case 'rename_menu':
+                    return msg, self.IKB.rename_menu(action.item_id, action.args)
+                case 'input_name':
+                    await self.state.set_state(ActionState.new_name)
+                    await self.state.update_data(msg=self.message, item_id=action.item_id)
+                    return msg, self.IKB.item_back(action.item_id)
+                case 'rename':
+                    return msg, self.IKB.to_inventory()
                 case _:
                     return '💻 Скоро', self.IKB.back('actions') 
         except SleepError as e:
