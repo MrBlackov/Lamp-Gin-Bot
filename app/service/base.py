@@ -4,6 +4,7 @@ from app.logged.botlog import logs
 from app.aio.config import admins, bot, newspaper_id
 from app.aio.cls.fsm.utils import FSMUtils
 from aiogram.types import Message
+import asyncio
 
 NOT_NEW_STATE = object()
 
@@ -32,6 +33,14 @@ class BaseService:
             self.state = state
         return self
 
+    async def text_boardcast(self, tg_ids: list[int], text: str, delay: int = 20):
+        k = 0
+        for tg_id in tg_ids:
+            k += 1
+            await self.bot.send_message(tg_id, text)
+            if k%delay == 0:
+                await asyncio.sleep(2)
+        return True
 
 
 
