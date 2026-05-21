@@ -141,7 +141,7 @@ class ActionIKB(BotIKB):
         self.builder.button(text='↩️ Назад', callback_data=BookCall(tag=ActionTags.book, page=page, item_id=item_id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
 
-    def new_book_back(self, item_id: int, where: str = 'item'):
+    def item_back(self, item_id: int, where: str = 'item'):
         self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()    
     
@@ -174,5 +174,10 @@ class ActionIKB(BotIKB):
         self.builder.button(text='❌ Отключить микрофон', callback_data=RadioCall(tag=ActionTags.radio, micro_off=True, item_id=item_id, tg_id=self.tg_id)) 
         return self.builder.adjust(1).as_markup()    
        
-
+    def rename_menu(self, item_id: int, args: str):
+        self.builder.button(text='✏️ Другое имя', callback_data=ActionCall(tag=ActionTags.tag, step=1, args=args, item_id=item_id, tg_id=self.tg_id)) 
+        self.builder.button(text='✅ Переименовать', callback_data=ActionCall(tag=ActionTags.tag, step=3, args=args, item_id=item_id, tg_id=self.tg_id)) 
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where='item', item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()   
+        
  

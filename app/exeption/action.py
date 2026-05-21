@@ -36,7 +36,7 @@ class ActionQuantityFloat(ActionError):
     faq = ''  
 
 class NotNewStatsError(ActionError):
-    msg = '❌ Обновлений нету'
+    msg = '❌ Пока ничего нового'
     code = '510.9'
     faq = ''   
     
@@ -82,12 +82,16 @@ class BookDontHaveInfoError(ActionError):
 
 class BookSettingCloseError(ActionError):
     msg = '❌ Эту книгу нельзя редактировать'
-    code = '510.16'
+    code = '510.17'
     faq = '' 
 
 class RadioMsgLongError(ActionError):
     msg = '❌ Ваше сообщение слишком большое'
-    code = '510.16'
+    code = '510.18'
     faq = '' 
 
+class NameLongError(ActionError):
+    msg = '❌ Новое имя или фамилия больше 50 символов. Введите имя или фамилию меньше размером.'
+    code = '510.19'
+    faq = '' 
 
