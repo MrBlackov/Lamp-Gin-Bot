@@ -38,6 +38,7 @@ class ActionTags:
     book = 'book'
     book_setting = 'book_setting'
     radio = 'radio'
+    tag = 'tag'
 
 
 

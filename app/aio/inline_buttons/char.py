@@ -25,7 +25,7 @@ from app.aio.cls.callback.char import (
                                        NewCharSkillCall,
                                        )
 from app.aio.cls.callback.faq import FAQCall
-from app.aio.cls.callback.action import ActionCall
+from app.aio.cls.callback.action import ActionCall, ThrowItemCall
 from app.db.models.item import ItemDB, SkillDB, SkillSketchDB
 from app.db.models.char import CharacterDB
 from app.aio.inline_buttons.base import BotIKB
@@ -263,8 +263,9 @@ class InventoryIKB(BotIKB):
         if item.sketch.action and len(item.sketch.action) > 0:
             for item_action in item.sketch.action:
                 action = ActionSelf.item_action().get(item_action)
-                if action:
+                if action and action.to_item_button:
                     self.builder.button(text=action.text(), callback_data=ActionCall(tag=action.tag, item_id=item.id, tg_id=self.tg_id))
+        self.builder.button(text='🥏 Бросить', callback_data=ThrowItemCall(tag='throw', item_id=item.id, tg_id=self.tg_id))  
         self.builder.button(text='🚮 Выбросить', callback_data=InventoryItemsActionCall(to_throw=True, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
