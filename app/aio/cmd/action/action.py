@@ -17,7 +17,8 @@ from app.aio.cls.callback.action import (ActionBackCall,
                                          ThrowItemQuantityCall, 
                                          PaperCall,
                                          BookCall,
-                                         BookSettingCall)
+                                         BookSettingCall,
+                                         RadioCall)
 from app.aio.cls.fsm.action import ActionState
 from app.service.utils import is_natural_int
 from app.exeption.action import ActionError, ActionQuantityFloat, ActionQuantityLessOne, ActionQuantityNoInt, NotNewStatsError
@@ -66,6 +67,23 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Paper
 @call_exept()
 async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: BookCall, state: FSMContext, **kwargs):
     msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id, page=callback_data.page, is_escape=callback_data.is_escape, args=callback_data.args)
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@action_router.callback_query(RadioCall.filter(F.micro_off == True))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: RadioCall, state: FSMContext, **kwargs):   
+    radio_state = await state.get_state()
+    if radio_state == 'ActionState:micro':
+        await state.set_state()
+        await callback.answer('✅ Микрофон выключен')
+        await callback.message.edit_reply_markup()
+
+@action_router.callback_query(RadioCall.filter())     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: RadioCall, state: FSMContext, **kwargs):
+    msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_action(callback_data.tag, callback_data.step, callback_data.minute, micro=callback_data.micro, swoo=callback_data.swoo, item_id=callback_data.item_id, args=callback_data.args)
     await callback.message.edit_text(msg, reply_markup=markup)
 
 @action_router.callback_query(ThrowItemCall.filter())     
@@ -143,6 +161,19 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     await fsm.set_state()
     await msg0.delete()
 
+@action_router.message(ActionState.micro, F.content_type == 'text')
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, state: FSMContext, **kwargs):
+    fsm = ActionFSM(state)
+    msg1 = await fsm.get_value('msg')
+    msg, markup = await ActionService(message.from_user.id, state, message).redact_text('radio', 0, message.text)
+    msg2 = await message.answer(msg, reply_markup=markup)
+    if msg1:
+        await msg1.edit_text(msg1.text)
+    await fsm.update_data(msg=msg2)
+
+
 @action_router.message(ActionState.dice_command, F.content_type == 'text')
 @log.decor(arg=True)
 @exept
@@ -210,9 +241,15 @@ for action in ActionSelf.cmd_actions:
         @log.decor(arg=True)
         @exept
         async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
-            print(command.command, command.args)
             msg, markup = await ActionService(message.from_user.id, state, message).cmd_action(command.prefix + command.command, command.args, command.args)
             await message.answer(msg, reply_markup=markup)
 
-
+@action_router.message(Command('stop'))
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
+    radio_state = await state.get_state()
+    if radio_state == 'ActionState:micro':
+        await state.set_state()
+        await message.answer('✅ Микрофон выключен')
 

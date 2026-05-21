@@ -37,7 +37,8 @@ class ActionService(BaseService):
     
     async def to_action(self, tag: str, step: int = 1, minute: int | None = None, **kwargs):
         try:
-            action = await self.layer.action(tag, step, minute, **kwargs)
+            action_state = await self.state.get_state()
+            action = await self.layer.action(tag, step, minute, state=action_state, **kwargs)
             emodzi = action.emodzi
             result = action.result
             msg_format = {
@@ -108,6 +109,17 @@ class ActionService(BaseService):
                     await self.state.set_state(ActionState.book_new_page)
                     await self.state.update_data(msg=self.message, item_id=action.item_id)
                     return msg, self.IKB.book_back(action.page, action.item_id)
+                
+                case 'radio':
+                    if action.micro:
+                        await self.state.set_state(ActionState.micro)
+                    else:
+                        await self.state.set_state()
+                    return msg, self.IKB.radio(action.item_id, action.micro, action.swoo)
+                case 'use_micro':
+                    await self.text_boardcast(action.purpose_tg_ids, action.purpose_msg)
+                    return msg, self.IKB.micro(action.item_id)
+                
                 case _:
                     return '💻 Скоро', self.IKB.back('actions') 
         except SleepError as e:

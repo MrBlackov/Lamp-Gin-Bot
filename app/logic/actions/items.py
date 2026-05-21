@@ -7,12 +7,14 @@ from app.logic.actions.base import (ActionBase,
                                     ActionStateDB, 
                                     delete_action_state, 
                                     get_action_state_for_tag,
+                                    get_action_states_for_tag,
+                                    update_action_state_for_id,
                                     update_item_for_id,
-                                    get_item_sketch_for_action_tag,
+                                    get_chars_for_exist_id,
                                     action_point,
                                     TextHTML)
 from app.logic.dnd import dices, dice
-from app.exeption.action import DiceCmdNoValideError, BookDontHaveInfoError, BookSettingCloseError, DiceCmdDontHaveDError, DiceCmdLongError, PaperLongError
+from app.exeption.action import DiceCmdNoValideError, RadioMsgLongError, BookDontHaveInfoError, BookSettingCloseError, DiceCmdDontHaveDError, DiceCmdLongError, PaperLongError
 from app.validate.item import BookValide
 
 class ItemsAction(ActionBase):
@@ -199,29 +201,73 @@ class BookSettingAction(ItemsAction):
 class RadioAction(ItemsAction):
     tag = ActionTags.radio
 
-    name = 'Изменить надпись'
-    emodzi = '✏️'
+    name = 'Настройки рации'
+    emodzi = '📻'
+    action_text = 'слушает'
+
+    to_cmd = True
+    commands_text = ['рация', 'radio']
+    default_nbt = {'kanal':'y'}
 
     @classmethod
     def have_items(self):
         return [self.tag]
 
+    def __init__(self, char, user = None, step = 1, minute = None, action_tags = ..., **kwargs):
+        super().__init__(char, user, step, minute, action_tags, **kwargs)
+        self.micro: bool = kwargs.get('micro', self.state == 'ActionState:micro')
+        self.swoo: bool = kwargs.get('swoo', False)
+        self.radio_kanals = ['y', 'r', 'b', 'g']
+        self.radio_kanals_dict = {
+            'y':'1к.',
+            'r':'2к.',
+            'b':'3к.',
+            'g':'4к.',
+            None:'Выкл.',
+        }
+
     async def to_action(self):
-        paper = self.char.exist.inventory.item_ids.get(self.item_id)
+        self.check_have_item()
+        radio_state = await get_action_state_for_tag(self.tag, self.char.exist.id)
+        self.radio_kanal = radio_state.nbt.get('kanal') if radio_state else None
+        if self.step == 0 and radio_state:
+            print(self.args)
+            return await self.use_micro()
+        if radio_state:
+            self.swoo = True
+        if self.step == 3 and radio_state == None:
+            radio_state = (await add_db_obj(data=[ActionStateDB(tag=self.tag, level=self.default_level, is_block_freedom=self.is_block_freedom, reset=self.default_reset, start=self.start, end=self.end, nbt=self.default_nbt, exist_id=self.char.exist.id)]))[0]
+            self.radio_kanal = radio_state.nbt.get('kanal', self.radio_kanal) if radio_state else self.radio_kanal
+            self.swoo = True
+        elif self.step == 3 and radio_state:
+            is_stop = await delete_action_state(id=radio_state.id)
+            self.radio_kanal = None
+            self.swoo = False
+            self.micro = False
         if self.step == 2:
-            self.result = 'redact_paper'
-            self.msg = '✏️ Отправьте новую надпись. Вы можете использовать HTML-разметку текста'
-            return self
-        elif self.step == 3:
-            if len(self.args) > 2000:
-                raise PaperLongError('This paper too long')
-            paper = await update_item_for_id(paper.id, {'nbt': paper.nbt | {'text': self.args}})
-        elif self.step == 4:
-            if 'text' in paper.nbt:
-                paper.nbt.pop('text')
-            paper = await update_item_for_id(paper.id, {'nbt': paper.nbt})
-        self.result = 'paper'
-        text = paper.nbt.get('text')
-        self.is_have_text = type(text) == str
-        self.msg = TextHTML(f'📄 Надпись (отсуствует)' if type(text) != str else f'📄 Надпись \n\n' + text).escape()
+            self.micro = not self.micro
+        if self.step == 4 and self.radio_kanal:
+            i_kanal = self.radio_kanals.index(self.radio_kanal)
+            new_radio_kanal = self.radio_kanals[i_kanal + 1] if i_kanal < len(self.radio_kanals) - 1 else self.radio_kanals[0]
+            radio_state = await update_action_state_for_id(radio_state.id, new_data={'nbt':radio_state.nbt | {'kanal':new_radio_kanal}})
+            self.radio_kanal = radio_state.nbt.get('kanal', self.radio_kanal) if radio_state else self.radio_kanal
+            print(i_kanal, new_radio_kanal, self.radio_kanal, radio_state, radio_state.nbt)
+
+        self.result = 'radio'
+        self.msg = self.emodzi + f' Рация ({self.radio_kanals_dict.get(self.radio_kanal)})'
         return self
+    
+    async def use_micro(self):
+        if len(self.args) > 200:
+            self.args = self.args[:200]
+            is_long = True
+        else:
+            is_long = False
+        radio_states = await get_action_states_for_tag(self.tag)
+        radio_chars = await get_chars_for_exist_id(exist_ids=[r.exist_id for r in radio_states if r.nbt.get('kanal') == self.radio_kanal])
+        self.purpose_msg = f'📻 [{self.radio_kanals_dict.get(self.radio_kanal)}]: {self.args}'
+        self.msg = f'Вы 📻 [{self.radio_kanals_dict.get(self.radio_kanal)}]: {self.args}' +  (' \n\n❗ Сообщение большое, оно было обрезано' if is_long else '')
+        self.result = 'use_micro'
+        self.purpose_tg_ids = [c.user.tg_id for c in radio_chars if self.char.user.id != c.user.id]
+        return self
+  

@@ -84,3 +84,10 @@ class BookSettingCloseError(ActionError):
     msg = '❌ Эту книгу нельзя редактировать'
     code = '510.16'
     faq = '' 
+
+class RadioMsgLongError(ActionError):
+    msg = '❌ Ваше сообщение слишком большое'
+    code = '510.16'
+    faq = '' 
+
+

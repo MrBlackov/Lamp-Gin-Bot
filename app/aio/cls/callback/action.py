@@ -27,6 +27,12 @@ class BookCall(ActionCall, prefix='book'):
 class BookSettingCall(ActionCall, prefix='book_setting'):
     pass
 
+class RadioCall(ActionCall, prefix='radio'):
+    micro: bool = False
+    swoo: bool = False
+    micro_off: bool = False
+
+
 class ActionRedactCall(BaseCall, prefix='action_redact'):
     to_time: bool = False
     to_item: bool = False

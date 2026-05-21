@@ -4,14 +4,20 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from decouple import config
 from aiogram.types import BotCommand, BotCommandScopeChat, BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats, BotCommandScopeAllChatAdministrators
+from aiogram.client.session.aiohttp import AiohttpSession
 
+def get_proxy(file: str = 'app/aio/socks.txt'):
+    return [s.replace('\n', '').split(' ') for s in open(file).readlines()]
 
+proxy = config('proxy')
+session = AiohttpSession(proxy=proxy)
 admins = [int(config('owner'))]
 owner = int(config('owner'))
 newspaper_id = int(config('newcpaper_id'))
 token = config('token2')
+is_proxy = config('is_proxy')
 log_groups = [int(x) for x in config('log_groups').split(',')]
-bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True))
+bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True), session=session if is_proxy == 't' else None)
 dp = Dispatcher(storage=MemoryStorage())
 cmds = {
     'mychar':'👑 Действующий персонаж',
