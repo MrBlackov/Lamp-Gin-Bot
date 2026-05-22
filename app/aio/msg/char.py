@@ -210,8 +210,8 @@ class InventoryItemsText:
     def throw():
         return '🤔 Сколько выбросить?'
 
-    def item(item: ItemDB):
-        return ItemText(item).text
+    def item(item: ItemDB, skills = None):
+        return ItemText(item, skills).text
     
     def pick_up_quantity():
         return '🤔 Сколько предметов хотите поднять?'

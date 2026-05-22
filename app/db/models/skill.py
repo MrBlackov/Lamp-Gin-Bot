@@ -11,6 +11,7 @@ class SkillSketchDB(Base):
     description: Mapped[str | None] = mapped_column(default=None)
 
     default_level: Mapped[int] = mapped_column(default=1)
+    min_level: Mapped[int] = mapped_column(default=1, nullable=True)
     default_coins: Mapped[int] = mapped_column(default=0)
     xmod: Mapped[float] = mapped_column(default=1.0)
     price: Mapped[int | None] = mapped_column(default=None)
@@ -42,3 +43,7 @@ class SkillDB(Base):
     @property
     def max_coins(self):
         return self.sketch.default_coins*(self.level/10)
+    
+    @property
+    def text(self):
+        return f'{self.sketch.text} ({self.level} ур.)'

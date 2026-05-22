@@ -42,7 +42,7 @@ class ActionLayer(BaseLayer):
             result = await action(char=self.char, action_tags=ActionSelf.tags).to_state_action(action_state)
             if result.msg:
                 await self.bot.send_message(self.user.tg_id, result.msg.format(emodzi=result.emodzi, name=result.name.lower(), char_name=self.char.exist.full_name))
-                print(result.msg.format(emodzi=result.emodzi, char_name=self.char.exist.full_name))
+                print(result.msg.format(emodzi=result.emodzi, char_name=self.char.exist.full_name, name=result.name.lower()))
             else:
                 print(f'{result.emodzi} {self.char.exist.full_name} {result.action_text}')
             if result.new_action_state:

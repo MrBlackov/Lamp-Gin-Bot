@@ -1,12 +1,12 @@
 from app.enum_type.tags import ActionTags, SkillTags
 from datetime import datetime, timedelta
-from app.db.metods.gets import get_all_chars, get_char_for_id, get_action_states_for_tag, ActionStateDB, UserDB, CharacterDB, ItemDB, ItemSketchDB, get_item_sketch, get_item_sketch_for_tag, get_exists_for_ids, get_action_state_for_tag, get_action_states_for_block_freedom, get_action_state_for_id, get_action_states_for_exist_id, SkillDB
+from app.db.metods.gets import get_all_chars, get_all_skills, get_char_for_id, get_action_states_for_tag, ActionStateDB, UserDB, CharacterDB, ItemDB, ItemSketchDB, get_item_sketch, get_item_sketch_for_tag, get_exists_for_ids, get_action_state_for_tag, get_action_states_for_block_freedom, get_action_state_for_id, get_action_states_for_exist_id, SkillDB
 from app.db.metods.updates import update_skill_for_id, update_exist_for_id, update_item_for_id, update_skill_for_tag, update_action_state_for_id, update_action_state_for_tag
 from app.db.metods.adds import add_db_obj
-from app.db.metods.unique import get_chars_for_exist_id, get_item_for_tag, get_item_sketch_for_action_tag, get_item_for_action_tag
+from app.db.metods.unique import get_chars_for_exist_id, update_skills_for_attribute_point_id, get_item_for_tag, get_item_sketch_for_action_tag, get_item_for_action_tag
 from app.db.metods.deletes import delete_action_state, delete_action_states
 from app.aio.msg.utils import TextHTML
-from app.exeption.action import HaveSkillError, EnergyLessZeroError, HaveItemError
+from app.exeption.action import HaveSkillError, EnergyLessZeroError, HaveItemError, SkillLevelSmallError
 from app.logic.item import ItemsLogic, InventaryOverFlowing
 from app.logic.utils import action_point, set_to_list, list_to_set
 from app.logic.settings import SettingSelf
@@ -15,7 +15,7 @@ class Logic:
     item = ItemsLogic()
 
 class ActionBase:
-    tag: str | None = None
+    tag: str = None
     default_start = datetime.now
     default_end = None
     default_minute: int | None = None
@@ -50,21 +50,29 @@ class ActionBase:
     logic = Logic
 
     def __init__(self, char: CharacterDB, user: UserDB | None = None, step: int = 1, minute: int | None = None, action_tags: dict[str, 'ActionBase'] = {}, **kwargs):
+        self.kwargs = kwargs
+        self.item_id: int | None = kwargs.get('item_id')
+        self.args: str | None = kwargs.get('args')
+        self.state: str | None = kwargs.get('state')
+
         self.char = char
         self.user = user
-        self.skills = char.exist.attibute_point.skills
-        self.energy = char.exist.attibute_point.skill_tags.get(SkillTags.energy)
-        self.items = char.exist.inventory.items
+        self.attibute_point = char.exist.attibute_point
+        self.skills = self.attibute_point.skills
+        self.energy = self.attibute_point.skill_tags.get(SkillTags.energy)
+        self.inventory = char.exist.inventory
+        self.items = self.inventory.items        
+        self.use_items = {tag:(self.inventory.item_action_tags.get(tag, [None])[0]) for tag in self.have_items()} if len(self.have_items()) > 0 else None
+        if self.item_id and len(self.have_items()) > 0:
+            self.use_items = self.use_items | {self.have_items()[0]:self.inventory.item_ids.get(self.item_id)} if self.use_items else {self.have_items()[0]:self.inventory.item_ids.get(self.item_id)}
+        elif self.item_id == None:
+            self.item_id = self.inventory.item_action_tags.get(self.tag)[0].id if self.inventory.item_action_tags.get(self.tag) else None
         self.step = step
         self.minute = minute if minute else self.default_minute
         self.start = self.default_start() 
         self.end = self.start + timedelta(minutes=self.minute) if self.minute and self.minute > 0 else None
         self.action_tags = action_tags
         self.new_action_state: ActionStateDB | None = None
-        self.kwargs = kwargs
-        self.item_id: int | None = kwargs.get('item_id')
-        self.args: str | None = kwargs.get('args')
-        self.state: str | None = kwargs.get('state')
 
     @classmethod
     def text(self):
@@ -120,15 +128,7 @@ class ActionBase:
 
     async def to_skill_level_up(self, skill_levels_up: dict[str, int | float] | None):
         if skill_levels_up:
-            for skill_tag, level_up in skill_levels_up.items():
-                skill = self.char.exist.attibute_point.skill_tags.get(skill_tag)
-                skill.level += level_up*skill.sketch.xmod
-                skill = await update_skill_for_id(skill.id, new_data={'level':skill.level})
-                if skill.sketch.up_level_formula:
-                    for tag, xmod in skill.sketch.up_level_formula.items():
-                        parent_skill = self.char.exist.attibute_point.skill_tags.get(tag)
-                        await update_skill_for_tag(tag=tag, attribute_point_id=self.char.exist.attibute_point.id, new_data={'level':parent_skill.level+level_up*xmod})
-            return skill
+            return await update_skills_for_attribute_point_id(attribute_point_id=self.char.exist.attibute_point.id, skills_up=skill_levels_up)
         
     async def to_state_action(self, action_state: ActionStateDB):
         if self.energy.coins <= 0:
@@ -171,7 +171,8 @@ class BlockFreedomAction(ActionBase):
             levels_info = []
             for skill_tag, level in nbt['start_levels'].items():
                 skill = char.exist.attibute_point.skill_tags.get(skill_tag)
-                levels_info.append(f'{skill.sketch.emodzi} {skill.sketch.name}: +{TextHTML.float_format(skill.level-level, 5)} ур.')
+                if skill:
+                    levels_info.append(f'{skill.sketch.emodzi} {skill.sketch.name}: +{TextHTML.float_format(skill.level-level, 5)} ур.')
             return levels_info
         return []
 
@@ -184,12 +185,12 @@ class BlockFreedomAction(ActionBase):
                 skill = self.char.exist.attibute_point.skill_tags.get(skill_tag)
                 if skill == None:
                     raise HaveSkillError(f'This char(id={self.char.id}) havent skill for action')
+                if skill.level < skill.sketch.min_level:
+                    raise SkillLevelSmallError(f'This char(id={self.char.id}) has skill.level < 1')
                 skill_levels[skill_tag] = skill.level
             self.default_nbt.update({'start_levels':skill_levels})
         if self.have_items() and have_items:
-            items = await get_item_for_action_tag(action_tag=self.have_items(), inventory_id=self.char.exist.inventory.id)
-            if items == None or len(items) < 1:
-                raise HaveItemError(f'This char(id={self.char.id}) havent item for action')
+            self.check_have_item()
         return True
     
     async def to_action(self):

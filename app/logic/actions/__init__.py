@@ -14,6 +14,7 @@ from .train import TrainAction
 from .run import RunningAction
 from .look import LookAroundAction
 from .items import DiceAction, PaperAction, BookAction, BookSettingAction, RadioAction, TagAction
+from .study import StudyAction
 
 class ActionSelf:
     all_action: list[type[ActionBase]] = [
@@ -36,6 +37,7 @@ class ActionSelf:
                   #BookSettingAction,
                   RadioAction,
                   TagAction,
+                  StudyAction,
                   ]
     tags = ActionTags
 
@@ -51,4 +53,6 @@ class ActionSelf:
             if a.is_have_items:
                 for i in a.have_items():
                     item_actions[i] = a
+            if a.to_item_button:
+                item_actions[a.tag] = a
         return item_actions
