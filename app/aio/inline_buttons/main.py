@@ -1,8 +1,8 @@
 from app.aio.inline_buttons.base import BotIKB
 from app.logged.botlog import logs
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from app.aio.cls.callback.main import ChatSettingActionCall, ChatBackCall, MenuCall
-
+from app.aio.config import wiki
 
 class MenuIKB(BotIKB):
     def menu(self):
@@ -12,6 +12,7 @@ class MenuIKB(BotIKB):
         self.builder.button(text='⚙️ Настройки аккаунта', callback_data=MenuCall(where='user_setting', tg_id=self.tg_id))
         self.builder.button(text='📦 Список всех предметов в игре', callback_data=MenuCall(where='items', tg_id=self.tg_id))
         self.builder.button(text='📚 Получить справку', callback_data=MenuCall(where='help', tg_id=self.tg_id))
+        self.builder.button(text='📖 Вики', web_app=WebAppInfo(url=wiki))
         return self.builder.adjust(1).as_markup()      
 
 class ChatIKB(BotIKB):

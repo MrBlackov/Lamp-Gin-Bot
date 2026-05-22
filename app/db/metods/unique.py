@@ -315,3 +315,33 @@ async def get_skills_for_attribute_point_ids(
         except SQLAlchemyError as e:
             log.error(e)
             raise
+        
+@connection()
+@log.decor()
+async def update_skills_for_attribute_point_id(
+                             session: AsyncSession,
+                             attribute_point_id: int,   
+                             skills_up: dict[str, float],
+                             logging: bool = True
+                             ) -> list[SkillDB]:
+        try:
+            query = select(SkillDB).filter_by(attribute_point_id=attribute_point_id)
+            result = await session.execute(query)
+            record = result.scalars().all()
+            skill_tags = {s.sketch.tag:s for s in record}
+
+            for skill_tag, level_up in skills_up.items():
+                skill = skill_tags.get(skill_tag)
+                if skill:
+                    skill.level += level_up*skill.sketch.xmod
+                    if skill.sketch.up_level_formula:
+                        for tag, xmod in skill.sketch.up_level_formula.items():
+                            parent_skill = skill_tags.get(tag)
+                            if parent_skill:
+                                parent_skill.level += level_up*xmod
+            return skill
+
+            return record
+        except SQLAlchemyError as e:
+            raise
+        

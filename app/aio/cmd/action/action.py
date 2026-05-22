@@ -97,7 +97,17 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Actio
         msg, markup = await ActionService(callback.from_user.id, state, callback.message).del_timer(callback_data.tag)
         await callback.message.edit_text(msg, reply_markup=markup)
     except TelegramBadRequest:
-        raise NotNewStatsError('❌ Обновлений нету', level='debug')
+        pass
+    
+@action_router.callback_query(ActionRedactCall.filter(F.to_item == True))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: ActionRedactCall, state: FSMContext, **kwargs):
+    try:
+        msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_item(callback_data.char_id, callback_data.tag, callback_data.item_tag, callback_data.minute)
+        await callback.message.edit_text(msg, reply_markup=markup)
+    except TelegramBadRequest:
+        pass
     
 @action_router.callback_query(ActionRedactCall.filter(F.to_stats == True))     
 @log.decor(arg=True)

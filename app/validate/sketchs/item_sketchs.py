@@ -94,7 +94,7 @@ class ItemSketchValide(SketchsBasevalidate):
 
     @field_validator('nbt', mode='after')
     @classmethod
-    def emodzi_valid(cls, nbt: dict | str = '{}'):
+    def nbt_valid(cls, nbt: dict | str = '{}'):
         if type(nbt) != dict:
             try:
                 return json.loads(nbt.replace("'", '"').replace('True', 'true').replace('False', 'false'))

@@ -20,5 +20,13 @@ class BookValide(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
+class StudyValide(BaseModel):
+    tag: str
+    level: int
+    iq: int = 10
+    up_level: float = 0.01
+
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+
 
 

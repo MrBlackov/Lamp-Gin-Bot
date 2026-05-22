@@ -221,8 +221,8 @@ async def get_skills_for_attribute_point_id(ap_id: int, **kwargs) -> list[SkillD
     filters.update(kwargs)
     return await select_skills(filters=filters)
 
-async def get_all_skills() -> list[SkillSketchDB]:
-    return await select_skill_sketchs()
+async def get_all_skills(is_hide: bool | None = False) -> list[SkillSketchDB]:
+    return await select_skill_sketchs(filters={'is_hide':is_hide}) if type(is_hide) == bool else await select_skill_sketchs()
 
 async def get_base_skills() -> list[SkillSketchDB]:
     return await select_skill_sketchs(filters={'is_base':True})

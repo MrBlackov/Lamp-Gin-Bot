@@ -14,7 +14,7 @@ from aiogram.types import Message, CallbackQuery
 from app.logged.botlog import log
 from app.aio.config import owner, bot
 from app.service.main import UserService
-from app.exeption.decorator import exept
+from app.exeption.decorator import exept, call_exept
 from aiogram.methods import CreateForumTopic
 from app.aio.middlewares.message_clean import MessageCleanDpMiddleware
 from app.aio.cls.callback.base import MenuCall
@@ -29,6 +29,14 @@ base_router.message.middleware(MessageCleanDpMiddleware())
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
     msg, markup = UserService(message.from_user.id, state, message).menu()
     await message.answer(msg, reply_markup=markup)
+
+
+@faq_router.callback_query(MenuCall.filter(F.where == 'menu'))     
+@log.decor(arg=True)
+@call_exept()
+async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: MenuCall, state: FSMContext, **kwargs):
+    msg, markup = UserService(callback.from_user.id, state, callback.message).menu()
+    await callback.message.edit_text(msg, reply_markup=markup)
 
 @base_router.message(Command('user'))
 @log.decor(arg=True)

@@ -1,7 +1,7 @@
 from app.aio.msg.utils import TextHTML
 from app.exeption import BotError
 from app.logic.settings import SettingSelf
-from app.aio.config import owner
+from app.aio.config import owner, wiki
 
 class FaqText:
     def __init__(self, error: BotError):
@@ -55,9 +55,6 @@ class FaqText:
     def to_start(name: str):
         return (
             f'👋 Приветствую вас, {TextHTML(name).bold()}! Что сделаем для начала? \n\n'
-            'Создать персонажа - /newchar \n'
-            'Войти в меню - /menu \n'
-            'Получить справку - /help \n'
             )
 
     def help_cmd(is_admin: bool = False):
@@ -112,8 +109,8 @@ class FaqText:
             ' /help - Получить общую справку \n'
             ' /helpcmd - Получить справку по командам'
             ).blockquote() + '\n\n'
-            f'❗ Если у вас возникнут вопросы или проблемы, не стесняйтесь обращаться за помощью к {TextHTML('mr_blackov').openmessage(owner)}.\n\n❗ Также все актуальные новости в {TextHTML('Газете').href('https://t.me/oldneal')}.'
-        )
+            f'❗ Если у вас возникнут вопросы или проблемы, не стесняйтесь обращаться за помощью к {TextHTML('mr_blackov').openmessage(owner)}.'
+            )
 
     def item_rules():
         return (

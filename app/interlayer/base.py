@@ -1,4 +1,4 @@
-from app.db.metods.gets import get_user_for_tg_id, get_users_for_ids, get_user_setting_for_user_id, get_char_setting_for_char_id, get_action_states_for_exist_id, get_user_for_id, get_items_for_inventory, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
+from app.db.metods.gets import get_user_for_tg_id, get_users_for_ids, get_all_skills, get_user_setting_for_user_id, get_char_setting_for_char_id, get_action_states_for_exist_id, get_user_for_id, get_items_for_inventory, get_action_states_for_block_freedom, get_main_char_for_user_id, get_char_for_id, get_skills_for_attribute_point_id
 from app.db.metods.unique import get_char_for_exist_id, ActionStateDB
 from app.logged.infolog import infolog
 from app.aio.config import admins, bot
@@ -76,3 +76,6 @@ class BaseLayer:
     def another(self, tg_id: int):
         self.tg_id = tg_id
         return self
+
+    async def all_skills(self, is_hide: bool | None = False):
+        return await get_all_skills(is_hide) 

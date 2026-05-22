@@ -6,7 +6,7 @@ class SkillText:
         self.skills = skills
     
     def to_text(skill: SkillDB):
-        return f'{skill.sketch.emodzi} {skill.sketch.name}\n\n' + skill.sketch.description if skill.sketch.description else f'{skill.sketch.emodzi} {skill.sketch.name}\n\n'
+        return f'{skill.sketch.text} ({TextHTML.float_format(skill.level, 5)} ур.)' + ('\n\n' + skill.sketch.description if skill.sketch.description else '')
     
     @property
     def text(self):

@@ -39,6 +39,9 @@ class ActionRedactCall(BaseCall, prefix='action_redact'):
     tag: str
     to_stats: bool = False
     to_del_timer: bool = False
+    item_tag: str | None = None
+    char_id: int | None = None
+    minute: int | None = None
 
 class LookAroundCall(BaseCall, prefix='look_around'):
     pass

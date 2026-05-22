@@ -59,12 +59,12 @@ class NewCharacterService(BaseService):
     
     async def skills(self, skill_tag: str, level: int, is_base: bool):
         char_sketch: CharSketch = await self.state.get_value('sketch')
-        if is_base and level < 1:
-            raise SKillLessOneError('You cant less one level of base skill')
-        if level < 0:
-            raise SKillLessZeroError('You cant less zero level of skill')
         sketch = char_sketch.all_skills.get(skill_tag)
         skill = char_sketch.skills.get(skill_tag)
+        if sketch.is_base and level < sketch.min_level:
+            raise SKillLessOneError('You can min level of base skill')
+        if level < 0:
+            raise SKillLessZeroError('You cant less zero level of skill')
         if skill:
             r_level = level - skill.level
             char_sketch.coins -= r_level*sketch.price
@@ -340,6 +340,7 @@ class InventoryService(BaseService):
         
     async def get_item_info(self, item_id: int):
         items = await self.state.get_value('items')
+        skills = await self.layer.all_skills()
         if items == None:
             items = {}
             inventory = await self.layer.inventory()
@@ -348,7 +349,7 @@ class InventoryService(BaseService):
                     items |= {item.id: item}
                 await self.state.update_data(items=items)
             await self.state.update_data(item=item_id)
-        return self.text.item(items[item_id]), self.IKB.action(items[item_id], 'inventory')
+        return self.text.item(items[item_id], skills), self.IKB.action(items[item_id], 'inventory')
         
 
     async def to_throw(self, msg):

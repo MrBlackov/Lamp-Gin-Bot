@@ -50,6 +50,11 @@ class HaveSkillError(ActionError):
     code = '510.11'
     faq = ''  
 
+class SkillLevelSmallError(ActionError):
+    msg = '❌ У вас недостаточный уровень навыка'
+    code = '510.11'
+    faq = 'Навык нельзя использовать если его уровень меньше нужного'  
+
 class EnergyLessZeroError(ActionError):
     msg = '❌ Ваш персонаж устал'
     code = '510.11'
@@ -95,3 +100,7 @@ class NameLongError(ActionError):
     code = '510.19'
     faq = '' 
 
+class SkillNotStudyError(ActionError):
+    msg = '❌ Этот предмет больше ничему вас не научит.'
+    code = '510.20'
+    faq = '' 

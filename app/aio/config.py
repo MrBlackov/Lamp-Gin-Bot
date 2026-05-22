@@ -10,15 +10,20 @@ def get_proxy(file: str = 'app/aio/socks.txt'):
     return [s.replace('\n', '').split(' ') for s in open(file).readlines()]
 
 proxy = config('proxy')
-session = AiohttpSession(proxy=proxy)
-admins = [int(config('owner'))]
-owner = int(config('owner'))
-newspaper_id = int(config('newcpaper_id'))
-token = config('token2')
 is_proxy = config('is_proxy')
-log_groups = [int(x) for x in config('log_groups').split(',')]
+session = AiohttpSession(proxy=proxy)
+
+admins = [int(a) for a in config('admins').split(',')]
+owner = int(config('owner'))
+token = config('token2')
 bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True), session=session if is_proxy == 't' else None)
 dp = Dispatcher(storage=MemoryStorage())
+
+newspaper_id = int(config('newcpaper_id'))
+log_groups = [int(x) for x in config('log_groups').split(',')]
+
+wiki = config('wiki')
+
 cmds = {
     'mychar':'👑 Действующий персонаж',
     'mychars':'👥 Список ваших персонажей',
