@@ -5,7 +5,7 @@ class CharError(BotError):
     code = '500.3'
 
 class SKillLessOneError(CharError):
-    msg = '❌ Этот навык нельзя убрать'    
+    msg = '❌ Этот навык нельзя нельзя сделать пониже'    
     code = '502.2'
 
 class SKillLessZeroError(CharError):

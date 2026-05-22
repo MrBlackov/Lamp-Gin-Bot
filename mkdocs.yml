@@ -1,15 +1,44 @@
 site_name: Lamp Gin Bot Wiki
+
+docs_dir: sourse
+site_dir: docs
+site_url: https://mrblackov.github.io/Lamp-Gin-Bot/
+
 nav:
-  - Home: index.md
+  - Главная: index.md
+  - Персонажи:
+    - Общее: char/base.md
+    - Создание: char/new.md
+  - Навыки: 
+    - Общее: skill/base.md
+    - Повышение уровня: skill/base.md
+  - Действия: 
+    - Общее: action/base.md
+  - Предметы: 
+    - Общее: item/base.md
+    - Создание: item/create.md
+  - Крафты: 
+    - Общее: craft/base.md
+    - Создание: craft/create.md
+  - Команды: 
+    - Основные: cmd/base.md
+    - Для действий: cmd/action.md
+  - Ошибки:
+    - Основные: error/base.md
+  - O нас: about.md
+
 theme:
   name: material
   language: ru
   features:
     - navigation.tabs
-    - navigation.sections
+    - navigation.sectionsn
+    - navigation.tracking
+    - navigation.expand
     - toc.integrate
-    - search.suggest
+    - searchsuggest
     - content.code.copy
+
   palette:
     - scheme: default
       toggle:
@@ -19,3 +48,14 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Светлый режим
+
+extra: 
+  copyright: "© Телеграм бот по Повелителю тайн."
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/MrBlackov/Lamp-Gin-Bot
+      name: Исходный код на GitHub 
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/oldneal
+      name: Газета Старого Нила

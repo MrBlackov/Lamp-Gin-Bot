@@ -16,7 +16,7 @@ class InventoryDB(Base):
         self.items = items
         self.item_ids = {i.id:i for i in items}
         self.item_tags = {i.sketch.tag:i for i in items}
-        self.item_action_tags = {}
+        self.item_action_tags: dict[str, list[ItemDB]] = {}
         for item in items:
             if item.sketch.action:
                 for tag in item.sketch.action:

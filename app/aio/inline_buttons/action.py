@@ -31,6 +31,10 @@ class ActionIKB(BotIKB):
         self.builder.row(InlineKeyboardButton(text=('➖ Менее подробнее' if not(is_details) else '➕ Подробнее'), callback_data=ActionBackCall(where='actions', is_details=not(is_details), tg_id=self.tg_id).pack()))
         return self.builder.as_markup()
  
+
+
+
+
     def wake_up(self):        
         self.builder.button(text='📊 Статистика', callback_data=ActionRedactCall(tag=ActionTags.stats, to_stats=True, tg_id=self.tg_id))
         self.builder.button(text='🌞 Проснуться', callback_data=ActionCall(tag=ActionTags.wake_up, tg_id=self.tg_id))
@@ -46,13 +50,32 @@ class ActionIKB(BotIKB):
         self.builder.button(text='⏸️ Остановиться', callback_data=ActionCall(tag=ActionTags.stop, tg_id=self.tg_id))
         return self.builder.as_markup()    
       
-    def redact(self, tag: str, emodzi: str, action_text: str, where: str, minute: int | None = None):      
-        self.builder.button(text=('⏱️ Изменить время' if minute and minute > 0 else '➕ Добавить таймер'), callback_data=ActionRedactCall(tag=tag, to_time=True, tg_id=self.tg_id)).as_markup()
+
+
+
+
+    def redact(self, tag: str, emodzi: str, action_text: str, where: str, item_id: int, minute: int | None = None, items: dict[str, ItemDB | None] | None = None, char_id: int | None = None):      
+        self.builder.button(text=('⏱️ Изменить время' if minute and minute > 0 else '➕ Добавить таймер'), callback_data=ActionRedactCall(tag=tag, to_time=True, tg_id=self.tg_id))
         if minute and minute > 0:
-            self.builder.button(text='❌ Отключить таймер', callback_data=ActionRedactCall(tag=tag, to_del_timer=True, tg_id=self.tg_id)).as_markup()
-        self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where=where, is_details=True, tg_id=self.tg_id)).as_markup()
-        self.builder.button(text=emodzi + ' ' + action_text, callback_data=ActionCall(tag=tag, step=2, minute=minute, tg_id=self.tg_id)).as_markup()
-        return self.builder.adjust(*[1, 1, 2] if minute and minute > 0 else [1, 2]).as_markup()
+            self.builder.button(text='❌ Отключить таймер', callback_data=ActionRedactCall(tag=tag, to_del_timer=True, tg_id=self.tg_id))
+        if items:
+            for item_tag, item in items.items():
+                self.builder.button(text=item.sketch.text if item else '❌ Нету', callback_data=ActionRedactCall(tag=tag, to_item=True, item_tag=item_tag, minute=minute, is_details=True, char_id=char_id, tg_id=self.tg_id))
+        self.builder.adjust(*[1, 1, 2] if minute and minute > 0 else [1, 2])
+        self.builder.row(
+            InlineKeyboardButton(text='↩️ Назад', callback_data=ActionBackCall(where=where, is_details=True, tg_id=self.tg_id).pack()),   
+            InlineKeyboardButton(text=emodzi + ' ' + action_text, callback_data=ActionCall(tag=tag, step=2, minute=minute, item_id=item_id, tg_id=self.tg_id).pack()), 
+            width=2)
+        return self.builder.as_markup()
+
+    def use_items(self, tag: str, minute: int, items: list[ItemDB] | None):   
+        if items:
+            for item in items:
+                self.builder.button(text=item.sketch.text, callback_data=ActionCall(tag=tag, step=1, minute=minute, item_id=item.id, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=ActionCall(tag=tag, step=1, minute=minute, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()
+
+
 
     def lookaround(self, results: list[tuple[ExistenceDB | None, ActionBase | None]]):        
         for exist, action in results:
@@ -60,6 +83,9 @@ class ActionIKB(BotIKB):
         self.builder.button(text='👁️ Посмотреть ещё раз', callback_data=ActionCall(tag=ActionTags.lookaround, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where='actions', is_details=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
+
+
+
 
     def item_throw(self, char: CharacterDB, kwargs: dict = {}, where: str | None = None):
         print(kwargs)
@@ -91,6 +117,9 @@ class ActionIKB(BotIKB):
         self.builder.button(text='↩️ Назад', callback_data=ActionBackCall(where=where, is_details=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()     
  
+
+
+
     def dice(self, kwargs: dict = {}):
         self.builder.button(text='🥏 Перебросить', callback_data=ActionCall(tag=ActionTags.dice, **kwargs, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()     
@@ -100,6 +129,9 @@ class ActionIKB(BotIKB):
         self.builder.button(text='❌ Отменить', callback_data=MenuCall(where='cancel', is_details=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()   
  
+
+
+
     def redact_paper(self, item_id: int, is_have_text: bool, is_escape: bool, where: str = 'item'):
         if is_have_text:
             self.builder.button(text='✏️ Изменить надпись', callback_data=PaperCall(tag=ActionTags.paper, item_id=item_id, step=2, tg_id=self.tg_id))
@@ -114,6 +146,10 @@ class ActionIKB(BotIKB):
         self.builder.button(text='↩️ Назад', callback_data=ActionCall(tag=ActionTags.paper, item_id=item_id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()    
     
+
+
+
+
     def book(self, item_id: int, page: int, max_page: int, book_info: bool, where: str = 'item'):
         arrow = 0
         if page > 0:
@@ -141,13 +177,11 @@ class ActionIKB(BotIKB):
         self.builder.button(text='↩️ Назад', callback_data=BookCall(tag=ActionTags.book, page=page, item_id=item_id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
 
-    def item_back(self, item_id: int, where: str = 'item'):
-        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id, tg_id=self.tg_id))
-        return self.builder.adjust(1).as_markup()    
-    
     def book_back(self, page: int, item_id: int):
         self.builder.button(text='↩️ Назад', callback_data=BookCall(tag=ActionTags.book, page=page, item_id=item_id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()    
+
+
 
     def book_setting(self, item_id: int, is_redact: bool, where: str = 'item'):             
         self.builder.button(text='🏷️ Изменить название', callback_data=BookSettingCall(tag=ActionTags.book_setting, step=0, item_id=item_id, tg_id=self.tg_id))
@@ -162,6 +196,9 @@ class ActionIKB(BotIKB):
         self.builder.button(text='↩️ Назад', callback_data=BookSettingCall(tag=ActionTags.book_setting, item_id=item_id, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()    
 
+
+
+
     def radio(self, item_id: int, micro: bool, swoo: bool, where: str = 'item'): 
         self.builder.button(text='✅ Включить звук' if not swoo else '❌ Отключить звук', callback_data=RadioCall(tag=ActionTags.radio, step=3, micro=micro, swoo=swoo, item_id=item_id, tg_id=self.tg_id))  
         if swoo:
@@ -174,6 +211,9 @@ class ActionIKB(BotIKB):
         self.builder.button(text='❌ Отключить микрофон', callback_data=RadioCall(tag=ActionTags.radio, micro_off=True, item_id=item_id, tg_id=self.tg_id)) 
         return self.builder.adjust(1).as_markup()    
        
+
+
+
     def rename_menu(self, item_id: int, args: str):
         self.builder.button(text='✏️ Другое имя', callback_data=ActionCall(tag=ActionTags.tag, step=1, args=args, item_id=item_id, tg_id=self.tg_id)) 
         self.builder.button(text='✅ Переименовать', callback_data=ActionCall(tag=ActionTags.tag, step=3, args=args, item_id=item_id, tg_id=self.tg_id)) 
@@ -181,3 +221,9 @@ class ActionIKB(BotIKB):
         return self.builder.adjust(1).as_markup()   
         
  
+
+    def item_back(self, item_id: int, where: str = 'item'):
+        self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=where, item_id=item_id, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()    
+    
+

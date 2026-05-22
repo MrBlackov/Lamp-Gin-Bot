@@ -57,7 +57,7 @@ class ActionService(BaseService):
                 case 'lookaround':
                     return msg, self.IKB.lookaround(action.results)  
                 case 'to_action_time':
-                    return msg, self.IKB.redact(tag=tag, minute=action.minute, emodzi=emodzi, action_text=action.name, where='actions')
+                    return msg, self.IKB.redact(tag=tag, minute=action.minute, emodzi=emodzi, action_text=action.name, item_id=action.item_id, items=action.use_items, char_id=action.char.id, where='actions')
                 case 'stats':
                     return msg, self.IKB.stats()    
                    
@@ -181,3 +181,10 @@ class ActionService(BaseService):
     async def redact_text(self, tag: str, step: int, text: str):
         item_id = await self.state.get_value('item_id')
         return await self.to_action(tag, step=step, item_id=item_id, args=text)
+
+    async def to_item(self, char_id: int, tag: str, item_tag: str | None, minute: int):
+        char = await self.layer.get_char_full_info(char_id, False, True, False, False, False)
+        items = char.exist.inventory.item_action_tags.get(item_tag)
+        return ('👇 Какой предмет будете использовать?' if items else '❌ У вас нет нужного предмета'), self.IKB.use_items(tag, minute, items)
+
+

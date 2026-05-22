@@ -1,35 +1,49 @@
 from app.db.models.item import ItemDB, ItemSketchDB
 from app.db.models.char import CharacterDB
+from app.db.models.skill import SkillSketchDB
 from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.aio.msg.utils import TextHTML
 from app.logic.actions import ActionTags
-from app.validate.item import BookValide
+from app.validate.item import BookValide, StudyValide
 
 class ItemText:
-    def __init__(self, item: ItemDB):
+    def __init__(self, item: ItemDB, skill_skethes: list[SkillSketchDB] | None = None):
         self.sketch = item.sketch
         self.item = item
+        self.skill_skethes = skill_skethes
+        self.skill_tags = {s.tag:s for s in (skill_skethes or [])} 
  
     @property
     def dop_text(self):
         texts = []
-        if ActionTags.paper in self.sketch.action:
-            text = self.item.nbt.get('text')
-            texts.append(f'📄 Надпись (отсуствует)' if type(text) != str else f'📄 Надпись \n\n' + text.replace('emoji_id', 'emoji-id'))
-        if ActionTags.book in self.sketch.action:
-            text: dict = self.item.nbt.get('book')
-            if text:
-                book = BookValide.model_validate(text)
-                texts.append(
-                    f'🏷️ {book.name}' + TextHTML('\n'.join([
-                        f'👤 Автор: {book.author}',
-                        f'✏️ Можно редактировать: {'✅' if not(book.is_close_setting) else '❌'}',
-                        (f'📊 Кол-во страниц: {len(book.pages)}' if book.pages and len(book.pages) > 0 else '❌ Страниц нету'),
-                        f'📜 Описание: {book.description if book.description and len(book.description) > 0 else "❌"}'
-                    ])).blockquote()
-                )
-            else:
-                texts.append(f'❗ Вы можете написать книгу')
+        #if ActionTags.paper in self.sketch.action:
+        #    text = self.item.nbt.get('text')
+        #    texts.append(f'📄 Надпись (отсуствует)' if type(text) != str else f'📄 Надпись \n\n' + text.replace('emoji_id', 'emoji-id'))
+        #if ActionTags.book in self.sketch.action:
+        #    text: dict = self.item.nbt.get('book')
+        #    if text:
+        #        book = BookValide.model_validate(text)
+        #        texts.append(
+        #            f'🏷️ {book.name}' + TextHTML('\n'.join([
+        #                f'👤 Автор: {book.author}',
+        #                f'✏️ Можно редактировать: {'✅' if not(book.is_close_setting) else '❌'}',
+        #                (f'📊 Кол-во страниц: {len(book.pages)}' if book.pages and len(book.pages) > 0 else '❌ Страниц нету'),
+        #                f'📜 Описание: {book.description if book.description and len(book.description) > 0 else "❌"}'
+        #            ])).blockquote()
+        #        )
+        #    else:
+        #        texts.append(f'❗ Вы можете написать книгу')
+        if ActionTags.study in self.sketch.action and self.skill_skethes:
+            study: dict = self.sketch.nbt.get('study')
+            study_skills_nbt: list[dict] = study.get('skills')
+            for skill_dict in study_skills_nbt:
+                study_skill = StudyValide.model_validate(skill_dict)
+                skill = self.skill_tags.get(study_skill.tag)
+                text = f'{skill.text}' + TextHTML('\n'.join([
+                    f'📖 Скорость обучения: {study_skill.up_level}',
+                    f'🔰 Уровень: {study_skill.level}',
+                ])).blockquote()
+                texts.append(f'{text}')
         return '\n' + '\n'.join(texts)
 
     @property
@@ -41,7 +55,7 @@ class ItemText:
             '⏲️ Вес одного: {WEIGHT}кг',
             '🧳 Общий вес: {ALLWEIGHT}кг',
             '📜 Описание: {DESCRIPT}',
-        ])).blockquote() #+ '\n{DOP}'
+        ])).blockquote() + '\n{DOP}'
  
     @property    
     def text(self):
