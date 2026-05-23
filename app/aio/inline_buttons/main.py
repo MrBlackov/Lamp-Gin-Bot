@@ -11,6 +11,7 @@ class MenuIKB(BotIKB):
         self.builder.button(text='😎 Друзья', callback_data=MenuCall(where='myfriends', tg_id=self.tg_id))
         self.builder.button(text='⚙️ Настройки аккаунта', callback_data=MenuCall(where='user_setting', tg_id=self.tg_id))
         self.builder.button(text='📦 Список всех предметов в игре', callback_data=MenuCall(where='items', tg_id=self.tg_id))
+        self.builder.button(text='💡 Список всех навыков в игре', callback_data=MenuCall(where='skills', tg_id=self.tg_id))
         self.builder.button(text='📚 Получить справку', callback_data=MenuCall(where='help', tg_id=self.tg_id))
         self.builder.button(text='📖 Вики', web_app=WebAppInfo(url=wiki))
         return self.builder.adjust(1).as_markup()      

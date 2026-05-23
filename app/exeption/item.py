@@ -67,10 +67,9 @@ class NBTValiteError(ItemError):
     faq = f'Правильный синтаксис: {'{"key1": "value", "key2": true, "key3":1, "key4":{"key": "value"}, "key5":["value", "value"] }'}' + '\n\n - key: nbt-ключ \n - value: nbt-значение (значение может быть строкой, числом, bool-значением, списком или словарем)'
 
 
-
 class NoFindItemSketchForID(ItemError):
     msg = '❌ Эскиз предмета с таким ID не найден, попробуйте поискать в /items'
-    code = '401.10'
+    code = '401.21'
     faq = 'Вы отправили ID эскиза, которого не сущействует, посмотрите ID эскиза нужного вам предмета в /items и отправьте его'
 
 
