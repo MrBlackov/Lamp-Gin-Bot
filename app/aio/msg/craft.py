@@ -2,7 +2,7 @@ from app.aio.msg.utils import TextHTML
 from app.db.models.item import CraftDB
 from app.validate.craft import CraftValide
 
-class CraftText(TextHTML):
+class CraftText:
     def __init__(self, craft: CraftDB | CraftValide):
         self.craft = craft
 

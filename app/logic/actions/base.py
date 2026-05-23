@@ -185,7 +185,7 @@ class BlockFreedomAction(ActionBase):
                 skill = self.char.exist.attibute_point.skill_tags.get(skill_tag)
                 if skill == None:
                     raise HaveSkillError(f'This char(id={self.char.id}) havent skill for action')
-                if skill.level < skill.sketch.min_level:
+                if skill.level < (skill.sketch.min_level or 1):
                     raise SkillLevelSmallError(f'This char(id={self.char.id}) has skill.level < 1')
                 skill_levels[skill_tag] = skill.level
             self.default_nbt.update({'start_levels':skill_levels})

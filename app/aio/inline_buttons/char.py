@@ -255,7 +255,7 @@ class InventoryIKB(BotIKB):
     
     def items(self, items: dict[int, ItemDB]):
         for id, item in items.items():
-            self.builder.button(text=item.text, callback_data=InventoryItemsCall(item=id, tg_id=self.tg_id))
+                self.builder.button(**item.button_text, callback_data=InventoryItemsCall(item=id, tg_id=self.tg_id))
         self.builder.button(text='🕵️ Осмотреться', callback_data=InventoryItemsActionCall(to_pick_up=True, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
     
@@ -276,7 +276,7 @@ class InventoryIKB(BotIKB):
     
     def location_items(self, items: list[ItemDB], where: str, back_where: str):
         for item in items:
-            self.builder.button(text=f'{item.sketch.emodzi} {item.sketch.name} {f'({item.quantity}шт.)' if item.quantity > 1 else ''}', callback_data=InventoryItemsPickUpCall(item_id=item.id, tg_id=self.tg_id))
+            self.builder.button(**item.button_text, callback_data=InventoryItemsPickUpCall(item_id=item.id, tg_id=self.tg_id))
         self.builder.button(text='🕵️ Осмотреться', callback_data=InventoryItemsGoCall(where=where, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=InventoryItemsGoCall(where=back_where, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup() 

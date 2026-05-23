@@ -14,13 +14,7 @@ class SKillIKB(BotIKB):
 
     def skills(self, skills: list[SkillDB], page: int, max_page: int, where: str | None = None):
         for skill in skills:
-            if skill.sketch.is_hide:
-                continue
-            if skill.sketch.custom_emodzi_id:
-                button_text = {'text':  f' {skill.sketch.name} - {TextHTML.float_format(skill.level, 5)} ур.', 'icon_custom_emoji_id': skill.sketch.custom_emodzi_id}
-            else:
-                button_text = {'text': f'{skill.sketch.emodzi} {skill.sketch.name} - {TextHTML.float_format(skill.level, 5)} ур.'}
-            self.builder.button(**button_text, callback_data=SkillCall(skill_id=skill.id, tg_id=self.tg_id))
+            self.builder.button(**skill.button_text, callback_data=SkillCall(skill_id=skill.id, tg_id=self.tg_id))
         self.builder.adjust(1)
         pages = []
         if page > 0:
@@ -34,7 +28,7 @@ class SKillIKB(BotIKB):
         return self.builder.as_markup()     
 
     def skill(self, skill: SkillDB, where: str = 'myskills'):
-        action = ActionSelf.item_action().get(skill.sketch.tag)
+        action = ActionSelf.skill_tags.get(skill.sketch.tag)
         if action:
             self.builder.button(text=action.text(), callback_data=ActionCall(tag=action.tag, tg_id=self.tg_id))
         elif skill.sketch.tag == SkillTags.craft:

@@ -10,7 +10,7 @@ class StatsIKB(BotIKB):
    
     def topskills(self, skills: list[SkillSketchDB], where: str):
         for skill in skills:
-            self.builder.button(text=skill.text, callback_data=TopSkillCall(skill_tag=skill.tag, tg_id=self.tg_id))
+            self.builder.button(**skill.button_text, callback_data=TopSkillCall(skill_tag=skill.tag, tg_id=self.tg_id))
         self.builder.adjust(2)
         self.builder.row(InlineKeyboardButton(text='↩️ Назад', callback_data=StatsBackCall(where=where, tg_id=self.tg_id).pack()))
         return self.builder.as_markup()
