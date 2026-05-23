@@ -71,7 +71,7 @@ class ActionIKB(BotIKB):
     def use_items(self, tag: str, minute: int, items: list[ItemDB] | None):   
         if items:
             for item in items:
-                self.builder.button(text=item.sketch.text, callback_data=ActionCall(tag=tag, step=1, minute=minute, item_id=item.id, tg_id=self.tg_id))
+                self.builder.button(**item.button_text, callback_data=ActionCall(tag=tag, step=1, minute=minute, item_id=item.id, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=ActionCall(tag=tag, step=1, minute=minute, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()
 

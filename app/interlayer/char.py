@@ -94,8 +94,8 @@ class InfoCharacterLayer(BaseLayer):
         print(newspaper_id)
         return await bot.get_chat_member(newspaper_id, self.tg_id)
 
-    async def get_chars(self, is_die: bool | None = False) -> UserChars:
-        self = await self.get_char_info()
+    async def get_chars(self, is_die: bool | None = None) -> UserChars:
+        await self.get_char_info()
         channel_member = await self.get_chat_member()
         use_bonus = False
         if channel_member:

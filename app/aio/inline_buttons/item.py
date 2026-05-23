@@ -126,7 +126,7 @@ class ListItemSketchIKB(BotIKB):
     
     def list_items(self, sketchs: list[ItemSketchDB], page: int, max_page: int, where: str):
         for sketch in sketchs:
-            self.builder.button(text=f'{sketch.emodzi} {sketch.name}', callback_data=ListItemSketchItemCall(item=sketch.id, tg_id=self.tg_id))
+            self.builder.button(**sketch.button_text, callback_data=ListItemSketchItemCall(item=sketch.id, tg_id=self.tg_id))
         self.builder.adjust(1)
         pages = []
         if page > 0:
