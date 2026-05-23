@@ -31,6 +31,12 @@ class SkillSketchDB(Base):
     @property
     def text(self):
         return f'{self.emodzi} {self.name}'
+    
+    @property
+    def button_text(self):
+        if self.custom_emodzi_id:
+            return {'text':self.name, 'icon_custom_emoji_id':str(self.custom_emodzi_id)}
+        return {'text':self.text}
 
 class SkillDB(Base):
     level: Mapped[float]
@@ -44,6 +50,18 @@ class SkillDB(Base):
     def max_coins(self):
         return self.sketch.default_coins*(self.level/10)
     
+    def to_text(self, decimals: int = 5):
+        return f'{self.sketch.text} ({f'{self.level:.{decimals}f}'.rstrip('0').rstrip('.')} ур.)'
+    
     @property
     def text(self):
-        return f'{self.sketch.text} ({self.level} ур.)'
+        return self.to_text()
+     
+    def to_button_text(self, decimals: int = 5):
+        if self.sketch.custom_emodzi_id:
+            return self.sketch.button_text | {'text':f'{self.sketch.name} ({f'{self.level:.{decimals}f}'.rstrip('0').rstrip('.')} ур.)'}
+        return {'text':self.to_text(decimals)}
+
+    @property   
+    def button_text(self):
+        return self.to_button_text()

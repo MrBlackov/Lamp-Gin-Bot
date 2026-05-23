@@ -31,6 +31,12 @@ class ItemSketchDB(Base):
     @property
     def text(self):
         return f'{self.emodzi} {self.name}'
+    
+    @property
+    def button_text(self):
+        if self.custom_emodzi_id:
+            return {'text':self.name, 'icon_custom_emoji_id':str(self.custom_emodzi_id)}
+        return {'text':self.text}
 
 class ItemDB(Base):
     inventory_id: Mapped[int | None] = mapped_column(ForeignKey('inventorydb.id'), nullable=True)
@@ -58,12 +64,21 @@ class ItemDB(Base):
         return False if self.from_char_transfers else True
 
     def to_text(self, quantity: int | None = None):
-        return f'{self.sketch.text}{f' ({quantity}шт.)' if quantity and quantity > 1 else ''}'
+        return f'{self.sketch.text}{f' ({quantity} шт.)' if quantity and quantity > 1 else ''}'
     
     @property
     def text(self):
         return self.to_text(self.quantity)
     
+    def to_button_text(self, quantity: int | None = None):
+        if self.sketch.custom_emodzi_id:
+            return self.sketch.button_text | {'text':f'{self.sketch.name}{f' ({quantity} шт.)' if quantity and quantity > 1 else ''}'}
+        return {'text':self.to_text(quantity)}
+    
+    @property
+    def button_text(self):
+        return self.to_button_text(self.quantity)
+
 class CraftDB(Base):
     ingredient_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
     result_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('itemdb.id')), default=None)
@@ -108,13 +123,13 @@ class CraftDB(Base):
         return item_dict
 
     def ingredients_emodzi(self, to_str: bool = False, sep: str = ''):
-        emodzi_list = [i.sketch.emodzi for i in self.ingredients] if self.ingredients else []
+        emodzi_list = [i.sketch._emodzi for i in self.ingredients] if self.ingredients else []
         if len(emodzi_list) == 0:
             return '💮'
         return sep.join(emodzi_list) if to_str else emodzi_list
     
     def results_emodzi(self, to_str: bool = False, sep: str = ''):
-        emodzi_list = [i.sketch.emodzi for i in self.results] if self.results else []
+        emodzi_list = [i.sketch._emodzi for i in self.results] if self.results else []
         if len(emodzi_list) == 0:
             return '⚗️'
         return sep.join(emodzi_list) if to_str else emodzi_list

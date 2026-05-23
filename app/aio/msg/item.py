@@ -40,8 +40,8 @@ class ItemText:
                 study_skill = StudyValide.model_validate(skill_dict)
                 skill = self.skill_tags.get(study_skill.tag)
                 text = f'{skill.text}' + TextHTML('\n'.join([
-                    f'📖 Скорость обучения: {study_skill.up_level}',
                     f'🔰 Уровень: {study_skill.level}',
+                    f'📖 Скорость обучения: {study_skill.up_level}',
                 ])).blockquote()
                 texts.append(f'{text}')
         return '\n' + '\n'.join(texts)
