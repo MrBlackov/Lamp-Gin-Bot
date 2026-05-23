@@ -10,5 +10,8 @@ class SkillPageCall(BaseCall, prefix='skill_page'):
 class SkillCall(BaseCall, prefix='skill'):
     skill_id: int
 
+class SkillSketchCall(BaseCall, prefix='skill_sketch'):
+    sketch_id: int
+
 
     
