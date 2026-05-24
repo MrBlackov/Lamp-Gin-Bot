@@ -36,6 +36,8 @@ class BaseLayer:
 
     async def get_char_full_info(self, char_id: int, and_skills: bool = True, and_items: bool = True, and_action: bool = True, and_setting: bool = True, and_recovery: bool = True, **kwargs):
         char = await get_char_for_id(char_id)
+        if char == None:
+            return char
         if and_skills:
             skills = await get_skills_for_attribute_point_id(char.exist.attibute_point.id)
             char.exist.attibute_point.add_skills(skills)

@@ -16,35 +16,37 @@ class ItemText:
     @property
     def dop_text(self):
         texts = []
-        #if ActionTags.paper in self.sketch.action:
-        #    text = self.item.nbt.get('text')
-        #    texts.append(f'📄 Надпись (отсуствует)' if type(text) != str else f'📄 Надпись \n\n' + text.replace('emoji_id', 'emoji-id'))
-        #if ActionTags.book in self.sketch.action:
-        #    text: dict = self.item.nbt.get('book')
-        #    if text:
-        #        book = BookValide.model_validate(text)
-        #        texts.append(
-        #            f'🏷️ {book.name}' + TextHTML('\n'.join([
-        #                f'👤 Автор: {book.author}',
-        #                f'✏️ Можно редактировать: {'✅' if not(book.is_close_setting) else '❌'}',
-        #                (f'📊 Кол-во страниц: {len(book.pages)}' if book.pages and len(book.pages) > 0 else '❌ Страниц нету'),
-        #                f'📜 Описание: {book.description if book.description and len(book.description) > 0 else "❌"}'
-        #            ])).blockquote()
-        #        )
-        #    else:
-        #        texts.append(f'❗ Вы можете написать книгу')
-        if ActionTags.study in self.sketch.action and self.skill_skethes:
-            study: dict = self.sketch.nbt.get('study')
-            study_skills_nbt: list[dict] = study.get('skills')
-            for skill_dict in study_skills_nbt:
-                study_skill = StudyValide.model_validate(skill_dict)
-                skill = self.skill_tags.get(study_skill.tag)
-                text = f'{skill.text}' + TextHTML('\n'.join([
-                    f'🔰 Уровень: {study_skill.level}',
-                    f'📖 Скорость обучения: {study_skill.up_level}',
-                ])).blockquote()
-                texts.append(f'{text}')
-        return '\n' + '\n'.join(texts)
+        if self.sketch.action:
+            #if ActionTags.paper in self.sketch.action:
+            #    text = self.item.nbt.get('text')
+            #    texts.append(f'📄 Надпись (отсуствует)' if type(text) != str else f'📄 Надпись \n\n' + text.replace('emoji_id', 'emoji-id'))
+            #if ActionTags.book in self.sketch.action:
+            #    text: dict = self.item.nbt.get('book')
+            #    if text:
+            #        book = BookValide.model_validate(text)
+            #        texts.append(
+            #            f'🏷️ {book.name}' + TextHTML('\n'.join([
+            #                f'👤 Автор: {book.author}',
+            #                f'✏️ Можно редактировать: {'✅' if not(book.is_close_setting) else '❌'}',
+            #                (f'📊 Кол-во страниц: {len(book.pages)}' if book.pages and len(book.pages) > 0 else '❌ Страниц нету'),
+            #                f'📜 Описание: {book.description if book.description and len(book.description) > 0 else "❌"}'
+            #            ])).blockquote()
+            #        )
+            #    else:
+            #        texts.append(f'❗ Вы можете написать книгу')
+            if ActionTags.study in self.sketch.action and self.skill_skethes:
+                study: dict = self.sketch.nbt.get('study')
+                study_skills_nbt: list[dict] = study.get('skills')
+                for skill_dict in study_skills_nbt:
+                    study_skill = StudyValide.model_validate(skill_dict)
+                    skill = self.skill_tags.get(study_skill.tag)
+                    text = f'{skill.text}' + TextHTML('\n'.join([
+                        f'🔰 Уровень: {study_skill.level}',
+                        f'📖 Скорость обучения: {study_skill.up_level}',
+                    ])).blockquote()
+                    texts.append(f'{text}')
+            return '\n' + '\n'.join(texts)
+        return ''
 
     @property
     def temperate(self):

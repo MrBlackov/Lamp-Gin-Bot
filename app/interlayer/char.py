@@ -5,7 +5,7 @@ from app.enum_type.char import Gender
 from app.validate.api.characters import GetSketchsInfo
 from app.validate.api.query import CreateCharSkecth
 from app.db.metods.gets import get_user_for_tg_id, get_all_skills, get_user_for_id, get_char_for_id, select_exist, get_main_char_for_user_id, get_char_for_id, get_items_for_inventory, get_item_sketchs
-from app.db.metods.updates import update_main_char, update_char, update_donate_delete_char_quan, update_char_location_default
+from app.db.metods.updates import update_main_char, update_char, update_donate_delete_char_quan, update_donat_for_id, update_char_location_default
 from app.db.metods.adds import add_char, add_db_obj
 from app.logic.char import CharLogic, NewCharLogic
 from app.validate.add.characters import Character_add
@@ -91,21 +91,25 @@ class InfoCharacterLayer(BaseLayer):
     async def get_chat_member(self, tg_id: int | None = None):
         if tg_id:
             return await bot.get_chat_member(newspaper_id, tg_id)
-        print(newspaper_id)
         return await bot.get_chat_member(newspaper_id, self.tg_id)
 
+    async def check_in_channel(self, tg_id: int | None = None):
+        result = await self.get_chat_member(tg_id)
+        use_channel_bonus = None
+        chars = await self.logic.get_chars(self.user.id, False)
+        if result:
+            if result.status != ChatMemberStatus.LEFT and result.status != ChatMemberStatus.KICKED:
+                use_channel_bonus = True if len(chars) > 1 else False
+        return await update_donat_for_id(self.user.donates.id, {'use_channel_bonus':use_channel_bonus, 'char_quantity':(len(chars) if chars else 0)})
+        
     async def get_chars(self, is_die: bool | None = None) -> UserChars:
         await self.get_char_info()
-        channel_member = await self.get_chat_member()
-        use_bonus = False
-        if channel_member:
-            if channel_member.status != ChatMemberStatus.LEFT and channel_member.status != ChatMemberStatus.KICKED:
-                use_bonus = True
+        donate = await self.check_in_channel()
         chars = await self.logic.get_chars(self.user.id, is_die)
         if chars:
             main_char_id = await self.logic.get_main_char_id(user_id=self.user.id)
-            return UserChars(chars=chars, main_id=main_char_id, max_chars=self.user.donates.char_quantity, use_bonus=use_bonus)
-        return UserChars(no_chars=True, max_chars=self.user.donates.char_quantity, use_bonus=use_bonus)
+            return UserChars(chars=chars, main_id=main_char_id, max_chars=self.user.donates.char_quantity, use_bonus=donate.use_channel_bonus)
+        return UserChars(no_chars=True, max_chars=self.user.donates.char_quantity, use_bonus=False)
 
     async def get_char(self, char_id: int):
         return await self.get_char_full_info(char_id)
@@ -121,11 +125,12 @@ class InfoCharacterLayer(BaseLayer):
     
     async def delete_char(self, exist_id: int):
         await self.get_char_info()
+        main_char_id = await self.logic.get_main_char_id(user_id=self.user.id)
         if self.user.donates.delete_char_quantiry == None or self.user.donates.delete_char_quantiry > 0:
             die = await self.logic.to_die(exist_id)
             if die:
                 await update_donate_delete_char_quan(self.user.donates.id, self.user.donates.delete_char_quantiry)
-                await update_main_char(self.user.id)
+                await update_main_char(self.user.id, None if die.people_id == main_char_id else main_char_id)
                 return die
         raise NoDeleteCharError(f'This user(id={self.user.id}) dont have delete_char_quantiry')
 

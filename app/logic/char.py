@@ -1,9 +1,9 @@
-from app.db.models.char import CharacterDB, ExistenceDB, AttributePointDB, InventoryDB, ItemDB
+from app.db.models.char import CharacterDB, ExistenceDB, AttributePointDB, InventoryDB, ItemDB, SkillDB
 from app.validate.info.characters import CharacterInfo, AttributePointsInfo, EXistanceInfo, ItemInfo
 from app.logged.botlog import logs
 from app.db.models.main import UserDB
 from app.db.metods.adds import add_db_obj
-from app.db.metods.gets import get_chars_for_user_id, get_char_for_id, get_all_chars, get_main_char_for_user_id, get_item_sketch_for_tag, get_user_for_tg_id
+from app.db.metods.gets import get_chars_for_user_id, get_base_skills, get_char_for_id, get_all_chars, get_main_char_for_user_id, get_item_sketch_for_tag, get_user_for_tg_id
 from app.db.metods.updates import update_main_char, update_char_die, update_donate_delete_char_quan
 from app.exeption.char import CharError
 from app.validate.newchar import CharSketch
@@ -43,11 +43,12 @@ class NewCharLogic:
         atp = await add_db_obj(data=[AttributePointDB(exist_id=exist[0].id)])
         await add_db_obj(data=[ItemDB(sketch_id=lbs.id, inventory_id=inventory[0].id, quantity = sketch.coins)]) if sketch.coins > 0 else None
         skills = sketch.skills
-        new_skills = []
+        all_base_skills = await get_base_skills()
+        new_skills = {s.tag:SkillDB(level=s.default_level, coins=s.default_coins, sketch=s, sketch_tag=s.tag, sketch_id=s.id, attribute_point_id=atp[0].id) for s in all_base_skills}
         for skill in skills.values():
             skill.attribute_point_id = atp[0].id
-            new_skills.append(skill)
-        await add_db_obj(data=new_skills)
+            new_skills[skill.sketch_tag] = skill
+        await add_db_obj(data=new_skills.values())
         return char
 
 
