@@ -13,7 +13,7 @@ import random
 from app.service.base import BaseService 
 from app.interlayer.char import CreateCharacterLayer, InfoCharacterLayer, InventoryCharacterLayer, NewCharLayer
 from app.aio.cls.fsm.char import InventoryState, NewCharState
-from app.exeption.char import BonusCharSubError, NoDeleteCharError, SKillCoinsLessZeroError, SKillLessOneError, SKillLessZeroError
+from app.exeption.char import BonusCharSubError, NoHaveMainChar, SKillCoinsLessZeroError, SKillLessOneError, SKillLessZeroError
 from aiogram.types.chat_member_banned import ChatMemberStatus
 from app.exeption.item import ItemError
 from app.aio.cls.fsm.utils import CharFSM
@@ -31,11 +31,11 @@ class NewCharacterService(BaseService):
         await self.state.clear_this_state()
         my_chars = await InfoCharacterLayer(self.tg_id).get_chars()
         if my_chars.chars:
-            if len(my_chars.chars) == my_chars.max_chars and my_chars.use_bonus == False:
+            if len(my_chars.no_die_chars) == my_chars.max_chars and my_chars.use_bonus == False:
                 channel = await self.get_channel_info()
                 return '😕 У вас уже максимальное количество персонажей,' \
                 ' но вы можете получить бонусного персонажа подписавшись на Газету Нила', self.IKB.get_bonus_char(channel.invite_link)
-            if len(my_chars.chars) > my_chars.max_chars:
+            if len(my_chars.no_die_chars) > my_chars.max_chars:
                 return '😕 У вас уже максимальное количество персонажей', None
         return '📲 Выберите пол', self.IKB.chouse_gender()    
 
@@ -47,6 +47,7 @@ class NewCharacterService(BaseService):
         raise BonusCharSubError(f'This user(tg_id:{self.tg_id}) dont sub to newspaper')
     
     async def menu(self, gender: str | None = None):
+        await self.state.set_state()
         char_sketch = await self.state.get_value('sketch')
         if char_sketch == None:
             char_sketch = await self.layer.generate_char(gender)
@@ -95,7 +96,7 @@ class NewCharacterService(BaseService):
     async def to_page_skills(self, page: int):
         coins = await self.state.get_value('coins')
         pages = await self.state.get_value('skills_pages')
-        return f'💡 Навыки доступные для приобретения [{coins} 💮] [{f'[{page + 1}/{len(pages)}стр]' if len(pages) > 1 else ''}]', self.IKB.skills(pages[page], page, len(pages), 'skills')
+        return f'💡 Навыки доступные для приобретения [{coins} 💮] {f'[{page + 1}/{len(pages)}стр]' if len(pages) > 1 else ''}', self.IKB.skills(pages[page], page, len(pages), 'skills')
     
     async def to_rename(self, name_type: str | None = None):
         if name_type:
@@ -131,7 +132,7 @@ class NewCharacterService(BaseService):
     async def to_page_names(self, page: int):
         name_type: str = await self.state.get_value('name_type')
         pages = await self.state.get_value('names_pages')
-        return f'📋 Держите список, Страница: [{f'[{page + 1}/{len(pages)}стр]' if len(pages) > 1 else ''}]', self.IKB.names(pages[page], name_type, page, len(pages), 'query')
+        return f'📋 Держите список {f'[{page + 1}/{len(pages)}стр]' if len(pages) > 1 else ''}', self.IKB.names(pages[page], name_type, page, len(pages), 'query')
 
     async def rename(self, name: str | None, name_type: str):
         char_sketch: CharSketch = await self.state.get_value('sketch')
@@ -151,15 +152,17 @@ class NewCharacterService(BaseService):
         char_sketch: CharSketch = await self.state.get_value('sketch')
         char_sketch.description = description
         await self.state.update_data(sketch=char_sketch)
+        await self.state.set_state()
         return await self.menu()
 
     async def create(self, is_finished: bool):
+        await self.state.set_state()
         char_sketch: CharSketch = await self.state.get_value('sketch')
         if is_finished or char_sketch.coins == 0:
             await self.layer.add_character(char_sketch)
             await self.state.clear_this_state()
             return '✅ Персонаж успешно создан!', None
-        return f'❗ У вас осталось {char_sketch.coins} 💮, они будут конвертированы в фунты', self.IKB.finish('menu')
+        return f'❗ У вас осталось {char_sketch.coins} 💮, они будут конвертированы в фунты.', self.IKB.finish('menu')
         
 
 
@@ -289,6 +292,8 @@ class InfoCharacterService(BaseService):
 
     async def get_main_char(self):
         char = await self.layer.get_main_char()
+        if char == None:
+            raise NoHaveMainChar('This user dont choose main char')
         return self.IKB.chouse_main_char(char.id, char.exist.id, True, char.exist.die), CharText(char).text
     
     async def get_chars(self):

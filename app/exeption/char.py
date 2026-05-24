@@ -26,7 +26,8 @@ class BonusCharSubError(CharError):
 
 class NoHaveMainChar(CharError):
     msg = '❌ У вас не выбран действующий персонаж'    
-    code = '503.1'    
+    code = '503.1'  
+    faq = 'Чтобы выбрать используйте команду /mychars и выберите из списка нужного персонажа'  
 
 class InventaryOverFlowing(CharError):
     msg = '❌ Инвентарь будет переполнен, предмет невозможно получить'
