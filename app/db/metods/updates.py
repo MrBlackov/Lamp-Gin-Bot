@@ -55,8 +55,11 @@ async def update_exist_for_id(exist_id: int, new_data: dict) -> ExistenceDB:
 async def update_char_location_default(char_id: int) -> CharacterDB:
     return await update_char(filters={'id':char_id}, new_data={'location_id':1})
 
+async def update_donat_for_id(donate_id: int, new_data: dict) -> DonateDB:
+    return await update_donate(filters={'id':donate_id}, new_data=new_data)
+
 async def update_donate_delete_char_quan(donate_id: int, new_quan: int | None = None, use_delete: int = 1):
-    return await update_donate(filters={'id':donate_id}, new_data={'delete_char_quantiry': ((new_quan - use_delete) if type(new_quan) == int else 0)})
+    return await update_donat_for_id(donate_id, new_data={'delete_char_quantiry': ((new_quan - use_delete) if type(new_quan) == int else 0)})
 
 update_item = update_obj(ItemDAO)
 update_items = update_objs(ItemDAO)

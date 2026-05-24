@@ -230,7 +230,7 @@ class InfoCharIKB(BotIKB):
             self.builder.button(text='💼 Инвентарь', callback_data=MenuCall(where='inventory', tg_id=self.tg_id)) 
             self.builder.button(text='⚗️ Крафты', callback_data=MenuCall(where='crafts', tg_id=self.tg_id)) 
             self.builder.button(text='💡 Навыки', callback_data=MenuCall(where='myskills', tg_id=self.tg_id)) 
-            self.builder.button(text='🎮 Доействия', callback_data=MenuCall(where='actions', tg_id=self.tg_id)) 
+            self.builder.button(text='🎮 Действия', callback_data=MenuCall(where='actions', tg_id=self.tg_id)) 
             self.builder.button(text='✉️ Сделки', callback_data=MenuCall(where='transfers', tg_id=self.tg_id)) 
             self.builder.button(text='⚙️ Настройки персонажа', callback_data=MenuCall(where='char_setting', tg_id=self.tg_id))
             adjust = [2, 2, 1]

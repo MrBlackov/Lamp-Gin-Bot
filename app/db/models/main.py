@@ -28,6 +28,7 @@ class DonateDB(Base):
     char_quantity: Mapped[int] = mapped_column(default=1)
     char_regeneration: Mapped[int] = mapped_column(default=3)
     delete_char_quantiry: Mapped[int | None] = mapped_column(default=1, nullable=True)
+    use_channel_bonus: Mapped[bool | None] = mapped_column(default=False, nullable=True)
 
 class UserDB(Base):
     tg_id: Mapped[int | None] = mapped_column(BigInteger, unique=True, default=None)

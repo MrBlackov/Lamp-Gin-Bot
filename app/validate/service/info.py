@@ -10,3 +10,7 @@ class UserChars(BaseServiceValidate):
     no_chars: bool = False
     max_chars: int
     use_bonus: bool = False
+
+    @property
+    def no_die_chars(self):
+        return [c for c in self.chars if c.exist.die == False] if self.chars else []
