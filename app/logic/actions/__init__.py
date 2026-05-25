@@ -56,3 +56,5 @@ class ActionSelf:
             if a.to_item_button:
                 item_actions[a.tag] = a
         return item_actions
+    
+    not_allowed_tags = [tags.drop, tags.tag]

@@ -27,4 +27,4 @@ class ChatText:
             f'📧 username: {self.tg_chat.username if self.tg_chat.username else "❌"}',
             f'📂 Тип: {self.tg_chat.tg_type.to_ru(self.tg_chat.tg_type)}',
             f'{f' Время удаления сообщений: {self.chat.setting.msg_delete_time} с.' if self.chat.setting.is_msg_delete else ''}'
-        ])).blockquote()
+        ])).blockquote() + ('\n\n👋 Приветствие' + TextHTML(self.chat.setting.greetings_text).blockquote() if self.chat.setting.greetings_new_members else '')

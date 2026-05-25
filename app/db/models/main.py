@@ -64,6 +64,9 @@ class ChatSettingDB(Base):
     chat_id: Mapped[int] = mapped_column(ForeignKey('chatdb.id'))
     msg_delete_time: Mapped[int] = mapped_column(default=360)
     is_msg_delete: Mapped[bool] = mapped_column(default=False)
+    receive_drops: Mapped[bool] = mapped_column(default=False, nullable=True)
+    greetings_new_members: Mapped[bool] = mapped_column(default=False, nullable=True)
+    greetings_text: Mapped[str | None] = mapped_column(default=None, nullable=True)
 
 class UserSettingDB(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('userdb.id'))

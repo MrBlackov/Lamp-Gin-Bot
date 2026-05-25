@@ -1,10 +1,11 @@
 from aiogram.fsm.context import FSMContext
 from app.aio.inline_buttons.char import BotIKB
 from app.logged.botlog import logs
-from app.aio.config import admins, bot, newspaper_id
+from app.aio.config import admins, bot, newspaper_id, owner
 from app.aio.cls.fsm.utils import FSMUtils
 from aiogram.types import Message
 import asyncio
+from app.service.utils import is_natural_int
 
 NOT_NEW_STATE = object()
 
@@ -15,8 +16,13 @@ class BaseService:
         self.IKB = BotIKB(tg_id)
         self.newspaper_id = newspaper_id
         self.admins = admins
+        self.owner = owner
         self.bot = bot
         self.message = message
+    
+    @classmethod
+    def is_natural_int(self, value, **kwargs):
+        return is_natural_int(value, self.tg_id, **kwargs)
 
     async def get_channel_info(self):
         channel = await self.bot.get_chat(self.newspaper_id)
