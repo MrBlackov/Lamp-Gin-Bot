@@ -34,13 +34,7 @@ async def update_chat_setting_by_id(setting_id: int, msg_delete_time: int | None
     print(setting_id)
     return await update_chat_setting(filters={'id':setting_id}, new_data=new_data)
 
-async def update_chat_setting_by_chat_id(chat_id: int, msg_delete_time: int | None = None, is_msg_delete: bool | None = None) -> ChatSettingDB:
-    new_data = {}
-    if msg_delete_time is not None:
-        new_data['msg_delete_time'] = msg_delete_time
-    if is_msg_delete is not None:
-        new_data['is_msg_delete'] = is_msg_delete
-    print(new_data)
+async def update_chat_setting_by_chat_id(chat_id: int, new_data: dict) -> ChatSettingDB:
     return await update_chat_setting(filters={'chat_id':chat_id}, new_data=new_data)
 
 async def update_main_char(user_id: int, char_id: int | None = None) -> UserDB:

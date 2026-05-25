@@ -27,12 +27,12 @@ theme:
   name: material
   language: ru
   features:
+    - search.suggest
     - navigation.tabs
     - navigation.sectionsn
     - navigation.tracking
     - navigation.expand
     - toc.integrate
-    - searchsuggest
     - content.code.copy
 
   palette:

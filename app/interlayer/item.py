@@ -8,6 +8,7 @@ from app.exeption.item import SizeNotIntItemSketchError, TagValideError, NBTVali
 from app.exeption.char import NoHaveMainChar
 from app.interlayer.base import BaseLayer
 import json
+from app.logic.action import ActionSelf
 
 class ItemLayer(BaseLayer):
     def __init__(self, tg_id: int):
@@ -55,7 +56,7 @@ class ItemLayer(BaseLayer):
             raise NoFindItemSketchForID(f'This user(tg_id={self.tg_id}) enter item_sketch_id, but dont find item_sketch')
         return data
     
-    async def change_data_valid(self, what_change: str, new_data: str):
+    async def change_data_valid(self, what_change: str, new_data: str, is_admin: bool = False):
         match what_change:
             case 'name':
                 if len(new_data) > 30:
@@ -78,9 +79,9 @@ class ItemLayer(BaseLayer):
             case  'nbt':
                 try:
                     nbts = dict(json.loads(new_data.replace("'", '"').replace('True', 'true').replace('False', 'false')))
-                    not_allowed_tags = []
+                    not_allowed_tags = ActionSelf.not_allowed_tags
                     for tag in not_allowed_tags:
-                        if tag in nbts:
+                        if tag in nbts and not is_admin:
                             nbts.pop(tag) 
                     return nbts
                 except:
