@@ -13,19 +13,19 @@
 
 Чтобы открыть инвентарь отправьте команду /inventory. 
 
-![Инвентарь](./img/base/inventory.png){width=40%}
+![Инвентарь](./img/base/inventory.png){width=70%}
 
 > ❗ В примере показан инвентарь уже старого персонажа. Вот как будет выглядить инвентарь нового персонажа.
 
-> ![Инвентарь нового персонажа](./img/base/new_char.png){width=20%}
+> ![Инвентарь нового персонажа](./img/base/new_char.png){width=30%}
 
 
 Нажав на предмет, мы можем увидеть его ID, вес и количество.
 
-![Предмет](./img/base/item.png){width=40%}
+![Предмет](./img/base/item.png){width=70%}
 
 Или если предмет с функционалом:
 
-![Рация](./img/base/item_func.png){width=40%}
+![Рация](./img/base/item_func.png){width=70%}
 
 <!--inventory-end-->

@@ -40,6 +40,7 @@ class ActionTags:
     radio = 'radio'
     tag = 'tag'
     study = 'study'
+    drop = 'drop'
 
 
 

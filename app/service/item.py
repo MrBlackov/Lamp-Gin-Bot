@@ -97,7 +97,7 @@ class AddItemService(ItemBaseService):
             else:
                 custom_emodzi_id = None
             sketch = await self.state.get_value('sketch')
-            value = await self.layer.change_data_valid(key, message.text)
+            value = await self.layer.change_data_valid(key, message.text, self.tg_id in self.admins)
             sketch['base_emodzi'] = value
             sketch['custom_emodzi_id'] = str(custom_emodzi_id) if custom_emodzi_id else None
             await self.state.update_data(sketch=sketch)
@@ -106,7 +106,7 @@ class AddItemService(ItemBaseService):
 
     async def redact_value(self, value: str, key: str):
         sketch = await self.state.get_value('sketch')
-        value = await self.layer.change_data_valid(key, value)
+        value = await self.layer.change_data_valid(key, value, self.tg_id in self.admins)
         sketch[key] = value
         await self.state.update_data(sketch=sketch)
         return await self.menu()

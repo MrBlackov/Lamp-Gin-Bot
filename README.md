@@ -4,7 +4,8 @@
 
 Актуальная версия - [0.2](#версия-02---18-марта-2026-года) \
 Сам бот - [@TheGinBot](https://t.me/TheGinBot) \
-Создатель - [@mr_blackov](https://t.me/mr_blackov)
+Создатель - [@mr_blackov](https://t.me/mr_blackov) \
+Сайт - [Вики](https://mrblackov.github.io/Lamp-Gin-Bot/)
 
 ## 💮 Возможности на данный момент
  - Создать своего персонажа с рандомными характеристиками.

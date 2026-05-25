@@ -20,10 +20,23 @@ class ChatIKB(BotIKB):
     def back(self, where: str):
         return self.builder.button(text='↩️ Назад', callback_data=ChatBackCall(where=where, tg_id=self.tg_id)).as_markup()
 
-    def menu(self, chat_id: int, is_msg_delete: bool):
+    def menu(self, chat_id: int, is_msg_delete: bool, is_greetings_new_members: bool = False, is_receive_drops: bool = False, is_private: bool = False):
         if is_msg_delete == False:
-            return self.builder.button(text='✅ Включить удаление сообщений', 
-                                       callback_data=ChatSettingActionCall(chat_id=chat_id, is_msg_delete=True, tg_id=self.tg_id)).as_markup()
-        self.builder.button(text='⏱️ Указать время удаления', callback_data=ChatSettingActionCall(chat_id=chat_id, to_msg_delete_time=True, tg_id=self.tg_id))
-        self.builder.button(text='❌ Выключить удаление сообщений', callback_data=ChatSettingActionCall(chat_id=chat_id, is_msg_delete=False, tg_id=self.tg_id))
+            self.builder.button(text='✅ Включить удаление сообщений', callback_data=ChatSettingActionCall(chat_id=chat_id, parametrs='is_msg_delete', bool_parametrs=True, to_redact_bool_parametr=True, tg_id=self.tg_id))
+        else:    
+            self.builder.button(text='⏱️ Указать время удаления', callback_data=ChatSettingActionCall(chat_id=chat_id, parametrs='msg_delete_time', to_redact_text_parametr=True, tg_id=self.tg_id))
+            self.builder.button(text='❌ Выключить удаление сообщений', callback_data=ChatSettingActionCall(chat_id=chat_id, parametrs='is_msg_delete', bool_parametrs=False, to_redact_bool_parametr=True, tg_id=self.tg_id))
+        if not is_private:
+            self.builder.button(text='❌ Выключить приветствие новых участников' if is_greetings_new_members else '✅ Включить приветствие новых участников', 
+                                callback_data=ChatSettingActionCall(chat_id=chat_id, parametrs='greetings_new_members', bool_parametrs=not is_greetings_new_members, to_redact_bool_parametr=True, tg_id=self.tg_id))
+            if is_greetings_new_members:
+                self.builder.button(text='✏️ Изменить текст приветствия', callback_data=ChatSettingActionCall(chat_id=chat_id, parametrs='greetings_text', to_redact_text_parametr=True, tg_id=self.tg_id))
+            self.builder.button(text='❌ Выключить получение дропов' if is_receive_drops else '✅ Включить получение дропов', 
+                                callback_data=ChatSettingActionCall(chat_id=chat_id, parametrs='receive_drops', bool_parametrs=not is_receive_drops, to_redact_bool_parametr=True, tg_id=self.tg_id))
+        return self.builder.adjust(1).as_markup()
+
+    def redact_text(self, chat_id: int, parametr: str, where: str):
+        if parametr == 'greetings_text':
+            self.builder.button(text='❌ Вернуть к стандартному тексту', callback_data=ChatSettingActionCall(chat_id=chat_id, parametrs=parametr, bool_parametrs=None, to_redact_bool_parametr=True, tg_id=self.tg_id))
+        self.builder.button(text='↩️ Назад', callback_data=ChatBackCall(where=where, tg_id=self.tg_id))
         return self.builder.adjust(1).as_markup()

@@ -9,6 +9,8 @@ from app.aio.cls.fsm.utils import UserFSM, ChatFSM
 from app.aio.inline_buttons.main import ChatIKB, MenuIKB
 from app.aio.cls.fsm.main import ChatState
 from app.exeption.main import MainQuantityLessSixTeen, MainQuantityMaxTime
+from app.enum_type.bd import TgType
+from app.exeption.main import MainQuantityFloat, MainQuantityLessSixTeen, MainQuantityNoInt
 
 class UserService(BaseService):
     def __init__(self, tg_id, state = None, message = None, **kwargs):
@@ -37,23 +39,32 @@ class ChatService(BaseService):
 
     async def menu(self, tg_id: int):
         chat = await self.layer.setting(tg_id)
-        return self.text(chat.tg_chat, chat).text, self.IKB.menu(chat.id, chat.setting.is_msg_delete)
+        return self.text(chat.tg_chat, chat).text, self.IKB.menu(chat.id, chat.setting.is_msg_delete, chat.setting.greetings_new_members, chat.setting.receive_drops, chat.tg_chat.tg_type == TgType.PRIVATE)
     
-    async def redact_msg_delete_time(self, chat_id: int, msg):
-        await self.state.set_state(ChatState.msg_delete_time)
-        await self.state.update_data(chat_id=chat_id, msg=msg)
-        return '✒️ Укажите новое время удаления сообщения', self.IKB.back('menu')
+    async def redact_text_parametrs(self, chat_id: int, parametr: str, msg):
+        await self.state.set_state(ChatState.redact_text_parametr)
+        await self.state.update_data(chat_id=chat_id, msg=msg, parametr=parametr)
+        return '✒️ Укажите новое значение', self.IKB.redact_text(chat_id, parametr, 'menu')
 
-    async def new_msg_delete_time(self, new_time: int):
-        if new_time < 120:
-            raise MainQuantityLessSixTeen(f'This user(tg_id={self.tg_id}) try set msg delete time less than 60 second')
-        if new_time > 170_000:
-            raise MainQuantityMaxTime(f'This user(tg_id={self.tg_id}) try set msg delete time more than 170.000 second')
+    async def new_msg_delete_time(self, new_value):
+        parametr = await self.state.get_value('parametr')
+        if parametr == 'msg_delete_time':
+            new_value = self.is_natural_int(new_value, self.message.from_user.id)
+            if new_value < 60:
+                raise MainQuantityLessSixTeen(f'This user(tg_id={self.tg_id}) try set msg delete time less than 60 second')
+            if new_value > 170_000:
+                raise MainQuantityMaxTime(f'This user(tg_id={self.tg_id}) try set msg delete time more than 170.000 second')
         chat_id = await self.state.get_value('chat_id')
-        chat = await self.layer.redact_msg_delete_time(chat_id, new_time)
-        return self.text(chat.tg_chat, chat).text, self.IKB.menu(chat.id, chat.setting.is_msg_delete)
+        chat = await self.layer.redact_parametrs(chat_id, new_data={parametr: new_value})
+        return self.text(chat.tg_chat, chat).text, self.IKB.menu(chat.id, chat.setting.is_msg_delete, chat.setting.greetings_new_members, chat.setting.receive_drops, chat.tg_chat.tg_type == TgType.PRIVATE)
 
-    async def redact_is_msg_delete(self, chat_id: int, is_msg_delete: bool):
-        chat = await self.layer.redact_is_msg_delete(chat_id, is_msg_delete)
-        return self.text(chat.tg_chat, chat).text, self.IKB.menu(chat.id, chat.setting.is_msg_delete)
+    async def redact_is_bool_parametrs(self, chat_id: int, new_value, parametr: str):
+        chat = await self.layer.redact_parametrs(chat_id, new_data={parametr: new_value})
+        return self.text(chat.tg_chat, chat).text, self.IKB.menu(chat.id, chat.setting.is_msg_delete, chat.setting.greetings_new_members, chat.setting.receive_drops, chat.tg_chat.tg_type == TgType.PRIVATE)
+
+    async def send_greetings_new_member(self, chat_id: int, full_name: str):
+        chat = await self.layer.setting(chat_id)
+        if chat.setting.greetings_new_members:
+            text = chat.setting.greetings_text.format(full_name=full_name)
+            await self.bot.send_message(chat_id, text)
 

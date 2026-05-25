@@ -38,7 +38,7 @@ class ActionService(BaseService):
     async def to_action(self, tag: str, step: int = 1, minute: int | None = None, **kwargs):
         try:
             action_state = await self.state.get_state()
-            action = await self.layer.action(tag, step, minute, state=action_state, **kwargs)
+            action = await self.layer.action(tag, step, minute, state=action_state, message=self.message, admins=self.admins, owner=self.owner, **kwargs)
             emodzi = action.emodzi
             result = action.result
             msg_format = {
