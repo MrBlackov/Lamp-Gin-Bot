@@ -36,6 +36,7 @@ from app.logic.item import ItemsLogic, InventaryOverFlowing
 from app.logic.utils import action_point, set_to_list, list_to_set
 from app.logic.settings import SettingSelf
 from aiogram.types import Message
+from app.logged.infolog import infolog
 
 class Logic:
     item = ItemsLogic()

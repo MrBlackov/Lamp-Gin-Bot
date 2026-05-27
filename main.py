@@ -23,19 +23,25 @@ async def run_drop_runner():
     return await DropService(1).runner()
 
 async def main():
+    c = 1
     try:
         dp.message.middleware(UpdateDataMiddleware())
         bot.session.middleware(MessageCleanRequestMiddleware())
         dp.include_routers(base_router) 
         asyncio.gather(loggers(), run_scheduler(), run_state_checker(), run_drop_runner(), return_exceptions=True)
-        logs.debug('start polling bot')
+        log.debug('start polling bot')
         await bot.delete_webhook(drop_pending_updates=True)
         await to_menu_cmds()
         await dp.start_polling(bot)
     except Exception as e:
-        asyncio.gather(loggers(), run_scheduler(), run_state_checker(), run_drop_runner(), return_exceptions=True)
         logs.critical(f"Polling failed: {e}") 
-        return True
+        if c < 3:
+            print(f"⏳ Attempting to restart polling (attempt {c})...")
+            await asyncio.sleep(5)  # Подождать перед перезапуском
+            c += 1
+            await main()
+        else:
+            raise
 
 if __name__ == "__main__": 
     asyncio.run(main(), debug=True)

@@ -1,5 +1,5 @@
 from aiogram.fsm.context import FSMContext
-from app.logged.botlog import logs
+from app.logged.botlog import logs, log
 from app.logged.infolog import infolog
 from app.aio.msg.base import UserText, ChatText
 from app.aio.msg.utils import TextHTML
@@ -28,6 +28,10 @@ class UserService(BaseService):
         layer = await self.layer.get_char_info()
         text = self.text(layer.user.tg_user, layer.user).text
         return text
+
+    async def get_logs(self):
+        results, all, msg = await log.send_all_log_files()
+        return f'🗂️ Логи отправлены: {results}/{all} ({TextHTML('Файлы').href(f'https://t.me/c/{str(msg.chat.id).strip('-100')}/177015/{msg.message_id}')})', None
 
 class ChatService(BaseService):
     def __init__(self, tg_id, state = None, message = None, **kwargs):
