@@ -4,7 +4,7 @@ from app.logged.infolog import infolog
 from app.aio.msg.base import UserText, ChatText
 from app.aio.msg.utils import TextHTML
 from app.service.base import BaseService 
-from app.interlayer.main import ChatLayer, UserLayer
+from app.interlayer.main import ChatLayer, UserLayer, ChatDB
 from app.aio.cls.fsm.utils import UserFSM, ChatFSM
 from app.aio.inline_buttons.main import ChatIKB, MenuIKB
 from app.aio.cls.fsm.main import ChatState
@@ -39,32 +39,44 @@ class ChatService(BaseService):
 
     async def menu(self, tg_id: int):
         chat = await self.layer.setting(tg_id)
-        return self.text(chat.tg_chat, chat).text, self.IKB.menu(chat.id, chat.setting.is_msg_delete, chat.setting.greetings_new_members, chat.setting.receive_drops, chat.tg_chat.tg_type == TgType.PRIVATE)
+        return self.text(chat.tg_chat, chat, self.message).text, self.menu_ikb(chat)
     
+    def menu_ikb(self, chat: ChatDB):
+        return self.IKB.menu(chat.id, 
+                             chat.setting.is_msg_delete, 
+                             chat.setting.greetings_new_members, 
+                             chat.setting.receive_drops, 
+                             chat.tg_chat.tg_type == TgType.PRIVATE, 
+                             is_default_text=chat.setting.is_default, 
+                             is_chat_have_topic=self.message.chat.is_forum, 
+                             main_topic_id=chat.setting.main_topic_id)
+
     async def redact_text_parametrs(self, chat_id: int, parametr: str, msg):
         await self.state.set_state(ChatState.redact_text_parametr)
         await self.state.update_data(chat_id=chat_id, msg=msg, parametr=parametr)
-        return '✒️ Укажите новое значение', self.IKB.redact_text(chat_id, parametr, 'menu')
+        return '✒️ Укажите новое значение', self.IKB.redact_text('menu')
 
     async def new_msg_delete_time(self, new_value):
         parametr = await self.state.get_value('parametr')
         if parametr == 'msg_delete_time':
-            new_value = self.is_natural_int(new_value, self.message.from_user.id)
+            new_value = self.is_natural_int(new_value)
             if new_value < 60:
                 raise MainQuantityLessSixTeen(f'This user(tg_id={self.tg_id}) try set msg delete time less than 60 second')
             if new_value > 170_000:
                 raise MainQuantityMaxTime(f'This user(tg_id={self.tg_id}) try set msg delete time more than 170.000 second')
+        if parametr == 'main_topic_id':
+            new_value = self.is_natural_int(new_value)
         chat_id = await self.state.get_value('chat_id')
         chat = await self.layer.redact_parametrs(chat_id, new_data={parametr: new_value})
-        return self.text(chat.tg_chat, chat).text, self.IKB.menu(chat.id, chat.setting.is_msg_delete, chat.setting.greetings_new_members, chat.setting.receive_drops, chat.tg_chat.tg_type == TgType.PRIVATE)
+        return self.text(chat.tg_chat, chat, self.message).text, self.menu_ikb(chat)
 
     async def redact_is_bool_parametrs(self, chat_id: int, new_value, parametr: str):
         chat = await self.layer.redact_parametrs(chat_id, new_data={parametr: new_value})
-        return self.text(chat.tg_chat, chat).text, self.IKB.menu(chat.id, chat.setting.is_msg_delete, chat.setting.greetings_new_members, chat.setting.receive_drops, chat.tg_chat.tg_type == TgType.PRIVATE)
+        return self.text(chat.tg_chat, chat, self.message).text, self.menu_ikb(chat)
 
     async def send_greetings_new_member(self, chat_id: int, full_name: str):
         chat = await self.layer.setting(chat_id)
         if chat.setting.greetings_new_members:
             text = chat.setting.greetings_text.format(full_name=full_name)
-            await self.bot.send_message(chat_id, text)
+            await self.bot.send_message(chat_id, text, message_thread_id=chat.setting.main_topic_id)
 

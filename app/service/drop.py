@@ -38,7 +38,7 @@ class DropService(BaseService):
                 now = self.datetime.datetime.now()
                 drops = await self.layer.get_drops(time=now, operator='<=', is_open=False)
                 if len(drops) > 0:
-                    await self.texts_boardcast([(drop.chat.tg_id, '⏰ В чате появился новый дроп!', DropIKB(0).open(drop.id), None) for drop in drops])
+                    await self.texts_boardcast([(drop.chat.tg_id, '⏰ В чате появился новый дроп!', DropIKB(0).open(drop.id), drop.chat.setting.main_topic_id) for drop in drops])
                     await self.layer.drops_to_open([d.id for d in drops])
                 no_open_drops = await self.layer.get_drops(time=now, operator='>')
                 print(f'📦 DropRunner send drop: {len(drops)}')
