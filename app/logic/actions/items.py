@@ -13,7 +13,8 @@ from app.logic.actions.base import (ActionBase,
                                     get_chars_for_exist_id,
                                     update_exist_for_id,
                                     action_point,
-                                    TextHTML)
+                                    TextHTML,
+                                    infolog)
 from app.logic.dnd import dices, dice
 from app.exeption.action import DiceCmdNoValideError, NameLongError, BookDontHaveInfoError, BookSettingCloseError, DiceCmdDontHaveDError, DiceCmdLongError, PaperLongError
 from app.validate.item import BookValide
@@ -22,6 +23,7 @@ class ItemsAction(ActionBase):
     to_IKB = False
     to_cmd = False
     is_have_items = True
+
 
 class DiceAction(ItemsAction):
     tag = ActionTags.dice
@@ -54,6 +56,7 @@ class DiceAction(ItemsAction):
             return self
         except ValueError as e:
             raise DiceCmdNoValideError(f'This dice-cmd dont valid')
+
 
 class PaperAction(ItemsAction):
     tag = ActionTags.paper
@@ -88,7 +91,6 @@ class PaperAction(ItemsAction):
         self.msg = self.msg.escape() if is_escape else self.msg
         self.is_escape = is_escape
         return self
-
 
 class BookAction(ItemsAction):
     tag = ActionTags.book
@@ -199,6 +201,7 @@ class BookSettingAction(ItemsAction):
                     ])).blockquote()
         return self
 
+
 class RadioAction(ItemsAction):
     tag = ActionTags.radio
 
@@ -232,7 +235,6 @@ class RadioAction(ItemsAction):
         radio_state = await get_action_state_for_tag(self.tag, self.char.exist.id)
         self.radio_kanal = radio_state.nbt.get('kanal') if radio_state else None
         if self.step == 0 and radio_state:
-            print(self.args)
             return await self.use_micro()
         if radio_state:
             self.swoo = True
@@ -252,7 +254,6 @@ class RadioAction(ItemsAction):
             new_radio_kanal = self.radio_kanals[i_kanal + 1] if i_kanal < len(self.radio_kanals) - 1 else self.radio_kanals[0]
             radio_state = await update_action_state_for_id(radio_state.id, new_data={'nbt':radio_state.nbt | {'kanal':new_radio_kanal}})
             self.radio_kanal = radio_state.nbt.get('kanal', self.radio_kanal) if radio_state else self.radio_kanal
-            print(i_kanal, new_radio_kanal, self.radio_kanal, radio_state, radio_state.nbt)
 
         self.result = 'radio'
         self.msg = self.emodzi + f' Рация ({self.radio_kanals_dict.get(self.radio_kanal)})'
@@ -270,6 +271,7 @@ class RadioAction(ItemsAction):
         self.msg = f'Вы 📻 [{self.radio_kanals_dict.get(self.radio_kanal)}]: {self.args}' +  (' \n\n❗ Сообщение большое, оно было обрезано' if is_long else '')
         self.result = 'use_micro'
         self.purpose_tg_ids = [c.user.tg_id for c in radio_chars if self.char.user.id != c.user.id]
+        await infolog.radio_msg(self.char.user.id, self.purpose_msg + f'\n\n {self.char.exist.full_name} (char_id={self.char.id}, user_id={self.char.user.id})')
         return self
   
 
@@ -310,6 +312,7 @@ class TagAction(ItemsAction):
         await self.pay_item_price({tag:1})
         self.result = 'rename'
         self.msg = f'✅ Персонаж переименован. Новое имя: {exist.full_name}'
+        await infolog.char_rename(self.char.user.id, self.char.id, self.char.exist.full_name, exist.full_name)
         return self
         
 

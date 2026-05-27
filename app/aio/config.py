@@ -20,6 +20,7 @@ bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML, l
 dp = Dispatcher(storage=MemoryStorage())
 
 newspaper_id = int(config('newcpaper_id'))
+infolog = int(config('infolog'))
 log_groups = [int(x) for x in config('log_groups').split(',')]
 
 wiki = config('wiki')
@@ -48,14 +49,15 @@ cmds = {
     'skills':'💡 Список всех навыков в игре',
     'help':'📚 Получить справку',
     'helpcmd':'📋 Получить список команд',
+    'chat_id':'ℹ️ Получить айди топика и чата',
 }
 
 admin_cmds = cmds | {
-    'additem':'Добавить предмет',
-    'changeitem':'Изменить предмет',
-    'giveitem':'Выдать предмет',
-    'user':'Посмотреть информацию о пользователе',
-    'chat_id':'Получать ID чата и ID топика',
+    'additem':'🧑‍💻 Добавить предмет',
+    'changeitem':'🧑‍💻 Изменить предмет',
+    'giveitem':'🧑‍💻 Выдать предмет',
+    'user':'🧑‍💻 Посмотреть информацию о пользователе',
+    'getlogs':'🧑‍💻 Отправить файлы логов',
 }
 
 async def to_menu_cmds():
