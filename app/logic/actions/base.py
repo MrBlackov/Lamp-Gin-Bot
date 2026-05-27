@@ -246,7 +246,7 @@ class BlockFreedomAction(ActionBase):
         try:
             return await self.logic.item.give(item.sketch_id, self.char.exist.inventory.id, self.char, item.quantity), True
         except InventaryOverFlowing:
-            return await add_db_obj(data=[ItemDB(location_id=1, sketch_id=item.sketch_id, quantity=item.quantity, nbt=item.nbt | {"is_pick_up": False})]), False
+            return await add_db_obj(data=[ItemDB(location_id=1, sketch_id=item.sketch_id, quantity=item.quantity, nbt=(item.nbt | {"is_pick_up": False} if item.nbt else {"is_pick_up": False}))]), False
 
 class StopAction(ActionBase):
     tag = ActionTags.stop

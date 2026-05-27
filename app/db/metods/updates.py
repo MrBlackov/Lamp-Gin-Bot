@@ -6,6 +6,7 @@ from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.db.dao.transfer import TransferDAO
 from app.db.dao.action import ActionStateDB, ActionStateDAO
 from typing import Literal
+from app.db.dao.drop import DropDB, DropDAO
 from datetime import datetime
 
 update_user = update_obj(UserDAO)
@@ -120,7 +121,14 @@ async def update_action_state_for_id(id: int, new_data: dict) -> ActionStateDB:
 async def update_action_state_for_tag(tag: str, new_data: dict) -> ActionStateDB:
     return await update_action_state(filters={'tag':tag}, new_data=new_data)
 
+update_drop = update_obj(DropDAO)
+update_drops = update_obj_for_ids(DropDAO)
 
+async def update_drop_for_id(id: int, new_data: dict) -> DropDB:
+    return await update_drop(filters={'id':id}, new_data=new_data)
+
+async def update_drops_for_id(ids: int, new_data: dict) -> list[DropDB]:
+    return await update_drops(ids=ids, new_data=new_data)
 
 
 

@@ -25,7 +25,7 @@ from app.aio.cls.callback.item import (NewItemACtionCall,
                                        ChangeItemSketchAddActionTagCall,
                                        ChangeItemSketchDeleteActionTagCall,
                                        MenuCall)
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CopyTextButton
 
 
 class NewItemIKB(BotIKB):
@@ -86,7 +86,9 @@ class NewItemIKB(BotIKB):
         self.builder.button(text='✅ Да', callback_data=NewItemACtionCall(delete_nbt=True, tg_id=self.tg_id))
         return self.builder.adjust(2).as_markup()
     
-    def nbt(self):
+    def nbt(self, text: str | None = None): 
+        if text:       
+            self.builder.button(text='📑 Копировать', copy_text=CopyTextButton(text=text))
         self.builder.button(text='✏️ Изменить', callback_data=NewItemACtionCall(redact_key='nbt', to_redact=True, tg_id=self.tg_id))
         self.builder.button(text='🗑️ Очистить', callback_data=NewItemACtionCall(to_delete_nbt=True, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=NewItemBackCall(where='menu', tg_id=self.tg_id))
@@ -174,7 +176,9 @@ class ChangeItemSketchIKB(BotIKB):
         self.builder.button(text='✅ Да', callback_data=ChangeItemSketchDeleteActionTagCall(tag=tag, is_delete=True, tg_id=self.tg_id))
         return self.builder.adjust(2).as_markup()
 
-    def nbt(self):
+    def nbt(self, text: str | None = None): 
+        if text:       
+            self.builder.button(text='📑 Копировать', copy_text=CopyTextButton(text=text))
         self.builder.button(text='✏️ Изменить', callback_data=ChangeItemSketchCall(what='nbt', tg_id=self.tg_id))
         self.builder.button(text='🗑️ Очистить', callback_data=ChangeItemSketchCall(what='nbt', to_delete_nbt=True, tg_id=self.tg_id))
         self.builder.button(text='↩️ Назад', callback_data=ChangeItemSketchBackCall(where='info', tg_id=self.tg_id))

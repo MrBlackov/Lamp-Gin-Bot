@@ -8,6 +8,7 @@ from app.validate.sketchs.item_sketchs import ItemSketchValide, ItemValide
 from app.db.dao.transfer import TransferDAO, TransferDB
 from app.db.dao.action import ActionStateDAO, ActionStateDB
 from app.logic.cls import MyTransfers, Craft
+from app.db.dao.drop import DropDB, DropDAO
 from datetime import datetime
 
 add_or_update_user = add_or_update_obj(UserDAO)
@@ -19,6 +20,7 @@ select_users_for_ids = get_for_ids(UserDAO)
 select_user_setting = select_obj_no_valide(UserSettingDAO)
 
 select_chat = select_obj_no_valide(ChatDAO)
+select_chats = select_objs_no_valide(ChatDAO)
 select_chat_setting = select_obj_no_valide(ChatSettingDAO)
 select_message = select_obj_no_valide(MessageDAO)
 
@@ -104,6 +106,7 @@ select_items = select_objs(ItemValide, ItemDAO)
 select_item_sketch = select_obj(ItemSketchValide, ItemSketchDAO)
 select_item_sketchs = select_objs(ItemSketchValide, ItemSketchDAO)
 select_items_for_ids = get_for_ids(ItemDAO)
+select_item_sketchs_for_ids = get_for_ids(ItemSketchDAO)
 
 async def get_item(sketch_id: int, inventory_id: int) -> ItemDB:
     return await select_item(filters={'sketch_id':sketch_id, 'inventory_id':inventory_id})
@@ -133,6 +136,9 @@ async def get_items_for_location(location_id: int) -> tuple[list[ItemDB], list[I
 
 async def get_items_for_ids(ids: list[int]) -> list[ItemDB] | None:
     return await select_items_for_ids(ids=ids)
+
+async def get_item_sketchs_for_ids(ids: list[int]) -> list[ItemSketchDB] | None:
+    return await select_item_sketchs_for_ids(ids=ids)
 
 async def get_item_sketchs(is_hide: bool = False) -> list[ItemSketchDB]:
     return await select_item_sketchs(filters={'is_hide':is_hide})
@@ -266,4 +272,12 @@ async def get_action_states_for_block_freedom(is_block_freedom: bool, exist_id: 
         filters['exist_id'] = exist_id
     return await select_action_states(filters=filters)
 
-    
+select_drop = select_obj_no_valide(DropDAO)
+select_drops = select_objs_no_valide(DropDAO)
+
+async def get_drop_for_id(id: int) -> DropDB:
+    return await select_drop(filters={'id':id})
+
+async def get_drops_for_chat_id(chat_id: int) -> list[DropDB]:
+    return await select_drops(filters={'chat_id':chat_id})
+

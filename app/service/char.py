@@ -353,10 +353,9 @@ class InventoryService(BaseService):
                 for item in inventory.items:
                     items |= {item.id: item}
                 await self.state.update_data(items=items)
-            await self.state.update_data(item=item_id)
+        await self.state.update_data(item=item_id)
         return self.text.item(items[item_id], skills), self.IKB.action(items[item_id], 'inventory')
         
-
     async def to_throw(self, msg):
         await self.state.update_data(msg=msg)
         await self.state.set_state(InventoryState.throw_quantity)

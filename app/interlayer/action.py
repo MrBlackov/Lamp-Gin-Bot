@@ -44,7 +44,7 @@ class ActionLayer(BaseLayer):
                 await self.bot.send_message(self.user.tg_id, result.msg.format(emodzi=result.emodzi, name=result.name.lower(), char_name=self.char.exist.full_name))
                 print(result.msg.format(emodzi=result.emodzi, char_name=self.char.exist.full_name, name=result.name.lower()))
             else:
-                print(f'{result.emodzi} {self.char.exist.full_name} {result.action_text}')
+                print(f'{result.emodzi}  {self.char.exist.full_name} {result.action_text}')
             if result.new_action_state:
                 new_action_state = result.new_action_state.to_dict
                 new_action_state.pop('exist')

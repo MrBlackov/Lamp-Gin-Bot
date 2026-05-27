@@ -55,9 +55,8 @@ class ItemSketchsLogic:
 
 
 class ItemsLogic:
-    async def give(self, sketch_id: int, inventory_id: int, char: CharacterDB, quantity: int = 1, size_except: bool = True) -> ItemDB:
+    async def give(self, sketch_id: int, inventory_id: int, char: CharacterDB, quantity: int = 1, size_except: bool = True, to_max_quantity: bool = False) -> ItemDB | None:
         try:
-            print(quantity)
             item = await get_item(sketch_id, inventory_id)
             sketch = item.sketch if item else await get_item_sketch(sketch_id)
             items = await get_items_for_inventory(inventory_id)
@@ -66,7 +65,13 @@ class ItemsLogic:
             for i in items:
                 size += i.sketch.size*i.quantity
     
-            print(size+sketch.size*quantity, max_size)
+            if to_max_quantity:
+                while size+sketch.size*quantity > max_size:
+                    quantity -= 1
+            
+            if quantity == 0:
+                raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
+
             if size+sketch.size*quantity > max_size:
                 raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
     
@@ -80,7 +85,7 @@ class ItemsLogic:
             return None
         except Exception:
             raise
-        
+
     @log.decor(arg=True)
     async def action(self, item: ItemDB, char: CharacterDB, action: str, quantity: int = 1):
         items = await get_items_for_inventory(char.exist.inventory.id)
@@ -135,8 +140,6 @@ class ItemsLogic:
   
         if action == '+':
             size = quantity*new_item.sketch.size
-            print(size, max_size)
-    
             if size > max_size:
                 raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
         return True

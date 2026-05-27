@@ -11,8 +11,8 @@ class FSMUtils:
     def prefix(self):
         return '_'.join(self.prefixs + [self.prefix_two]) + ('_' if len(self.prefixs + [self.prefix_two]) > 0 else '')
     
-    def get_value(self, key: str, default = None):
-        return self.state.get_value(self.prefix + key, default)
+    async def get_value(self, key: str, default = None):
+        return await self.state.get_value(self.prefix + key, default)
     
     async def update_data(self, **kwargs):
         state_keys = await self.get_value('state_keys', [])
@@ -75,3 +75,5 @@ class TransferFSM(FSMUtils):
 class SocialFSM(FSMUtils):
     prefixs = ['social']
     
+class DropFSM(FSMUtils):
+    prefixs = ['drop']
