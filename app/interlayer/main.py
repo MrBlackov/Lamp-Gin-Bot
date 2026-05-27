@@ -11,6 +11,7 @@ class ChatLayer(BaseLayer):
 
     def default_greetings_text(self, chat: ChatDB):  
         chat.setting.greetings_text = chat.setting.greetings_text if chat.setting.greetings_text else '👋 Рады видеть тебя тут, {full_name}! \n\n❔ А у тебя уже есть, персонаж в Лампе? Если нет, то быстрее создавай его, используя команду - /newchar'
+        chat.setting.is_default = True if chat.setting.greetings_text == '👋 Рады видеть тебя тут, {full_name}! \n\n❔ А у тебя уже есть, персонаж в Лампе? Если нет, то быстрее создавай его, используя команду - /newchar' else False
         return chat
 
     async def setting(self, tg_id: int):

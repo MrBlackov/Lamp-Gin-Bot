@@ -26,7 +26,7 @@ class BaseService:
     
     @classmethod
     def is_natural_int(self, value, **kwargs):
-        return is_natural_int(value, self.tg_id, **kwargs)
+        return is_natural_int(value, **kwargs)
 
     async def get_channel_info(self):
         channel = await self.bot.get_chat(self.newspaper_id)

@@ -67,6 +67,7 @@ class ChatSettingDB(Base):
     receive_drops: Mapped[bool] = mapped_column(default=False, nullable=True)
     greetings_new_members: Mapped[bool] = mapped_column(default=False, nullable=True)
     greetings_text: Mapped[str | None] = mapped_column(default=None, nullable=True)
+    main_topic_id: Mapped[int | None] = mapped_column(default=None, nullable=True)
 
 class UserSettingDB(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('userdb.id'))
