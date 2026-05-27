@@ -7,8 +7,9 @@ from app.db.models.transfer import TransferDB
 from app.db.models.item import CraftDB, ItemDB, ItemSketchDB
 from app.db.models.transfer import TransferDB
 from app.db.models.char import CharacterDB, ExistenceDB, AttributePointDB, CharSettingDB, UserSettingDB, SkillDB
-from app.db.models.main import MessageDB, TgChatDB, TgUserDB, UserDB, ChatDB
+from app.db.models.main import MessageDB, TgChatDB, TgUserDB, UserDB, ChatDB, ChatSettingDB
 from app.db.models.action import ActionStateDB
+from app.db.models.drop import DropDB
 from sqlalchemy import select, or_, and_
 from sqlalchemy.orm import joinedload
 from datetime import datetime
@@ -200,7 +201,7 @@ async def get_item_sketch_for_action_tag(
                              action_tag: str,                      
                             ):
         try:
-            query = select(ItemSketchDB).where(or_(ItemSketchDB.action.op('<@')([action_tag])))
+            query = select(ItemSketchDB).where(or_(ItemSketchDB.action.op('@>')([action_tag])))
             result = await session.execute(query)
             log.trace(query)
             record = result.scalars().all()
@@ -218,7 +219,7 @@ async def get_item_for_action_tag(
                              inventory_id: int                           
                             ):
         try:
-            query = select(ItemDB).filter_by(inventory_id=inventory_id).join(ItemSketchDB).where(ItemSketchDB.action.op('<@')([action_tag]))
+            query = select(ItemDB).filter_by(inventory_id=inventory_id).join(ItemSketchDB).where(ItemSketchDB.action.op('@>')([action_tag]))
             result = await session.execute(query)
             log.trace(query)
             record = result.scalars().all()
@@ -339,9 +340,119 @@ async def update_skills_for_attribute_point_id(
                             parent_skill = skill_tags.get(tag)
                             if parent_skill:
                                 parent_skill.level += level_up*xmod
-            return skill
-
             return record
         except SQLAlchemyError as e:
             raise
         
+@connection(commit=False)
+@log.decor()
+async def get_drop_for_datetime(
+                             session: AsyncSession,    
+                             arg_name: str = 'open',
+                             chat_id: int | None = None,
+                             time: datetime = datetime.now(),
+                             operator: str = '<=',
+                             **kwargs
+                            ):
+        try:
+            if arg_name == 'open':
+               arg = DropDB.open
+            else:
+                arg = DropDB.reset
+            
+            query = select(DropDB)
+
+            if chat_id:
+                query = query.filter_by(chat_id=chat_id)
+
+            if kwargs:
+                query = query.where(and_(*[getattr(DropDB, k) == v for k, v in kwargs.items()]))
+ 
+            match operator:
+                case '<=':
+                    query = query.where(arg <= time)
+                case '>':
+                    query = query.where(arg > time)
+                case '>=':
+                    query = query.where(arg >= time)
+                case '<':
+                    query = query.where(arg < time)
+                case '==':
+                    query = query.where(arg == time)
+                case '!=':
+                    query = query.where(arg != time)
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().first()
+            log.trace(f"Select data in {DropDB.__tablename__} data:{record.to_dict if record else None}")
+            return record
+        except SQLAlchemyError as e:
+            log.debug(e)
+            raise    
+
+@connection(commit=False)
+@log.decor()
+async def get_drops_for_datetime(
+                             session: AsyncSession,    
+                             arg_name: str = 'open',
+                             chat_id: int | None = None,
+                             time: datetime = datetime.now(),
+                             operator: str = '<=' ,
+                             **kwargs    
+                            ):
+        try:
+            if arg_name == 'open':
+               arg = DropDB.open
+            else:
+                arg = DropDB.reset
+            
+            query = select(DropDB)
+
+            if chat_id:
+                query = query.filter_by(chat_id=chat_id)
+
+            if kwargs:
+                query = query.where(and_(*[getattr(DropDB, k) == v for k, v in kwargs.items()]))
+
+            match operator:
+                case '<=':
+                    query = query.where(arg <= time)
+                case '>':
+                    query = query.where(arg > time)
+                case '>=':
+                    query = query.where(arg >= time)
+                case '<':
+                    query = query.where(arg < time)
+                case '==':
+                    query = query.where(arg == time)
+                case '!=':
+                    query = query.where(arg != time)
+            result = await session.execute(query)
+            log.trace(query)
+            record = result.scalars().all()
+            log.trace(f"Select data in {DropDB.__tablename__} data:{[r.to_dict for r in record] if record else None}")
+            return record
+        except SQLAlchemyError as e:
+            log.debug(e)
+            raise    
+
+
+@connection(commit=False)
+@log.decor()
+async def get_chats_for_type(
+                             session: AsyncSession,
+                             types: list[str],
+                             is_in: bool = True           
+                            ):
+        try:
+            query = select(ChatDB)
+            result = await session.execute(query)
+            log.trace(query)
+            record = [r for r in result.scalars().all() if (r.tg_chat.tg_type.value not in types and not is_in) or (r.tg_chat.tg_type.value in types and is_in)]
+            log.trace(f"Select data in {ChatDB.__tablename__}, data:{[r.to_dict for r in record]}")
+            settings = {s.chat_id: s for s in (await session.execute(select(ChatSettingDB).where(ChatSettingDB.chat_id.in_([r.id for r in record])))).scalars().all()}
+            return [r.add_setting(settings.get(r.id)) for r in record]
+        except SQLAlchemyError as e:
+            log.error(e)
+            raise
+

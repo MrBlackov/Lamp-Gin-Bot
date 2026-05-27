@@ -8,7 +8,7 @@ import json
 from app.aio.cls.fsm.item import ListItemSketchsState, ChangeItemSketchState, GiveItemState
 from app.exeption.item import GiveItemQuantityLessOne, GiveItemNoEnterNameOrID, GiveItemNoInt, GiveItemNoEnterID, ItemNoHideCreatedError
 from app.logic.query import LetterSearch
-from app.aio.msg.item import ItemSketchText, CharItemText, NewItemText
+from app.aio.msg.item import ItemSketchText, CharItemText, NewItemText, TextHTML
 from app.exeption.item import ThrowAwayQuantityNoInt
 from app.exeption.base import PermissionError
 from app.aio.msg.base import UserText
@@ -61,7 +61,7 @@ class AddItemService(ItemBaseService):
         return self.text.to_redact_text('emodzi'), self.IKB.cancel()
     
     async def to_tag(self, emodzi: str, msg):
-        await self.layer.change_data_valid('emodzi', emodzi)
+        await self.layer.change_data_valid('emodzi', emodzi, self.tg_id in self.admins)
         await self.state.set_state(NewItemState.to_tag)
         if msg.entities:
                 for entity in msg.entities:
@@ -74,7 +74,7 @@ class AddItemService(ItemBaseService):
         return self.text.to_redact_text('tag'), self.IKB.cancel()   
     
     async def to_menu(self, tag: str):
-        await self.layer.change_data_valid('tag', tag)
+        await self.layer.change_data_valid('tag', tag, self.tg_id in self.admins)
         name = await self.state.get_value('name')
         emodzi = await self.state.get_value('emodzi')
         custom_emodzi_id = await self.state.get_value('custom_emodzi_id')
@@ -141,7 +141,7 @@ class AddItemService(ItemBaseService):
     async def nbt(self):
         sketch = await self.state.get_value('sketch')
         sketch = ItemSketchValide(**sketch)
-        return self.text(sketch).nbt('json'), self.IKB.nbt()
+        return self.text(sketch).nbt('json'), self.IKB.nbt(TextHTML.json_format(sketch.nbt, 2))
 
     async def to_delete_nbt(self):
         return f"🗑️ Удалить NBT-данные?", self.IKB.to_delete_nbt()
@@ -240,10 +240,11 @@ class ChangeItemService(ItemBaseService):
         await self.state.set_state(ChangeItemSketchState.add_action)
         return '✒️ Отправьте новый тэг действия', self.IKB.back(back_where)
 
-    async def add_action_tag(self, tag :str):
+    async def add_action_tag(self, tag: str):
         sketch_id = await self.state.get_value('sketch_id')
         item = await self.layer.get_item_sketch(sketch_id)
         new_data = item.action + [tag] if item.action else [tag]
+        new_data = await self.layer.change_data_valid('action_tag', new_data, self.tg_id in self.admins)
         sketch = await self.layer.change_sketch(sketch_id, {'action':new_data})
         return '🎟️ Тэги действия', self.IKB.action_list(sketch.action)
 
@@ -255,7 +256,7 @@ class ChangeItemService(ItemBaseService):
     async def nbt(self):
         sketch_id = await self.state.get_value('sketch_id')
         item = await self.layer.get_item_sketch(sketch_id)
-        return self.text(item).nbt('json'), self.IKB.nbt()
+        return self.text(item).nbt('json'), self.IKB.nbt(TextHTML.json_format(item.nbt, 2))
 
     async def to_delete_nbt(self):
         await self.state.update_data(what_change='nbt')
@@ -279,7 +280,7 @@ class ChangeItemService(ItemBaseService):
     async def change_data(self, new_data: str, msg):
         what_change = await self.state.get_value('what_change')
         sketch_id = await self.state.get_value('sketch_id')
-        new_data = await self.layer.change_data_valid(what_change, new_data)
+        new_data = await self.layer.change_data_valid(what_change, new_data, self.tg_id in self.admins)
         if what_change == '_emodzi':
             if msg.entities:
                 for entity in msg.entities:

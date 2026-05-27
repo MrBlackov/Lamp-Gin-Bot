@@ -5,6 +5,7 @@ from app.db.dao.item import ItemDAO, ItemSketchDAO, ItemDB, ItemSketchDB, KitSke
 from app.db.dao.transfer import TransferDAO, TransferDB
 from aiogram.types import TelegramObject, User, Chat
 from datetime import datetime
+from app.db.dao.drop import DropDB, DropDAO
 
 add_or_update_tg_user = add_or_update_obj(TgUserDAO)
 add_or_update_tg_chat = add_or_update_obj(TgChatDAO)
