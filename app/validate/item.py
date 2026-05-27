@@ -28,5 +28,11 @@ class StudyValide(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
+class ItemDropValide(BaseModel):
+    min_quantity: int = 1
+    rarity: float
+    price: int
+
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
 

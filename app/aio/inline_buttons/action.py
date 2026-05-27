@@ -28,7 +28,8 @@ class ActionIKB(BotIKB):
         for tag, text in actions.items():
             self.builder.button(text=(' '.join(text) if not(is_details) else text[0]), callback_data=ActionCall(tag=tag, tg_id=self.tg_id))
         self.builder.adjust((3 if is_details else 1), repeat=True)
-        self.builder.row(InlineKeyboardButton(text=('➖ Менее подробнее' if not(is_details) else '➕ Подробнее'), callback_data=ActionBackCall(where='actions', is_details=not(is_details), tg_id=self.tg_id).pack()))
+        self.builder.row(InlineKeyboardButton(text=('📦 Дроп чата'), callback_data=MenuCall(where='drop', tg_id=self.tg_id).pack()),
+                         InlineKeyboardButton(text=('➖ Менее подробнее' if not(is_details) else '➕ Подробнее'), callback_data=ActionBackCall(where='actions', is_details=not(is_details), tg_id=self.tg_id).pack()))
         return self.builder.as_markup()
  
 

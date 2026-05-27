@@ -56,7 +56,7 @@ class ItemLayer(BaseLayer):
             raise NoFindItemSketchForID(f'This user(tg_id={self.tg_id}) enter item_sketch_id, but dont find item_sketch')
         return data
     
-    async def change_data_valid(self, what_change: str, new_data: str, is_admin: bool = False):
+    async def change_data_valid(self, what_change: str, new_data, is_admin: bool = False):
         match what_change:
             case 'name':
                 if len(new_data) > 30:
@@ -86,6 +86,11 @@ class ItemLayer(BaseLayer):
                     return nbts
                 except:
                     raise NBTValiteError('NBT must be a dict')
+            case 'action_tag':
+                not_allowed_tags = ActionSelf.not_allowed_tags
+                for tag in not_allowed_tags:
+                    if tag in new_data and not is_admin:
+                        new_data.remove(tag) 
             case 'tag':
                 sketch = await get_item_sketch_for_tag(new_data)
                 if sketch:

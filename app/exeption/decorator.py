@@ -43,7 +43,7 @@ def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity
         @wraps(func)
         async def wrapped(callback: CallbackQuery, callback_data: BaseCall, **kwargs): 
             try:
-                if check_is_user or callback_data.is_check:
+                if check_is_user and callback_data.is_check:
                     if callback.from_user.id != callback_data.tg_id:
                         raise ALienCallbackError(f'This user(tg_id={callback.from_user.id}) enter is alien callback keyboard')
                 answer_text = ''

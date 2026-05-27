@@ -3,10 +3,10 @@ import random
 import string
 import re
 
-def generate_date_range(start_date: date = date(1, 1, 1), 
-                        end_date: date = date(1, 1, 1), 
-                        start_time: time = time(), 
-                        end_time: time = time(), 
+def generate_date_range(start_date: date = date.min, 
+                        end_date: date = date.min, 
+                        start_time: time = time.min, 
+                        end_time: time = time.min, 
                         sep: timedelta = timedelta(days=1)) -> list[datetime]:
     dates = []
     start_datetime = datetime.combine(start_date, start_time)
@@ -27,6 +27,9 @@ def random_time(start_time, end_time, n: int = 1, sep=timedelta(minutes=1)):
     date_range = generate_date_range(start_time=start_time, end_time=end_time, sep=sep)
     return random.sample(date_range, n)
 
+def random_today_time(start_time = time.min, end_time = time.max, n: int = 1, sep=timedelta(minutes=1)):
+    return datetime.combine(date.today(), random_time(start_time, end_time, n, sep)[0].time())
+
 def generate_password(length=12, use_digits=True, use_punctuation=True):
     chars = string.ascii_letters
     if use_digits:
@@ -34,7 +37,7 @@ def generate_password(length=12, use_digits=True, use_punctuation=True):
     if use_punctuation:
         chars += string.punctuation
     
-    password = ''.join(random.choice(chars) for _ in range(length))
+    password = ''.join(random.choice(chars) for _ in range(length)) 
     return password
 
 def action_point(points: list[int | float | list]) -> float | int:
@@ -54,4 +57,3 @@ def set_to_list(kwargs: dict[str, int]):
 
 def list_to_set(iterable: list):
     return {v:iterable.count(v) for v in iterable}
-

@@ -153,6 +153,7 @@ class InventoryCharacterLayer(BaseLayer):
         return self
 
     async def throw_away(self, item_id: int, quantity: int = 1):
+        await self.get_char_info()
         await self.checking_freedom()
         return await self.item_logic.throw_away(item_id, quantity)
 

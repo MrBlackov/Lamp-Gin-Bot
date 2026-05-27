@@ -331,7 +331,7 @@ async def tg_log():
     async for item in log:
         try:
             item
-            print('Работает, ', 'Неотправленных логов:', log._queue.qsize())
+            print('👔 Работает, ', 'Неотправленных логов:', log._queue.qsize())
             await asyncio.sleep(log.timeout)
         except Exception as e:
             print(e)  

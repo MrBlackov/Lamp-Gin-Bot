@@ -8,6 +8,7 @@ from app.aio.cmd.social import social_router
 from app.aio.cmd.skill import skill_router
 from app.aio.cmd.action.action import action_router
 from app.aio.cmd.main.chat import chat_router
+from app.aio.cmd.drop import drop_router
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
@@ -20,7 +21,7 @@ from app.aio.middlewares.message_clean import MessageCleanDpMiddleware
 from app.aio.cls.callback.base import MenuCall
 
 base_router = Router()
-base_router.include_routers(setting_router, char_router, action_router, social_router, skill_router, faq_router, chat_router, stats_router)
+base_router.include_routers(setting_router, char_router, action_router, social_router, skill_router, faq_router, chat_router, drop_router, stats_router)
 base_router.message.middleware(MessageCleanDpMiddleware())
 
 @base_router.message(Command('menu'))
