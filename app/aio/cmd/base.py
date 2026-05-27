@@ -19,6 +19,7 @@ from app.exeption.decorator import exept, call_exept
 from aiogram.methods import CreateForumTopic
 from app.aio.middlewares.message_clean import MessageCleanDpMiddleware
 from app.aio.cls.callback.base import MenuCall
+from app.aio.msg.utils import TextHTML
 
 base_router = Router()
 base_router.include_routers(setting_router, char_router, action_router, social_router, skill_router, faq_router, chat_router, drop_router, stats_router)
@@ -51,6 +52,14 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
     else:
         await message.answer('⁉️ Неизввестная ошибка')
 
+@base_router.message(Command('getlogs'))
+@log.decor(arg=True)
+@exept
+async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
+    if message.from_user.id == owner:
+        msg, reply_markup = await UserService(message.from_user.id, state, message).get_logs()
+        await message.answer(msg, reply_markup=reply_markup)
+
 @base_router.message(Command('topic'))
 @log.decor(arg=True)
 @exept
@@ -60,15 +69,13 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
         
 
 @base_router.message(Command('chat_id'))
+@base_router.message(Command('topic_id'))
 @log.decor(arg=True)
 @exept
 async def cmd_start(message: Message, **kwargs):
-    user_id = message.from_user.id
-    full_name = message.from_user.full_name
-    user_name = message.from_user.username
     await message.answer(f'Chat id: {message.chat.id}')
     if message.is_topic_message:
-        await message.answer(f'Topic id: {message.message_thread_id}')    
+        await message.answer(f'\nTopic id: {message.message_thread_id}')    
 
 @base_router.message(Command('cancel'))
 @log.decor(arg=True)

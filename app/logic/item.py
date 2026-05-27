@@ -16,6 +16,7 @@ from app.db.metods.updates import (update_quantity_item,
 from app.db.metods.deletes import delete_item_for_id, delete_item_sketch_for_id, delete_items_for_sketch_id, delete_items
 from app.db.metods.another import get_items_and_chars_for_sketch
 from app.logged.botlog import log
+from app.logged.infolog import infolog
 from app.exeption.item import ThrowAwayQuantityLessOne, ThrowAwayQuantityMoreItemQuantity, MaxDropLessMinDropError, ItemError
 from app.exeption.char import InventaryOverFlowing, InventaryNoHaveError
 from app.db.models.char import CharacterDB
@@ -55,7 +56,7 @@ class ItemSketchsLogic:
 
 
 class ItemsLogic:
-    async def give(self, sketch_id: int, inventory_id: int, char: CharacterDB, quantity: int = 1, size_except: bool = True, to_max_quantity: bool = False) -> ItemDB | None:
+    async def give(self, sketch_id: int, inventory_id: int, char: CharacterDB, quantity: int = 1, size_except: bool = True, to_max_quantity: bool = False, is_log: bool = False) -> ItemDB | None:
         try:
             item = await get_item(sketch_id, inventory_id)
             sketch = item.sketch if item else await get_item_sketch(sketch_id)
@@ -77,8 +78,12 @@ class ItemsLogic:
     
             log.info(f'Give item(sketch_id: {sketch_id}) for char(char_id: {char.id}), quantity: {quantity}')
             if item:
-                return await update_quantity_item(item.id, item.quantity + quantity)
-            return await add_item(data=ItemValide(inventory_id=inventory_id, sketch_id=sketch_id, quantity=quantity))
+                new_item = await update_quantity_item(item.id, item.quantity + quantity)
+            else:
+                new_item = await add_item(data=ItemValide(inventory_id=inventory_id, sketch_id=sketch_id, quantity=quantity))
+            if is_log:
+                await infolog.give_info(char.user.id, f'📥 Получено {new_item.sketch.text} ({quantity} шт.) \n - char_id={char.id} \n - user_id={char.user.id}')
+            return new_item
         except InventaryOverFlowing as e:
             if size_except:
                 raise 

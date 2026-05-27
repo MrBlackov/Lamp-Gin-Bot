@@ -36,9 +36,9 @@ class ItemLayer(BaseLayer):
             raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         if sketch_id == None and name:
             item0 = await get_item_for_name(name)
-            item = await self.logic.give(item0.id, self.char.exist.inventory.id, self.char, quantity, size_except)
+            item = await self.logic.give(item0.id, self.char.exist.inventory.id, self.char, quantity, size_except, is_log=True)
         elif sketch_id: 
-            item = await self.logic.give(sketch_id, self.char.exist.inventory.id, self.char, quantity, size_except)
+            item = await self.logic.give(sketch_id, self.char.exist.inventory.id, self.char, quantity, size_except, is_log=True)
         else:
             raise ItemError('To give, but not enter sketcth_id or sketch_name')
         return item
