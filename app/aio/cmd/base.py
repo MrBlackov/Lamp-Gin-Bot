@@ -13,7 +13,7 @@ from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from app.logged.botlog import log
-from app.aio.config import owner, bot
+from app.aio.config import owner, bot, admins
 from app.service.main import UserService
 from app.exeption.decorator import exept, call_exept
 from aiogram.methods import CreateForumTopic
@@ -44,7 +44,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: MenuC
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):
-    if command.args != None and message.from_user.id == owner:
+    if command.args != None and message.from_user.id in admins:
         msg = await UserService(message.from_user.id, state, message).get_info(command.args)
         await message.answer(msg)
     elif command.args == None:
