@@ -465,7 +465,7 @@ class BotLog:
         print(f"🗂️ Completed: {sent_count} sent, {failed_count} failed, total {total_size_mb:.2f}MB")
         return sent_count, len(log_files), msg
 
-log = BotLog(chat_id=-1003226274859, timeout=5, sleep_timeout=20).create_handlers()
+log = BotLog(chat_id=-1003226274859, timeout=10, sleep_timeout=20).create_handlers()
 logs = log.log
 
 async def tg_log():
