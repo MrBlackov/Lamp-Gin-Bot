@@ -1,9 +1,11 @@
-from app.aio.cls.callback.base import BaseCall
+from app.aio.cls.callback.base import BaseCall, MenuCall
 
 class ChatSettingActionCall(BaseCall, prefix='chat_setting_action'):
-    to_msg_delete_time: bool = False
-    is_msg_delete: bool | None = None
     chat_id: int
+    bool_parametrs: bool | None = None
+    parametrs: str 
+    to_redact_text_parametr: bool | None = None
+    to_redact_bool_parametr: bool | None = None
 
 class ChatBackCall(BaseCall, prefix='chat_back'):
     where: str

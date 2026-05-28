@@ -1,4 +1,4 @@
-from app.aio.cls.callback.base import BaseCall
+from app.aio.cls.callback.base import BaseCall, MenuCall
 
 class CraftIdCall(BaseCall, prefix='craft_id'):
     craft_id: int

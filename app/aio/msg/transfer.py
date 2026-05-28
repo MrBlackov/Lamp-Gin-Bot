@@ -39,5 +39,5 @@ class InfoTransferText:
             return '✒️ Отправьте ID предмета в сделке'
 
     def to_transfer_id(transfer_id: str | int):
-        return TextHTML(f'/transfer {transfer_id}').code
+        return TextHTML(f'/transfer {transfer_id}').code()
 

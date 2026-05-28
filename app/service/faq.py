@@ -11,8 +11,8 @@ from app.exeption.faq import FaqErrorNoEnterError, FaqErrorNoFindError
 from app.aio.cls.fsm.utils import FaqFSM
 
 class FaqService(BaseService):
-    def __init__(self, tg_id: int, state: FSMContext | None = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id: int, state: FSMContext | None = None, message = None):
+        super().__init__(tg_id, state, message)
         self.state = FaqFSM(state)
         self.IKB = FaqIKB(tg_id)
         self.text = FaqText
@@ -22,7 +22,10 @@ class FaqService(BaseService):
         if error == None:
             raise FaqErrorNoFindError(f'This user(tg_id:{self.tg_id}) enter code, but dont find error')        
         return text + TextHTML(error.faq).blockquote(), None
-    
+
+    def to_faq(self, faq: str):
+        return self.text.to_faq(faq)
+
     def help_error_faq(self, code: str):
         error = error_faq.get(code, None)
         if error == None:
@@ -30,7 +33,7 @@ class FaqService(BaseService):
         return self.text(error).help_error_faq(), None
     
     def to_start(self, name: str | None):
-        return self.text.to_start(name if name else 'уважаемый'), None
+        return self.text.to_start(name if name else 'уважаемый'), self.IKB.to_start()
 
     def help_cmd(self):
         if self.tg_id in self.admins:
@@ -38,7 +41,7 @@ class FaqService(BaseService):
         return self.text.help_cmd(), None
 
     def help(self):
-        return self.text.help(), None
+        return self.text.help(), self.IKB.help()
    
     def to_item_rules(self):
         return self.text.item_rules(), None

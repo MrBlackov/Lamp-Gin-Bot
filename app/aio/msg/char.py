@@ -1,8 +1,32 @@
 from app.validate.add.characters import CharSketch
 from app.validate.info.characters import CharacterInfo
+from app.validate.newchar import CharSketch as NewCharSketch
 from app.aio.msg.utils import TextHTML
-from app.db.models.item import ItemDB
+from app.db.models.item import ItemDB, SkillDB
+from app.db.models.action import ActionStateDB
+from app.db.models.char import CharacterDB
+from app.logic.actions import ActionSelf
 from app.aio.msg.item import ItemText
+from app.aio.cls.tips.char import new_char_tips
+import random
+
+class NewCharText:
+    def __init__(self, sketch: NewCharSketch):
+        self.sketch = sketch
+    
+    tips = new_char_tips
+
+    def action_menu(self):
+        return f'👤 {self.sketch.first_name} {self.sketch.last_name if self.sketch.last_name else ''}\n\n💮 Очков навыка: {self.sketch.coins}\n\n💡 Навыки:' + TextHTML('\n'.join([
+            self.skill(s) for s in self.sketch.no_hide_skills
+        ])).blockquote() + '\n\n📝 Описание:' + TextHTML(self.sketch.description if self.sketch.description else '❌ Описание отсутствует').blockquote(True) + f'\n\n{random.choice(self.tips)}'
+    
+    def skill(self, skill: SkillDB):
+        return f'{skill.sketch.emodzi} {skill.sketch.name} - {skill.level} ур.' 
+
+    def redact_skill_level(self, skill: SkillDB):
+        return f'🔧 Редактировать навык \n' + TextHTML(f'{skill.sketch.emodzi} {skill.sketch.name} - {skill.level} ур.\n🏷️ Стоимость: {skill.sketch.price} 💮 \n💰 Очков навыка: {self.sketch.coins} 💮').blockquote()
+
 
 class SketchInfoText:
 
@@ -161,9 +185,24 @@ class CharInfoText:
 
         return ''.join(texts)
     
+class CharText:
+    def __init__(self, char: CharacterDB):
+        self.char = char
+
+    def to_text(self):
+        action = self.char.exist.action_states_block_freedom[0] if len(self.char.exist.action_states_block_freedom) > 0 else None 
+        action = ActionSelf.action_tags.get(action.tag) if action else (ActionSelf.action_tags.get(self.char.exist.action_states_another[0].tag) if len(self.char.exist.action_states_another) > 0 else ActionSelf.action_tags.get('recovery'))
+        return f'👤 {self.char.exist.full_name} ({action.emodzi} {action.action_text})' + TextHTML('\n'.join(
+            [f'🪪 id: {self.char.id}'] + 
+            [f'{skill.sketch.emodzi} {skill.sketch.name} - {TextHTML.float_format(skill.level, 7)}' for skill in self.char.exist.attibute_point.skills if skill.sketch.is_hide == False])).blockquote() + "\n📜 Описание" + TextHTML(self.char.description if self.char.description else '❌ Описание отсутствует').blockquote(True)
+
+    @property
+    def text(self):
+        return self.to_text()
+
 class InventoryItemsText:
     def inventory(size: int, max_sixe: int):
-        return f'💼 Ваш инвентарь [{size}/{max_sixe}кг]'
+        return f'💼 Ваш инвентарь [{TextHTML.float_format(size, 4)}/{TextHTML.float_format(max_sixe, 4)}кг]'
     
     def no_items():
         return '🙁 Ваш инвентарь пустой'
@@ -171,8 +210,8 @@ class InventoryItemsText:
     def throw():
         return '🤔 Сколько выбросить?'
 
-    def item(item: ItemDB):
-        return ItemText(item).text
+    def item(item: ItemDB, skills = None):
+        return ItemText(item, skills).text
     
     def pick_up_quantity():
         return '🤔 Сколько предметов хотите поднять?'

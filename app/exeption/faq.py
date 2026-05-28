@@ -9,7 +9,7 @@ class FaqError(BotError):
 class FaqErrorNoEnterError(BotError):
     msg = '❌ Отправьте вместе с командой код ошибки'
     code = '402.12'
-    faq = f'Вы отправили команду без указания кода ошибки. Пример - {TextHTML('/help error 500.1').code}'
+    faq = f'Вы отправили команду без указания кода ошибки. Пример - {TextHTML('/help error 500.1').code()}'
 
 class FaqErrorNoFindError(BotError):
     msg = '❌ Ошибка с таким кодом не существует'

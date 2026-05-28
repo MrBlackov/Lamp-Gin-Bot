@@ -19,11 +19,11 @@ class MessageUtils:
                 delete_msg = await bot.delete_message(msg.chat_tg_id, msg.msg_id)
                 results[msg.id] = delete_msg
             except Exception as e:
-                print('MessageUtilsDeleter: ', e)
+                print('🗨️  MessageUtilsDeleter: ', e)
                 results[msg.id] = True
         result_ids = [m for m, is_delete in results.items() if is_delete]
         await self.layer.delete_message_db(result_ids)
-        print('Удалено сообщений: ', len(result_ids))
+        print('🗨️  Удалено сообщений: ', len(result_ids))
 
 
     async def add_to_delete(self, msg_id: int, is_delete: bool = True):
@@ -37,7 +37,7 @@ class MessageUtils:
             try:
                 await self.delete_for_time()
             except Exception as e:
-                print('MessageUtilsRunner: ', e)
+                print('🗨️ MessageUtilsRunner: ', e)
                 return True
             finally:
                 await asyncio.sleep(5)

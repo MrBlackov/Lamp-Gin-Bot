@@ -1,5 +1,49 @@
-from app.aio.cls.callback.base import BaseCall
+from app.aio.cls.callback.base import BaseCall, MenuCall, MenuCall
 from typing import Literal
+
+class NewCharBackCall(BaseCall, prefix='new_char_back'):
+    where: str
+
+class NewCharGenderCall(BaseCall, prefix='new_char_gender'):
+    gender: Literal['M', 'W']
+    is_redact: bool = False
+
+class NewCharBonusCall(BaseCall, prefix='new_char_bonus'):
+    pass
+
+class NewCharActionCall(BaseCall, prefix='new_char_action'):
+    to_skills: bool = False
+    to_rename: bool = False
+    name_type: str | None = None
+    to_generate: bool = False
+    to_create: bool = False
+    is_finished: bool = False
+    to_description: bool = False
+    to_add_skills: bool = False
+
+class NewCharNameActionCall(BaseCall, prefix='new_char_name_action'):
+    to_random: bool = False
+    to_query: bool = False
+    to_delete: bool = False
+    name_type: str
+
+class NewCharNameCall(BaseCall, prefix='new_char_name'):
+    name: str
+    name_type: str
+
+class NewCharPageSkillCall(BaseCall, prefix='new_char_page_skill'):
+    page: int
+
+class NewCharPageNameCall(BaseCall, prefix='new_char_page_name'):
+    page: int
+
+class NewCharSkillCall(BaseCall, prefix='new_char_skill'):
+    skill_tag: str
+    level: int
+    is_base: bool = False
+
+
+
 
 class AddCharGenderCall(BaseCall, prefix='add_char_gender'):
     gender: Literal['M', 'W']
@@ -38,6 +82,10 @@ class AddCharFinishCall(BaseCall, prefix='add_char_finish'):
     go: bool | None = None
 
 
+
+
+
+
 class InfoCharListCall(BaseCall, prefix='info_char_list'):
     char_id: int
     main: bool = False
@@ -51,6 +99,9 @@ class InfoCharDeleteCall(BaseCall, prefix='info_char_delete'):
     exist_id: int | None = None
     is_delete: bool = False
     back: bool = False
+
+
+
 
 class InventoryItemsCall(BaseCall, prefix='inventory_items'):
     item: int

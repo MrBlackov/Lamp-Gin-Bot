@@ -1,0 +1,75 @@
+site_name: Lamp Gin Bot Wiki
+
+docs_dir: sourse
+site_dir: docs
+site_url: https://mrblackov.github.io/Lamp-Gin-Bot/
+
+nav:
+  - 🏠 Главная: index.md
+  - 🏁 Быстрый старт: start.md
+  - 👤 Персонажи:
+    - 📜 Общее: char/base.md
+    - ➕ Создание персонажей: char/new.md
+  - 📦 Предметы: item/base.md
+  #  - Создание эскизов: item/create.md
+  - ⚗️ Крафты: craft/base.md
+  #  - Создание крафта: char/create.md
+  - 🎮 Действия: action/base.md
+  - 💡 Навыки: skill/base.md
+  - ✉️ Сделки: transfer/base.md
+  - 📟 Команды: cmd/base.md
+  #- Ошибки:
+  #  - Общее: error/base.md
+  #- 🪧 O нас: about.md
+  - 📋 Версии: version.md
+
+theme:
+  name: material
+  language: ru
+  features:
+    - search.suggest
+    - navigation.tabs
+    - navigation.sectionsn
+    - navigation.tracking
+    - navigation.expand
+    - toc.integrate
+    - content.code.copy
+
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Тёмный режим
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Светлый режим
+
+extra: 
+  copyright: "© Телеграм бот по Повелителю тайн."
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/MrBlackov/Lamp-Gin-Bot
+      name: Исходный код на GitHub 
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/oldneal
+      name: Газета Старого Нила
+
+plugins:
+  - glightbox:
+      effect: zoom           # эффект открытия: zoom, fade, none
+      slide_effect: slide    # эффект переключения: slide, zoom, fade, none
+      loop: true            # зацикливание галереи
+      zoomable: true         # можно ли зумить изображение
+      draggable: true        # можно ли перетаскивать мышкой
+      auto_caption: true     # автоматически показывать alt-текст как подпись
+      caption_position: bottom  # положение подписи: bottom, top, left, right
+      width: 75%            # ширина лайтбокса
+      height: auto           # высота
+      background: white      # фон для прозрачных изображени
+  - include-markdown:
+      cache_dir: ".cache/includes"
+
+markdown_extensions:
+  - attr_list  

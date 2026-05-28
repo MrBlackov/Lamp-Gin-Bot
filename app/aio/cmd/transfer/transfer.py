@@ -15,7 +15,8 @@ from app.aio.cls.callback.transfer import (InfoTransferInfoCall,
                                            InfoTransferStatusCall,
                                            InfoTransferSortedCall,
                                            InfoTransferActionCall,
-                                           InfoTransferSearchCall,)
+                                           InfoTransferSearchCall,
+                                           MenuCall)
 from app.aio.cls.fsm.transfer import InfoTransferState
 from app.aio.cls.fsm.utils import TransferFSM
 
@@ -23,89 +24,91 @@ transfer_router = Router()
 transfer_router.include_routers(new_transfer_router)
 
 
-@new_transfer_router.message(Command('mytransfers'))
-@new_transfer_router.message(Command('transfer'), F.text == '/transfer')
-@new_transfer_router.message(Command('transfer'), F.text == '/transfer@TheGinBot')
+@transfer_router.message(Command('mytransfers'))
+@transfer_router.message(Command('transfer'), F.text == '/transfer')
+@transfer_router.message(Command('transfer'), F.text == '/transfer@TheGinBot')
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg, markup = await TransferService(message.from_user.id, state).info.main_menu()
+    msg, markup = await TransferService(message.from_user.id, state, message).info.main_menu()
     await message.answer(msg, reply_markup=markup)
 
-@new_transfer_router.callback_query(InfoTransferBackCall.filter(F.where == 'cmd')) 
+@transfer_router.callback_query(InfoTransferBackCall.filter(F.where == 'cmd')) 
+@transfer_router.callback_query(MenuCall.filter(F.where == 'transfers')) 
+@log.decor(arg=True)
+@call_exept()
+async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferBackCall | MenuCall, state: FSMContext, **kwargs):
+    msg, markup = await TransferService(callback.from_user.id, state, callback.message).info.main_menu()
+    await callback.message.edit_text(msg, reply_markup=markup)
+
+@transfer_router.callback_query(InfoTransferBackCall.filter(F.where == 'pages')) 
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferBackCall, state: FSMContext, **kwargs):
-    msg, markup = await TransferService(callback.from_user.id, state).info.main_menu()
+    msg, markup = await TransferService(callback.from_user.id, state, callback.message).info.to_pages()
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@new_transfer_router.callback_query(InfoTransferBackCall.filter(F.where == 'pages')) 
-@log.decor(arg=True)
-@call_exept()
-async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferBackCall, state: FSMContext, **kwargs):
-    msg, markup = await TransferService(callback.from_user.id, state).info.to_pages()
-    await callback.message.edit_text(msg, reply_markup=markup)
-
-@new_transfer_router.callback_query(InfoTransferSortedCall.filter())     
+@transfer_router.callback_query(InfoTransferSortedCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferSortedCall, state: FSMContext, **kwargs):
-    msg, markup = await TransferService(callback.from_user.id, state).info.to_transfer(callback_data.status)
+    msg, markup = await TransferService(callback.from_user.id, state, callback.message).info.to_transfer(callback_data.status)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@new_transfer_router.callback_query(InfoTransferSearchCall.filter())     
+@transfer_router.callback_query(InfoTransferSearchCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferSearchCall, state: FSMContext, **kwargs):
-    msg, markup = await TransferService(callback.from_user.id, state).info.to_search(callback_data.search_type, callback.message)
+    msg, markup = await TransferService(callback.from_user.id, state, callback.message).info.to_search(callback_data.search_type, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@new_transfer_router.message(InfoTransferState.search)
+@transfer_router.message(InfoTransferState.search)
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
-    msg0 = await TransferFSM(state, 'info').get_value('msg')
-    msg, markup = await TransferService(message.from_user.id, state).info.search(message.text)
+    state = TransferFSM(state, 'info')
+    msg0 = await state.get_value('msg')
+    msg, markup = await TransferService(message.from_user.id, state, message).info.search(message.text)
     msg2 = await message.answer(msg, reply_markup=markup)
     await state.update_data(msg=msg2)
     await state.set_state()
     await msg0.delete()
 
-@new_transfer_router.callback_query(InfoTransferInfoCall.filter())     
+@transfer_router.callback_query(InfoTransferInfoCall.filter())     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferInfoCall, state: FSMContext, **kwargs):
-    msg, markup = await TransferService(callback.from_user.id, state).info.transfer(callback_data.transfer_id)
+    msg, markup = await TransferService(callback.from_user.id, state, callback.message).info.transfer(callback_data.transfer_id)
     await callback.message.edit_text(msg, reply_markup=markup)   
 
-@new_transfer_router.callback_query(InfoTransferActionCall.filter(F.to_new_status == True))     
+@transfer_router.callback_query(InfoTransferActionCall.filter(F.to_new_status == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferActionCall, state: FSMContext, **kwargs):
-    msg, markup = await TransferService(callback.from_user.id, state).info.new_status(callback_data.transfer_id, callback_data.new_status)
+    msg, markup = await TransferService(callback.from_user.id, state, callback.message).info.new_status(callback_data.transfer_id, callback_data.new_status)
     await callback.message.edit_text(msg, reply_markup=markup)   
 
-@new_transfer_router.callback_query(InfoTransferActionCall.filter(F.to_complete == True))     
+@transfer_router.callback_query(InfoTransferActionCall.filter(F.to_complete == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferActionCall, state: FSMContext, **kwargs):
-    msg, markup = await TransferService(callback.from_user.id, state).info.to_complete(callback_data.transfer_id)
+    msg, markup = await TransferService(callback.from_user.id, state, callback.message).info.to_complete(callback_data.transfer_id)
     await callback.message.edit_text(msg, reply_markup=markup)  
 
-@new_transfer_router.callback_query(InfoTransferActionCall.filter(F.to_delete == True))     
+@transfer_router.callback_query(InfoTransferActionCall.filter(F.to_delete == True))     
 @log.decor(arg=True)
 @call_exept()
 async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferActionCall, state: FSMContext, **kwargs):
-    msg, markup = await TransferService(callback.from_user.id, state).info.to_delete(callback_data.transfer_id)
+    msg, markup = await TransferService(callback.from_user.id, state, callback.message).info.to_delete(callback_data.transfer_id)
     await callback.message.edit_text(msg, reply_markup=markup)  
  
 
 
 
-@new_transfer_router.message(Command('transfer'))
+@transfer_router.message(Command('transfer'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, command: CommandObject, state: FSMContext, **kwargs):  
-    msg, markup = await TransferService(message.from_user.id, state).info.to_transfer_for_id(command.args)
+    msg, markup = await TransferService(message.from_user.id, state, message).info.to_transfer_for_id(command.args)
     await message.answer(msg, reply_markup=markup)
 

@@ -98,5 +98,3 @@ random_words = [
     "переменная", "случайность", "парадокс", "эпизод", "контекст"
 ]
 
-print(LetterSearch(random_words).search('хамлон в дкбраз'))
-

@@ -16,8 +16,9 @@ from app.db.metods.updates import (update_quantity_item,
 from app.db.metods.deletes import delete_item_for_id, delete_item_sketch_for_id, delete_items_for_sketch_id, delete_items
 from app.db.metods.another import get_items_and_chars_for_sketch
 from app.logged.botlog import log
+from app.logged.infolog import infolog
 from app.exeption.item import ThrowAwayQuantityLessOne, ThrowAwayQuantityMoreItemQuantity, MaxDropLessMinDropError, ItemError
-from app.exeption.char import InventaryOverFlowing
+from app.exeption.char import InventaryOverFlowing, InventaryNoHaveError
 from app.db.models.char import CharacterDB
 from app.exeption.transfer import TransferNoHaventItemError
 
@@ -26,13 +27,15 @@ class ItemSketchsLogic:
         if item.max_drop < item.min_drop:
             raise MaxDropLessMinDropError(f'This item(name:{item.name}) to created, but max_drop < min_drop')
         log.info(f' User({item.creator_id}) created new item_sketch: {item.model_dump()}')
-        return await add_item_sketch(data=item)
+        item_dict = item.model_dump()
+        item_dict['_emodzi'] = item_dict.pop('base_emodzi')
+        return (await add_db_obj(data=[ItemSketchDB(**item_dict)]))[0]
     
     async def get_sketch(self, sketch_id: int):
         return await get_item_sketch(sketch_id)
 
-    async def get_sketchs(self):
-        return await get_item_sketchs()
+    async def get_sketchs(self, is_hide: bool = False):
+        return await get_item_sketchs(is_hide)
     
     async def update_sketch(self, item_id: int, new_data: dict):
         return await update_item_sketch_for_id(item_id, new_data)
@@ -53,31 +56,41 @@ class ItemSketchsLogic:
 
 
 class ItemsLogic:
-    async def give(self, sketch_id: int, inventory_id: int, char_id: int, quantity: int = 1, size_except: bool = True) -> ItemDB:
+    async def give(self, sketch_id: int, inventory_id: int, char: CharacterDB, quantity: int = 1, size_except: bool = True, to_max_quantity: bool = False, is_log: bool = False) -> ItemDB | None:
         try:
             item = await get_item(sketch_id, inventory_id)
             sketch = item.sketch if item else await get_item_sketch(sketch_id)
-            char = await get_char_for_id(char_id)
             items = await get_items_for_inventory(inventory_id)
-            max_size = char.exist.attibute_point.strength*1000
+            max_size = char.exist.attibute_point.skill_tags.get('inventory').level*1000
             size = 0
             for i in items:
                 size += i.sketch.size*i.quantity
     
+            if to_max_quantity:
+                while size+sketch.size*quantity > max_size:
+                    quantity -= 1
+            
+            if quantity == 0:
+                raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
+
             if size+sketch.size*quantity > max_size:
-                raise InventaryOverFlowing(f'This char({char_id}) inventary is full')
+                raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
     
-            log.info(f'Give item(sketch_id: {sketch_id}) for char(char_id: {char_id}), quantity: {quantity}')
+            log.info(f'Give item(sketch_id: {sketch_id}) for char(char_id: {char.id}), quantity: {quantity}')
             if item:
-                return await update_quantity_item(item.id, item.quantity + quantity)
-            return await add_item(data=ItemValide(inventory_id=inventory_id, sketch_id=sketch_id, quantity=quantity))
+                new_item = await update_quantity_item(item.id, item.quantity + quantity)
+            else:
+                new_item = await add_item(data=ItemValide(inventory_id=inventory_id, sketch_id=sketch_id, quantity=quantity))
+            if is_log:
+                await infolog.give_info(char.user.id, f'📥 Получено {new_item.sketch.text} ({quantity} шт.) \n - char_id={char.id} \n - user_id={char.user.id}')
+            return new_item
         except InventaryOverFlowing as e:
             if size_except:
                 raise 
             return None
         except Exception:
             raise
-        
+
     @log.decor(arg=True)
     async def action(self, item: ItemDB, char: CharacterDB, action: str, quantity: int = 1):
         items = await get_items_for_inventory(char.exist.inventory.id)
@@ -132,12 +145,16 @@ class ItemsLogic:
   
         if action == '+':
             size = quantity*new_item.sketch.size
-            print(size, max_size)
-    
             if size > max_size:
                 raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
         return True
       
+    def check_have_item(self, char: CharacterDB, item_id :int, quantity: int):
+        item = char.exist.inventory.item_ids.get(item_id)
+        if item.quantity < quantity:
+            raise InventaryNoHaveError(f'This char(id={char.id}) not have quantity by item')
+        return True
+
     @log.decor(arg=True)
     async def action_for_items(self, items: list[ItemDB], char: CharacterDB, action: str, quantity: int | None = None, is_pick_up: bool = False):
         inventory_items = await get_items_for_inventory(char.exist.inventory.id)
@@ -162,7 +179,10 @@ class ItemsLogic:
                 if inventory_item:
                     update_item[inventory_item.id] = inventory_item.quantity + item_quantity
                 else:
-                    new_item.append(ItemDB(inventory_id=char.exist.inventory.id, sketch_id=item.sketch_id, quantity=item_quantity))
+                    new_item.append(ItemDB(sketch_id=item.sketch_id, 
+                                               quantity=quantity, 
+                                               inventory_id=char.exist.inventory.id, 
+                                               nbt=item.nbt))
             elif action == '-':
                 if inventory_item:
                     if inventory_item.quantity - item_quantity <= 0:
@@ -182,20 +202,20 @@ class ItemsLogic:
         await delete_items(delete_item)
         return True
 
-    async def throw_away(self, item_id: int, quantity: int = 1, location_id: int = 1) -> bool:
+    async def throw_away(self, item_id: int | None = None, quantity: int = 1, location_id: int = 1, item: ItemDB | None = None) -> bool:
         if quantity < 1:
             raise ThrowAwayQuantityLessOne('User enter quantity < 1')
-        item = await get_item_for_id(item_id)
+        item = await get_item_for_id(item_id) if item == None else item
         if item.quantity < quantity:
             raise ThrowAwayQuantityMoreItemQuantity('User enter quantity > item.quantity')
         elif item.quantity > 1 and item.quantity - quantity > 0:
-            update = await update_quantity_item(item_id, item.quantity - quantity)
+            update = await update_quantity_item(item.id, item.quantity - quantity)
             if update:
                 return await add_db_obj(data=[ItemDB(sketch_id=update.sketch_id, 
                                                quantity=quantity, 
                                                location_id=location_id, 
                                                nbt=update.nbt | {'is_pick_up':False})])
-        return await update_item_throw_away(item_id, location_id)
+        return await update_item_throw_away(item.id, location_id)
 
     async def delete_items(self, sketch_id: int) -> bool:
         return await delete_items_for_sketch_id(sketch_id)

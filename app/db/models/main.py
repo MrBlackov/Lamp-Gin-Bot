@@ -1,4 +1,4 @@
-from sqlalchemy import String, ARRAY, BigInteger, ForeignKey, JSON
+from sqlalchemy import String, ARRAY, BigInteger, ForeignKey, JSON, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from typing import List
@@ -28,6 +28,7 @@ class DonateDB(Base):
     char_quantity: Mapped[int] = mapped_column(default=1)
     char_regeneration: Mapped[int] = mapped_column(default=3)
     delete_char_quantiry: Mapped[int | None] = mapped_column(default=1, nullable=True)
+    use_channel_bonus: Mapped[bool | None] = mapped_column(default=False, nullable=True)
 
 class UserDB(Base):
     tg_id: Mapped[int | None] = mapped_column(BigInteger, unique=True, default=None)
@@ -37,11 +38,18 @@ class UserDB(Base):
     main_char: Mapped[int | None] = mapped_column(ForeignKey("characterdb.id", ondelete='SET NULL'), default=None)
     tg_user: Mapped[TgUserDB | None] = relationship(TgUserDB, uselist=False, lazy='joined', primaryjoin="foreign(TgUserDB.tg_id) == UserDB.tg_id")
     setting_id: Mapped[int] = mapped_column(ForeignKey('usersettingdb.id'), nullable=True)
+    friend_ids: Mapped[list[int] | None] = mapped_column(ARRAY(Integer, ForeignKey('userdb.id')), default=None)
 
-    def add_setting(self, setting: 'UserSettingDB') -> 'UserDB':
-        self.setting = setting
+    def add_friends(self, friends: list['UserDB']) -> 'UserDB':
+        self.friends = friends
         return self
 
+    def add_setting(self, setting: 'UserSettingDB', parametrs: list) -> 'UserDB':
+        self.setting = setting
+        self.parametrs = parametrs
+        self.parametrs_tag = {p.tag:p for p in parametrs}
+        return self
+    
 class ChatDB(Base):
     tg_id: Mapped[int | None] = mapped_column(BigInteger, unique=True, default=None)
     tg_chat: Mapped[TgChatDB | None] = relationship(TgChatDB, uselist=False, lazy='joined', primaryjoin="foreign(TgChatDB.tg_id) == ChatDB.tg_id")
@@ -56,9 +64,14 @@ class ChatSettingDB(Base):
     chat_id: Mapped[int] = mapped_column(ForeignKey('chatdb.id'))
     msg_delete_time: Mapped[int] = mapped_column(default=360)
     is_msg_delete: Mapped[bool] = mapped_column(default=False)
+    receive_drops: Mapped[bool] = mapped_column(default=False, nullable=True)
+    greetings_new_members: Mapped[bool] = mapped_column(default=False, nullable=True)
+    greetings_text: Mapped[str | None] = mapped_column(default=None, nullable=True)
+    main_topic_id: Mapped[int | None] = mapped_column(default=None, nullable=True)
 
 class UserSettingDB(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('userdb.id'))
+    settings: Mapped[dict] = mapped_column(JSON, default={})
 
 class MessageDB(Base):
     chat_tg_id: Mapped[int] = mapped_column(BigInteger)

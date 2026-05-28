@@ -8,7 +8,8 @@ from app.aio.cls.callback.craft import (CraftBackCall,
                                         CraftItemIdCall,
                                         CraftItemPagesCall,
                                         CraftUseCall,
-                                        CraftAdminACtionCall)
+                                        CraftAdminACtionCall,
+                                        MenuCall)
 from app.db.models.item import CraftDB, ItemSketchDB
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -40,7 +41,7 @@ class AddCraftIKB(BotIKB):
 
     def itempage(self, datas: list[ItemSketchDB], page: int, max_page: int, where: str, item_type: str):
         for data in datas:
-            self.builder.button(text=f'{data.emodzi} {data.name} [{data.id}]', callback_data=CraftItemIdCall(item_id=data.id, item_type=item_type, tg_id=self.tg_id))
+            self.builder.button(**data.button_text, callback_data=CraftItemIdCall(item_id=data.id, item_type=item_type, tg_id=self.tg_id))
         self.builder.adjust(1)
         pages = []
         if page > 0:

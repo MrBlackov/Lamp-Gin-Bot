@@ -7,8 +7,9 @@ from app.db.metods.gets import get_user_for_tg_id, get_user_for_id, get_main_cha
 from app.exeption.transfer import TransferNoHaventItemError, TransferQuantityNoIntError, TransferSellerNoHaventItemError, TransferError, TransferNoFindError
 from app.db.models.transfer import TransferDB
 from app.exeption.char import NoHaveMainChar
+from app.interlayer.base import BaseLayer
 
-class TransferLayer:
+class TransferLayer(BaseLayer):
     def __init__(self, tg_id: int):
         self.tg_id = tg_id
         self.char = CharLogic(tg_id)
@@ -16,17 +17,9 @@ class TransferLayer:
         self.item_sketch = ItemSketchsLogic()
         self.transfer = TransferLogic()
 
-    async def get_char_info(self, user_id: int | None = None):
-        if user_id:
-            self.user = await get_user_for_id(user_id)
-        else:
-            self.user = await get_user_for_tg_id(self.tg_id, True)
-        self.char_id = await get_main_char_for_user_id(self.user.id)
-        self.char_info = await get_char_for_id(self.char_id)
-        return self
-
     async def locator(self):
         await self.get_char_info()
+        await self.checking_freedom()
         chars = await self.char.get_all_chars()
         if self.char == None:
             raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
@@ -51,6 +44,7 @@ class TransferLayer:
                        items2: list, 
                        status: str):
         self = await self.get_char_info()
+        await self.checking_freedom()
         if status == 'confirmed':
             inventory = await get_items_for_inventory(char1.exist.inventory.id)
             self.item.check_size_inventory(char1, inventory, items2, '+')

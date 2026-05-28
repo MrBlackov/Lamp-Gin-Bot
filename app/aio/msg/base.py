@@ -15,9 +15,10 @@ class UserText:
         ])).blockquote()
 
 class ChatText:
-    def __init__(self, tg_chat: TgChatDB, chat: ChatDB):
+    def __init__(self, tg_chat: TgChatDB, chat: ChatDB, message = None):
         self.chat = chat
         self.tg_chat = tg_chat
+        self.message = message
 
     @property
     def text(self):
@@ -25,6 +26,5 @@ class ChatText:
             f'🔰 chat_id: {self.chat.id}',
             f'💠 tg_id: {self.chat.tg_id}',
             f'📧 username: {self.tg_chat.username if self.tg_chat.username else "❌"}',
-            f'📂 Тип: {self.tg_chat.tg_type.to_ru(self.tg_chat.tg_type)}',
-            f'{f' Время удаления сообщений: {self.chat.setting.msg_delete_time} с.' if self.chat.setting.is_msg_delete else ''}'
-        ])).blockquote()
+            f'📂 Тип: {self.tg_chat.tg_type.to_ru(self.tg_chat.tg_type)}'
+        ]) + f'{f'\n🗑️ Время удаления сообщений: {self.chat.setting.msg_delete_time} с.' if self.chat.setting.is_msg_delete else ''}' + (f'\n📍 Главный топик: {self.chat.setting.main_topic_id if self.chat.setting.main_topic_id else '❌'}' if self.message.chat.is_forum else '')).blockquote() + ('\n\n👋 Приветствие' + TextHTML(self.chat.setting.greetings_text).blockquote() if self.chat.setting.greetings_new_members else '')

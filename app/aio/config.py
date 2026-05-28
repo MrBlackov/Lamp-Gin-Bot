@@ -4,37 +4,60 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from decouple import config
 from aiogram.types import BotCommand, BotCommandScopeChat, BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats, BotCommandScopeAllChatAdministrators
+from aiogram.client.session.aiohttp import AiohttpSession
 
+def get_proxy(file: str = 'app/aio/socks.txt'):
+    return [s.replace('\n', '').split(' ') for s in open(file).readlines()]
 
-admins = [int(config('owner'))]
+proxy = config('proxy')
+is_proxy = config('is_proxy')
+session = AiohttpSession(proxy=proxy)
+
+admins = [int(a) for a in config('admins').split(',')]
 owner = int(config('owner'))
-newspaper_id = int(config('newcpaper_id'))
-token = config('token')
-log_groups = [int(x) for x in config('log_groups').split(',')]
-bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+token = config('token2')
+bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True), session=session if is_proxy == 't' else None)
 dp = Dispatcher(storage=MemoryStorage())
+
+newspaper_id = int(config('newcpaper_id'))
+infolog = int(config('infolog'))
+log_groups = [int(x) for x in config('log_groups').split(',')]
+
+wiki = config('wiki')
+
 cmds = {
-    'mychar':'👤 Список ваших персонажей',
+    'mychar':'👑 Действующий персонаж',
+    'mychars':'👥 Список ваших персонажей',
     'inventory':'💼 Инвентарь',
     'transfer':'✉️ Ваши сделки',
     'craft':'⚗️ Доступные крафты',
+    'myskills':'💡 Ваши навыки',
+    'actions':'🎮 Доступные действия',
+    'myfriends':'😎 Друзья',
+    'drop':'📦 Дроп в чате',
+    'setting':'⚙️ Настройки аккаунта',
+    'chat':'⚙️ Настройки чата',
+    'menu':'🏠 Главное меню',
+    'tops':'🏆 Топы',
 
     'newchar':'➕ Создать персонажа',
     'newtransfer':'➕ Создать сделку',
     'newitem':'➕ Создать предмет',
     'newcraft':'➕ Создать крафт',
 
-    'chat':'⚙️ Настройки чата',
     'items':'📦 Список всех предметов в игре',
+    'skills':'💡 Список всех навыков в игре',
     'help':'📚 Получить справку',
+    'helpcmd':'📋 Получить список команд',
+    'chat_id':'ℹ️ Получить айди топика и чата',
 }
 
 admin_cmds = cmds | {
-    'additem':'Добавить предмет',
-    'changeitem':'Изменить предмет',
-    'giveitem':'Выдать предмет',
-    'user':'Посмотреть информацию о пользователе',
-    'chat_id':'Получать ID чата и ID топика',
+    'additem':'🧑‍💻 Добавить предмет',
+    'changeitem':'🧑‍💻 Изменить предмет',
+    'giveitem':'🧑‍💻 Выдать предмет',
+    'user':'🧑‍💻 Посмотреть информацию о пользователе',
+    'getlogs':'🧑‍💻 Отправить файлы логов',
 }
 
 async def to_menu_cmds():

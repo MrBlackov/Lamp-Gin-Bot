@@ -1,18 +1,27 @@
 from faker import Faker
 from typing import Literal
 from faker.providers.person.en_US import Provider as EnUsProvider
+from faker.providers.person.ru_RU import Provider as RuProvider
+from faker.providers.person.en_GB import Provider as EnGbProvider
+from faker.providers.person.de_DE import Provider as DeProvider
+from faker.providers.person.fr_FR import Provider as FrProvider
+from faker.providers.person.it_IT import Provider as ItProvider
 from app.validate.add.characters import Points
 from collections import OrderedDict
 from app.enum_type.char import Gender
 from app.exeption.another import DiceError
-from app.validate.add.characters import ItemValide, ItemSketchDB
+from app.exeption.action import DiceCmdNoValideError
+from app.validate.add.characters import ItemValide
+from app.db.models.item import SkillDB, SkillSketchDB, ItemSketchDB
 import random
 
-lokals = {
-    'loen':'en_US'
-}
 providers = {
-    'loen':EnUsProvider,
+    'ru_RU':RuProvider, 
+    'en_US':EnUsProvider, 
+    'en_GB':EnGbProvider, 
+    'de_DE':DeProvider, 
+    'fr_FR':FrProvider, 
+    'it_IT':ItProvider
 }
 
 class dice:
@@ -35,14 +44,15 @@ class dice:
         return self
     
     def to_throw(self, quantity: int = 1):
-        return self._to_throw(quantity)._throw
+        return self._to_throw(quantity).medium
+    
     @property
     def sum(self):
-        return sum(self.throw)
+        return sum(self._throw)
     
     @property
     def medium(self):
-        return sum(self.throw)/len(self.throw)
+        return sum(self._throw)//len(self._throw)
 
 class dices:
     def __init__(self, cubes: list[dice] = [dice()]):
@@ -59,14 +69,16 @@ class dices:
             self.throw = tuple(throw)
         return self
         
-    def _roll_dice(command: str, d: list[int] = [1, 20]):
+    def roll_dice(self, command: str, d: list[int] = [1, 20]):
         k_dice = 1
         mod = 0
         try:
             if 'd' in command:
                 d_index = command.index('d')
+                probel = command.index(' ') if ' ' in command else len(command)
                 if d_index > 0:
                     k_dice = int(command[:d_index])
+                    d = (d[0], int(command[d_index+1:probel]) or d[1])
                 command = command.replace(command[0:d_index+1] + ' ', '')
             parts = command.split(' ')
             for c in parts:
@@ -79,16 +91,15 @@ class dices:
                     if mod_index > 0:
                         mod -= float(parts[mod_index+1])
         except ValueError as e:
-            raise
+            raise DiceCmdNoValideError(f'This dice-cmd dont valid')
         
-        dices_throw = dice(d[1], d[0]).to_throw(k_dice)
-        self = dices()
+        dices_throw = dice(d[1], d[0])._to_throw(k_dice)._throw
         self.throw = dices_throw
-        self.result = self.medium + mod
+        self.mod = mod
+        self.d = d
+        self.d_text = f'{k_dice}d{d[1]}'
+        self.result = self.sum + mod
         return self
-    
-    def roll_dice(command: str, d: list[int] = [1, 20]):
-        return dices._roll_dice(command, d).result
 
     @property
     def sum(self):
@@ -129,15 +140,14 @@ class rnd_list:
         return self.fake.random_choices(self.list)
 
 class person:
-    def __init__(self, gender: Gender, coins: int = 60, local: Literal['loen'] = 'loen'):
-        self.fake = Faker(lokals[local])
-        print(gender)
+    def __init__(self, gender: Gender, coins: int = 60, local: str = 'en_US'):
+        self.fake = Faker(providers[local])
         self.provider = providers[local]
         self.coins = coins
         self.gender = gender
         self.random = random
 
-    def get_names(self, local:  Literal['loen'] | None = None): 
+    def get_names(self, local:  str | None = None): 
         if local:
             self.provider = providers[local]
         first_names = self.provider.first_names_male if self.gender == Gender.M.value else self.provider.first_names_female
@@ -216,7 +226,49 @@ class person:
                 items.append(ItemValide(sketch_id=sketch.id, quantity=quan, sketch=sketch))
         return items
     
+class CharGenerator:
+    def __init__(self, gender: str, coins: int = 50, local: str | None = None):
+        self.gender = gender
+        self.coins = coins
+        self.random = random
+        self.provider_str = self.random.choice(list(providers.keys()))
+        self.faker = Faker(self.provider_str)
+        self.provider = providers.get(self.provider_str)
 
+
+    def to_age(self, args: list[dice] = [dice(80, 16), dice(21, 18), dice(21, 18)]) -> int:
+        return int(dices(args).medium)
+    
+    @property
+    def age(self):
+        return self.to_age()
+
+    @property
+    def first_name(self):
+        return self.faker.first_name_male() if self.gender == 'M' else self.faker.first_name_female()
+
+    @property
+    def last_name(self):
+        return self.faker.last_name_male() if self.gender == 'M' else self.faker.last_name_female()
+    
+    def rnd_names(self):
+        return (self.faker.first_name_male(), self.faker.last_name_male()) if self.gender == 'M' else (self.faker.first_name_female(), self.faker.last_name_female())
+
+    def skills(self, base_skills: list[SkillSketchDB]):
+        return {s.sketch.tag:s for s in [SkillDB(level=bs.default_level, coins=bs.default_coins, sketch=bs, sketch_tag=bs.tag, sketch_id=bs.id) for bs in base_skills]}
+
+    def get_names_for_local(self, local:  str | None = None): 
+        if local:
+            self.provider = providers[local]
+        first_names = self.provider.first_names_male if self.gender == Gender.M.value else self.provider.first_names_female
+        return (first_names, self.provider.last_names) if type(first_names) != dict and type(first_names) != OrderedDict else (first_names.keys(), self.provider.last_names.keys())
+
+    def get_all_names(self):
+        fn, ln = [], []
+        for local in providers:
+            nfn, nln = self.get_names_for_local(local)
+            fn.extend(list(nfn)), ln.extend(list(nln))
+        return fn, ln
 
 if __name__ == '__main__':   
     for _ in range(100):

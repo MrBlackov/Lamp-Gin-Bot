@@ -11,8 +11,8 @@ class FSMUtils:
     def prefix(self):
         return '_'.join(self.prefixs + [self.prefix_two]) + ('_' if len(self.prefixs + [self.prefix_two]) > 0 else '')
     
-    def get_value(self, key: str, default = None):
-        return self.state.get_value(self.prefix + key, default)
+    async def get_value(self, key: str, default = None):
+        return await self.state.get_value(self.prefix + key, default)
     
     async def update_data(self, **kwargs):
         state_keys = await self.get_value('state_keys', [])
@@ -21,6 +21,9 @@ class FSMUtils:
     def set_state(self, new_state = None):
         return self.state.set_state(new_state)
  
+    async def get_state(self):
+        return await self.state.get_state()
+
     async def get_data(self):
         data = await self.state.get_data()
         return {k.replace(self.prefix, ''):v for k,v in data.items()}
@@ -56,8 +59,21 @@ class ChatFSM(FSMUtils):
 
 class StatsFSM(FSMUtils):
     prefixs = ['stats']
+
+class SkillFSM(FSMUtils):
+    prefixs = ['skill']
+
+class SettingFSM(FSMUtils):
+    prefixs = ['setting']
+
+class ActionFSM(FSMUtils):
+    prefixs = ['action']
     
 class TransferFSM(FSMUtils):
     prefixs = ['transfer']
     
-
+class SocialFSM(FSMUtils):
+    prefixs = ['social']
+    
+class DropFSM(FSMUtils):
+    prefixs = ['drop']

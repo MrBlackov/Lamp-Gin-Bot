@@ -1,4 +1,4 @@
-from app.aio.cls.callback.base import BaseCall
+from app.aio.cls.callback.base import BaseCall, MenuCall
 from typing import Literal
 
 class KitIdCall(BaseCall, prefix='kit_id'):

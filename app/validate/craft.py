@@ -10,4 +10,6 @@ class CraftValide(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
-
+class TestValide(BaseModel):
+    name: str
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)

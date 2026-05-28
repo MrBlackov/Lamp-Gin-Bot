@@ -1,25 +1,175 @@
 from aiogram.fsm.context import FSMContext
-from app.aio.inline_buttons.char import AddCharIKB, InfoCharIKB, InventoryIKB
+from app.aio.inline_buttons.char import AddCharIKB, InfoCharIKB, InventoryIKB, NewCharIKB
 from app.enum_type.char import Gender
 from app.logged.botlog import logs
 from app.logged.infolog import infolog
 from app.validate.api.characters import CharSketchInfo
+from app.validate.newchar import CharSketch, SkillDB
 from app.validate.api.query import CreateCharSkecth
-from app.aio.msg.char import SketchInfoText, CharInfoText, InventoryItemsText
+from app.aio.msg.char import SketchInfoText, CharInfoText, InventoryItemsText, NewCharText, CharText
 from app.aio.msg.base import UserText
 from app.aio.msg.utils import TextHTML
 import random
 from app.service.base import BaseService 
-from app.interlayer.char import CreateCharacterLayer, InfoCharacterLayer, InventoryCharacterLayer
-from app.aio.cls.fsm.char import InventoryState
-from app.exeption.char import BonusCharSubError, NoDeleteCharError
+from app.interlayer.char import CreateCharacterLayer, InfoCharacterLayer, InventoryCharacterLayer, NewCharLayer
+from app.aio.cls.fsm.char import InventoryState, NewCharState
+from app.exeption.char import BonusCharSubError, NoHaveMainChar, SKillCoinsLessZeroError, SKillLessOneError, SKillLessZeroError
 from aiogram.types.chat_member_banned import ChatMemberStatus
 from app.exeption.item import ItemError
 from app.aio.cls.fsm.utils import CharFSM
+from app.logic.query import LetterSearch
+
+class NewCharacterService(BaseService):
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
+        self.state = CharFSM(state, 'new')
+        self.IKB = NewCharIKB(tg_id)
+        self.layer = NewCharLayer(tg_id)
+        self.text = NewCharText
+
+    async def chouse_gender(self):
+        await self.state.clear_this_state()
+        my_chars = await InfoCharacterLayer(self.tg_id).get_chars()
+        if my_chars.chars:
+            if len(my_chars.no_die_chars) == my_chars.max_chars and my_chars.use_bonus == False:
+                channel = await self.get_channel_info()
+                return '😕 У вас уже максимальное количество персонажей,' \
+                ' но вы можете получить бонусного персонажа подписавшись на Газету Нила', self.IKB.get_bonus_char(channel.invite_link)
+            if len(my_chars.no_die_chars) > my_chars.max_chars:
+                return '😕 У вас уже максимальное количество персонажей', None
+        return '📲 Выберите пол', self.IKB.chouse_gender()    
+
+    async def chouse_gender_bonus(self):
+        to_member = await self.get_chat_member()
+        if to_member:
+            if to_member.status != ChatMemberStatus.LEFT and to_member.status != ChatMemberStatus.KICKED:    
+                return '📲 Выберите пол', self.IKB.chouse_gender()
+        raise BonusCharSubError(f'This user(tg_id:{self.tg_id}) dont sub to newspaper')
+    
+    async def menu(self, gender: str | None = None):
+        await self.state.set_state()
+        char_sketch = await self.state.get_value('sketch')
+        if char_sketch == None:
+            char_sketch = await self.layer.generate_char(gender)
+            await self.state.update_data(sketch=char_sketch) 
+        return self.text(char_sketch).action_menu(), self.IKB.actions()
+    
+    async def to_skills(self):
+        char_sketch: CharSketch = await self.state.get_value('sketch')
+        return f'💡 Навыки [{char_sketch.coins} 💮]', self.IKB.redact_skills(char_sketch.no_hide_skills, 'menu')
+    
+    async def skills(self, skill_tag: str, level: int, is_base: bool):
+        char_sketch: CharSketch = await self.state.get_value('sketch')
+        sketch = char_sketch.all_skills.get(skill_tag)
+        skill = char_sketch.skills.get(skill_tag)
+        if sketch.is_base and level < sketch.min_level:
+            raise SKillLessOneError('You can min level of base skill')
+        if level < 0:
+            raise SKillLessZeroError('You cant less zero level of skill')
+        if skill:
+            r_level = level - skill.level
+            char_sketch.coins -= r_level*sketch.price
+        else:
+            r_level = 1
+            char_sketch.coins -= level*sketch.price
+        if char_sketch.coins < 0:
+            raise SKillCoinsLessZeroError('You dont have enough skill coins')
+        if level > 0:
+            skill = SkillDB(level=level, coins=sketch.default_coins, sketch=sketch, sketch_tag=sketch.tag, sketch_id=sketch.id)
+            char_sketch.skills[skill_tag] = skill
+            if skill_tag in char_sketch.products:
+                char_sketch.products.pop(skill_tag)
+        else:
+            skill = SkillDB(level=level, coins=sketch.default_coins, sketch=sketch, sketch_tag=sketch.tag, sketch_id=sketch.id)
+            char_sketch.skills.pop(skill_tag)
+            char_sketch.products[skill_tag] = sketch
+        await self.state.update_data(sketch=char_sketch)
+        return self.text(char_sketch).redact_skill_level(skill), self.IKB.redact_skill_level(skill_tag, level, is_base, 'skills')
+
+    async def to_add_skills(self, values_in_page: int = 10):
+        char_sketch: CharSketch = await self.state.get_value('sketch')
+        products = list(char_sketch.products.values())
+        pages = [tuple(products[i:i+values_in_page]) for i in range(0, len(products), values_in_page)]
+        await self.state.update_data(skills_pages=pages, coins=char_sketch.coins)
+        return await self.to_page_skills(0)
+    
+    async def to_page_skills(self, page: int):
+        coins = await self.state.get_value('coins')
+        pages = await self.state.get_value('skills_pages')
+        return f'💡 Навыки доступные для приобретения [{coins} 💮] {f'[{page + 1}/{len(pages)}стр]' if len(pages) > 1 else ''}', self.IKB.skills(pages[page], page, len(pages), 'skills')
+    
+    async def to_rename(self, name_type: str | None = None):
+        if name_type:
+            await self.state.update_data(name_type=name_type)
+        else:
+            name_type = await self.state.get_value('name_type')
+        return f'🔧 Изменение {'имени' if name_type == 'first' else 'фамилии'}', self.IKB.redact_name(name_type, 'menu')
+
+    async def to_random_name(self, name_type: str):
+        char_sketch: CharSketch = await self.state.get_value('sketch')
+        names: list[str] = char_sketch.all_first_names if name_type == 'first' else char_sketch.all_last_names
+        name = random.choice(names)
+        return f'🎲 Выпало имя: {name}', self.IKB.random_name(name, name_type, 'rename')
+    
+    async def to_query_names(self, name_type: str, msg):
+        char_sketch: CharSketch = await self.state.get_value('sketch')
+        names: list[str] = char_sketch.all_first_names if name_type == 'first' else char_sketch.all_last_names
+        print(names)
+        await self.state.set_state(NewCharState.part_name)
+        await self.state.update_data(name_type=name_type, names=names, msg=msg)
+        return f'🔍 Введите часть имени для поиска. \n \n❗ Если имя английское, то часть имени тоже должна быть на английском и т.д.', self.IKB.back('rename')
+
+    async def query_names(self, query_value: str, values_in_page: int = 10):
+        names: list[str] = await self.state.get_value('names')
+        query_names = LetterSearch(names).search(query_value)
+        if len(query_names) > 0:
+            pages = [tuple(query_names[i:i+values_in_page]) for i in range(0, len(query_names), values_in_page)]
+            await self.state.update_data(names_pages=pages)
+            return await self.to_page_names(0)
+        else:
+            return '❌ Ничего не найдено', self.IKB.back('rename')
+
+    async def to_page_names(self, page: int):
+        name_type: str = await self.state.get_value('name_type')
+        pages = await self.state.get_value('names_pages')
+        return f'📋 Держите список {f'[{page + 1}/{len(pages)}стр]' if len(pages) > 1 else ''}', self.IKB.names(pages[page], name_type, page, len(pages), 'query')
+
+    async def rename(self, name: str | None, name_type: str):
+        char_sketch: CharSketch = await self.state.get_value('sketch')
+        if name_type == 'first':
+            char_sketch.first_name = name
+        else:
+            char_sketch.last_name = name
+        await self.state.update_data(sketch=char_sketch)
+        return await self.menu()
+
+    async def to_description(self, msg):
+        await self.state.update_data(msg=msg)
+        await self.state.set_state(NewCharState.description)
+        return '📝 Введите описание персонажа. \n\n❗ Описание может содержать до 1000 символов.', self.IKB.back('menu')
+
+    async def descript(self, description: str):
+        char_sketch: CharSketch = await self.state.get_value('sketch')
+        char_sketch.description = description
+        await self.state.update_data(sketch=char_sketch)
+        await self.state.set_state()
+        return await self.menu()
+
+    async def create(self, is_finished: bool):
+        await self.state.set_state()
+        char_sketch: CharSketch = await self.state.get_value('sketch')
+        if is_finished or char_sketch.coins == 0:
+            await self.layer.add_character(char_sketch)
+            await self.state.clear_this_state()
+            return '✅ Персонаж успешно создан!', None
+        return f'❗ У вас осталось {char_sketch.coins} 💮, они будут конвертированы в фунты.', self.IKB.finish('menu')
+        
+
+
 
 class AddCharacterService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = CharFSM(state, 'add')
         self.IKB = AddCharIKB(tg_id)
 
@@ -119,7 +269,7 @@ class AddCharacterService(BaseService):
     @property
     def info_to_str(self):
         text = [f'🪪 {self.char.full_name}', f'\n{SketchInfoText(self.char.sketch).to_text(True)}']
-        if self.char.description: text.append(f'\n 📜 Описание \n{TextHTML(TextHTML(self.char.description).blockquote(True)).unescape}')
+        if self.char.description: text.append(f'\n 📜 Описание \n{TextHTML(TextHTML(self.char.description).blockquote(True)).unescape()}')
         return ''.join(text)
     
     async def markup_to_info(self):
@@ -134,12 +284,18 @@ class AddCharacterService(BaseService):
         return True
 
 class InfoCharacterService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = CharFSM(state, 'info')
         self.IKB = InfoCharIKB(tg_id)
         self.layer = InfoCharacterLayer(self.tg_id)
 
+    async def get_main_char(self):
+        char = await self.layer.get_main_char()
+        if char == None:
+            raise NoHaveMainChar('This user dont choose main char')
+        return self.IKB.chouse_main_char(char.id, char.exist.id, True, char.exist.die), CharText(char).text
+    
     async def get_chars(self):
         datas = await self.layer.get_chars(None)
         if datas.no_chars:
@@ -154,20 +310,13 @@ class InfoCharacterService(BaseService):
         if data == None:
             new_data = await self.layer.get_chars(None)
             data = {char.id:char for char in new_data.chars}
-        char = data.get(char_id)
-        if char == None:
-            char = await self.layer.get_char(char_id)
-        return self.IKB.chouse_main_char(char_id, char.exist.id, (True if char_id == main_id else False), char.exist.die), CharInfoText(char).text
+        char = await self.layer.get_char(char_id)
+        return self.IKB.chouse_main_char(char_id, char.exist.id, (True if char_id == main_id else False), char.exist.die), CharText(char).text
     
     async def char_to_main(self, char_id: int):
         datas = await self.layer.char_to_main(char_id)
-        chars = {}
-        data = datas.chars
-        for d in data:
-            chars[d.id] = d
-        await self.state.update_data(chars=chars, main_id=datas.main_id)
-        chars = {char.id:char for char in data}
-        return self.IKB.get_list(datas.main_id, chars), '🪪 Ваши персонажи'
+        await self.state.update_data(main_id=datas.main_id)
+        return await self.get_char(char_id)
     
     async def to_delete_char(self, char_id: int, exist_id: int):
         return self.IKB.to_delete_char(char_id, exist_id), '🙁 Вы точно хотите прервать жизнь персонажа?'
@@ -177,8 +326,8 @@ class InfoCharacterService(BaseService):
         return await self.get_chars()
     
 class InventoryService(BaseService):
-    def __init__(self, tg_id, state = None):
-        super().__init__(tg_id, state)
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
+        super().__init__(tg_id, state, message, **kwargs)
         self.state = CharFSM(state, 'inventory')
         self.IKB = InventoryIKB(tg_id)
         self.text = InventoryItemsText
@@ -196,11 +345,17 @@ class InventoryService(BaseService):
         
     async def get_item_info(self, item_id: int):
         items = await self.state.get_value('items')
+        skills = await self.layer.all_skills()
+        if items == None:
+            items = {}
+            inventory = await self.layer.inventory()
+            if inventory.items:
+                for item in inventory.items:
+                    items |= {item.id: item}
+                await self.state.update_data(items=items)
         await self.state.update_data(item=item_id)
-        if items:
-            return self.text.item(items[item_id]), self.IKB.throw('inventory')
+        return self.text.item(items[item_id], skills), self.IKB.action(items[item_id], 'inventory')
         
-
     async def to_throw(self, msg):
         await self.state.update_data(msg=msg)
         await self.state.set_state(InventoryState.throw_quantity)
@@ -247,10 +402,11 @@ class InventoryService(BaseService):
     
 
 class Character:
-    def __init__(self, tg_id: int, state: FSMContext | None = None):
+    def __init__(self, tg_id, state = None, message = None, **kwargs):
         self.tg_id = tg_id
         self.state = state
-        self.to_create = AddCharacterService(tg_id, state)
-        self.info = InfoCharacterService(tg_id, state)
-        self.inventory = InventoryService(tg_id, state)
+        self.to_create = AddCharacterService(tg_id, state, message, **kwargs)
+        self.new = NewCharacterService(tg_id, state, message, **kwargs)
+        self.info = InfoCharacterService(tg_id, state, message, **kwargs)
+        self.inventory = InventoryService(tg_id, state, message, **kwargs)
         
