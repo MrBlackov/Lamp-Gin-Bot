@@ -47,7 +47,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: ChatSettingAc
     msg, markup = await ChatService(callback.from_user.id, state, callback.message).redact_text_parametrs(callback_data.chat_id, callback_data.parametrs, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@chat_router.message(ChatState.redact_text_parametr)
+@chat_router.message(ChatState.redact_text_parametr, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 @permisiion_check(False)

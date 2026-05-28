@@ -28,7 +28,7 @@ class BaseLayer:
             user = await get_user_for_tg_id(self.tg_id, True)
         if and_setting:
             setting = await get_user_setting_for_user_id(user.id)
-            user.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
+            user.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters])
         if and_frinends:
             friends = (await get_users_for_ids(ids=user.friend_ids)) if user.friend_ids and len(user.friend_ids) > 0 else []
             user.add_friends(friends)

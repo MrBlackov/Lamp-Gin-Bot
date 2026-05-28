@@ -51,7 +51,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: InventoryItem
     msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.to_throw(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@inventory_router.message(InventoryState.throw_quantity, F.content_type == 'text')
+@inventory_router.message(InventoryState.throw_quantity, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -109,7 +109,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: InventoryItem
     msg, markup = await Character(callback.from_user.id, state, callback.message).inventory.to_pick_up(callback_data.item_id, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@inventory_router.message(InventoryState.pick_up_quantity)
+@inventory_router.message(InventoryState.pick_up_quantity, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

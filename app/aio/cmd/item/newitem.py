@@ -40,7 +40,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
     await callback.message.edit_text(msg, reply_markup=markup)
     await state.update_data(msg=callback.message)
 
-@new_item_router.message(NewItemState.to_name)
+@new_item_router.message(NewItemState.to_name, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -51,7 +51,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     await fsm.update_data(msg=msg2)
     await msg0.delete()
 
-@new_item_router.message(NewItemState.to_emodzi)
+@new_item_router.message(NewItemState.to_emodzi, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -63,7 +63,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     await msg0.delete()
 
 
-@new_item_router.message(NewItemState.to_tag)
+@new_item_router.message(NewItemState.to_tag, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -104,7 +104,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
     msg, markup = await ItemService(callback.from_user.id, state, callback.message).add.to_redact(callback_data.redact_key, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@new_item_router.message(NewItemState.to_redact)
+@new_item_router.message(NewItemState.to_redact, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -155,7 +155,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
     msg, markup = await ItemService(callback.from_user.id, state, callback.message).add.to_add_action_tag(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@new_item_router.message(NewItemState.add_action)
+@new_item_router.message(NewItemState.add_action, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

@@ -35,7 +35,7 @@ class SocialService(BaseService):
         return '✒️ Отправьте юзер пользователя', self.IKB.back('myfriends')
 
     async def send_request(self, user_name: str):
-        friend, user = await self.layer.get_friend(user_name)
+        friend, user = await self.layer.get_friend(user_name.strip('@'))
         await bot.send_message(chat_id=friend.tg_id, text=self.text.request(user), reply_markup=SocialIKB(friend.tg_id).request(user.id))
         return self.text.send(friend), self.IKB.back('myfriends')
     

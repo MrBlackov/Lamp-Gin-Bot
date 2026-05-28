@@ -54,7 +54,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Setti
     msg, markup = await SettingService(callback.from_user.id, state, callback.message).to_insert_json(callback_data.type, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@setting_router.message(SettingState.insert_json)
+@setting_router.message(SettingState.insert_json, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

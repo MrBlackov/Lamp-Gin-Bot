@@ -75,7 +75,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Actio
     msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_time_redact(callback_data.tag, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@action_router.message(ActionState.minute, F.content_type == 'text')
+@action_router.message(ActionState.minute, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -152,7 +152,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Throw
     msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_throw_quantity(callback.message, item_id=callback_data.item_id, quantity=callback_data.quantity, purpose_char_id=callback_data.purpose_char_id)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@action_router.message(ActionState.throw_quantity, F.content_type == 'text')
+@action_router.message(ActionState.throw_quantity, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -168,7 +168,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
 
 
 
-@action_router.message(ActionState.dice_command, F.content_type == 'text')
+@action_router.message(ActionState.dice_command, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -192,7 +192,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: Paper
     msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id, is_escape=callback_data.is_escape, args=callback_data.args)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@action_router.message(ActionState.redact_paper, F.content_type == 'text')
+@action_router.message(ActionState.redact_paper, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -214,7 +214,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: BookC
     msg, markup = await ActionService(callback.from_user.id, state, callback.message).to_action(callback_data.tag, callback_data.step, callback_data.minute, item_id=callback_data.item_id, page=callback_data.page, is_escape=callback_data.is_escape, args=callback_data.args)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@action_router.message(ActionState.book_setting, F.content_type == 'text')
+@action_router.message(ActionState.book_setting, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -232,7 +232,7 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     await fsm.set_state()
     await msg0.delete()
 
-@action_router.message(ActionState.book_new_page, F.content_type == 'text')
+@action_router.message(ActionState.book_new_page, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -287,7 +287,7 @@ async def cmd_handler(message: Message, command: CommandObject, state: FSMContex
         await state.set_state()
         await message.answer('✅ Микрофон выключен')
 
-@action_router.message(ActionState.new_name, F.content_type == 'text')
+@action_router.message(ActionState.new_name, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

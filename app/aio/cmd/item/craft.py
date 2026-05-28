@@ -73,7 +73,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: CraftItemIdCa
     msg, markup = await CraftService(callback.from_user.id, state, callback.message).add.to_item_info(callback_data.item_id, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@craft_router.message(AddCraftState.item_quantity)
+@craft_router.message(AddCraftState.item_quantity, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -99,7 +99,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: CraftActionCa
     msg, markup = await CraftService(callback.from_user.id, state, callback.message).add.redact_hide(callback_data.hide)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@craft_router.message(AddCraftState.time)
+@craft_router.message(AddCraftState.time, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -188,7 +188,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: CraftActionCa
     msg, markup = await CraftService(callback.from_user.id, state, callback.message).info.to_quantity(callback_data.craft_id, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@craft_router.message(CraftState.quantity)
+@craft_router.message(CraftState.quantity, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

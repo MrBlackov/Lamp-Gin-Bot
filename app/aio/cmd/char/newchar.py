@@ -122,7 +122,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewCh
     msg, markup = await Character(callback.from_user.id, state, callback.message).new.to_query_names(callback_data.name_type, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@new_char_router.message(NewCharState.part_name)
+@new_char_router.message(NewCharState.part_name, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -163,7 +163,7 @@ async def callback_to_new_item_faq(callback: CallbackQuery, callback_data: NewCh
     msg, markup = await Character(callback.from_user.id, state, callback.message).new.to_description(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
     
-@new_char_router.message(NewCharState.description)
+@new_char_router.message(NewCharState.description, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

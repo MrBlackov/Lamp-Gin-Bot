@@ -8,7 +8,7 @@ from aiogram.client.session.aiohttp import AiohttpSession
 
 admins = [int(a) for a in config('admins').split(',')]
 owner = int(config('owner'))
-token = config('token')
+token = config('token2')
 bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True))
 dp = Dispatcher(storage=MemoryStorage())
 

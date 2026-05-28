@@ -57,7 +57,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: GiveItemCall,
     msg, markup = await ItemService(callback.from_user.id, state, callback.message).give.to_change_quantity(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@admin_router.message(GiveItemState.change_quantity)
+@admin_router.message(GiveItemState.change_quantity, F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
