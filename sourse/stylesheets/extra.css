@@ -1,0 +1,51 @@
+/* Для телефонов (экраны уже 768px и меньше) */
+@media screen and (max-width: 768px) {
+  .md-content__inner img {
+    width: 100%;           /* Фото на всю ширину экрана */
+    max-width: 100vw;      /* Не вылезает за границы экрана */
+    height: auto;          /* Высота пропорциональна ширине */
+  }
+}
+
+/* Для ПК (экраны шире 1025px) */
+@media screen and (min-width: 769px) {
+  .md-content__inner img {
+    width: 60%;            /* На ПК фото еще меньше - 60% ширины контента */
+    max-width: 500px;      /* Или ограничить максимумом в 500px */
+    height: auto;
+  }
+}
+
+.md-content__inner img {
+  transition: all 0.3s ease;  /* Плавное изменение размера */
+}
+
+/* Светлая тема */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #4051b5;        /* Основной цвет (шапка, сайдбар) */
+  --md-accent-fg-color: #ff8c00;         /* Акцентный цвет (ссылки, кнопки) */
+  --md-typeset-a-color: #4051b5;         /* Цвет ссылок */
+}
+
+/* Тёмная тема */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #1e1e2f;        /* Более тёмная шапка */
+  --md-accent-fg-color: #ff8c00;         /* Розовый акцент (как в Dracula) */
+  --md-typeset-a-color: #8be9fd;         /* Голубые ссылки */
+  --md-default-bg-color: #282a36;        /* Фон как у Dracula темы */
+}
+
+/* Добавление границ между разделами навигации */
+nav[data-md-level="0"] > .md-nav__list > .md-nav__item {
+  border-bottom: 1px solid;
+  border-color: var(--md-default-fg-color--lightest);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+/* Подсветка текущего раздела */
+.md-nav__item--active > .md-nav__link {
+  font-weight: 700;
+  border-left: 3px solid var(--md-accent-fg-color);
+  padding-left: 12px;
+}
