@@ -34,13 +34,7 @@ async def main():
         await dp.start_polling(bot)
     except Exception as e:
         logs.critical(f"Polling failed: {e}") 
-        if c < 3:
-            print(f"⏳ Attempting to restart polling (attempt {c})...")
-            await asyncio.sleep(5)  # Подождать перед перезапуском
-            c += 1
-            await main()
-        else:
-            raise
+        return True
 
 if __name__ == "__main__": 
     asyncio.run(main(), debug=True)

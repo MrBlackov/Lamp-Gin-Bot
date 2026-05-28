@@ -42,4 +42,4 @@ class SkillService(BaseService):
             skill = await self.layer.get_sketch(sketch_id)
         else:
             skill = skill_ids.get(sketch_id)
-        return self.text.to_sketch_text(skill), self.IKB.back('sketchs')
+        return self.text.to_sketch_text(skill), self.IKB.back('skills')
