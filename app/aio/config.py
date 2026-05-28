@@ -6,17 +6,10 @@ from decouple import config
 from aiogram.types import BotCommand, BotCommandScopeChat, BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats, BotCommandScopeAllChatAdministrators
 from aiogram.client.session.aiohttp import AiohttpSession
 
-def get_proxy(file: str = 'app/aio/socks.txt'):
-    return [s.replace('\n', '').split(' ') for s in open(file).readlines()]
-
-proxy = config('proxy')
-is_proxy = config('is_proxy')
-session = AiohttpSession(proxy=proxy)
-
 admins = [int(a) for a in config('admins').split(',')]
 owner = int(config('owner'))
-token = config('token2')
-bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True), session=session if is_proxy == 't' else None)
+token = config('token')
+bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True))
 dp = Dispatcher(storage=MemoryStorage())
 
 newspaper_id = int(config('newcpaper_id'))
