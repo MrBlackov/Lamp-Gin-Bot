@@ -49,7 +49,7 @@ class BaseLayer:
             char.exist.add_action_state(action_states)
         if and_setting:
             setting = await get_char_setting_for_char_id(char_id)
-            char.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters if setting])
+            char.add_setting(setting, [a(setting) for a in SettingSelf.all_parameters])
         if and_recovery:
             await RecoveryAction(char, action_tags=ActionSelf.action_tags).to_action()
         return char

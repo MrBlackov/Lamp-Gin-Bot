@@ -48,7 +48,7 @@ class InfoLog:
         return True
 
     async def char_rename(self, user_id: int, char_id: int, old_name: str, new_name: str):
-        await self.bot.send_message(chat_id=self.topic.chat, text=f'🏷️ Персонаж переименован \n char_id={char_id} \n exist_id={self.char.exist.id}] \n "{old_name}" -> "{new_name}" \n\n #rename #user_id_{user_id}', message_thread_id=self.topic.tag)
+        await self.bot.send_message(chat_id=self.topic.chat, text=f'🏷️ Персонаж переименован \n char_id={char_id} \n "{old_name}" -> "{new_name}" \n\n #rename #user_id_{user_id}', message_thread_id=self.topic.tag)
         return True    
   
     async def give_info(self, user_id: int, text: str):
