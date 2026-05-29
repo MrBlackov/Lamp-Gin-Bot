@@ -16,3 +16,6 @@ class SocialText:
 
     def delete(user: UserDB):
         return f'❌ Вы больше не друзья с {TextHTML(user.tg_user.fullname).openmessage(user.tg_id)}'
+    
+    def bot_blocked(user: UserDB):
+        return f'❌ Запрос дружбы c {TextHTML(user.tg_user.fullname).openmessage(user.tg_id)} не был отправлен, ваш друг заблокировал бота или еще не начал им пользоваться.'

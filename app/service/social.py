@@ -1,6 +1,6 @@
 from app.aio.inline_buttons.social import SocialIKB
 from app.enum_type.char import Gender
-from app.logged.botlog import logs
+from app.logged.botlog import log
 from app.logged.infolog import infolog
 from app.aio.msg.social import TextHTML, SocialText
 from app.aio.msg.base import TextHTML, UserText
@@ -10,6 +10,7 @@ from app.aio.cls.fsm.utils import SocialFSM
 from app.aio.cls.fsm.social import SocialState
 from app.exeption.social import SocialError
 from app.aio.config import bot
+from aiogram.exceptions import TelegramForbiddenError
 
 class SocialService(BaseService):
     def __init__(self, tg_id, state = None, message = None, **kwargs):
@@ -40,14 +41,19 @@ class SocialService(BaseService):
         return self.text.send(friend), self.IKB.back('myfriends')
     
     async def answer_request(self, friend_id: int, status: str):
-        friend, user = await self.layer.answer_request(friend_id, status)
-        if status == 'decline':
-            await bot.send_message(chat_id=friend.tg_id, text=self.text.decline(user), reply_markup=SocialIKB(friend.tg_id).back('myfriends'))
-            return self.text.decline(friend), self.IKB.back('myfriends')
-        elif status == 'accert':            
-            await bot.send_message(chat_id=friend.tg_id, text=self.text.accert(user), reply_markup=SocialIKB(friend.tg_id).back('myfriends'))
-            return self.text.accert(friend), self.IKB.back('myfriends')
-    
+        try:
+            friend, user = await self.layer.answer_request(friend_id, status)
+            if status == 'decline':
+                await bot.send_message(chat_id=friend.tg_id, text=self.text.decline(user), reply_markup=SocialIKB(friend.tg_id).back('myfriends'))
+                return self.text.decline(friend), self.IKB.back('myfriends')
+            elif status == 'accert':            
+                await bot.send_message(chat_id=friend.tg_id, text=self.text.accert(user), reply_markup=SocialIKB(friend.tg_id).back('myfriends'))
+                return self.text.accert(friend), self.IKB.back('myfriends')
+        except TelegramForbiddenError as e:
+            log.warning(f'❌ SocialService: {e}')
+            return self.text.bot_blocked(friend), self.IKB.back('myfriends')
+  
+
     async def delete_friend(self, friend_id: int):
         friend, user = await self.layer.delete_friend(friend_id)
         await bot.send_message(chat_id=friend.tg_id, text=self.text.delete(user), reply_markup=SocialIKB(friend.tg_id).back('myfriends'))

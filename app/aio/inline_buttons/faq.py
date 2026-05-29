@@ -12,10 +12,10 @@ class FaqIKB(BotIKB):
     def to_start(self):
         self.builder.button(text='👤 Создать персонажа', callback_data=MenuFAQCall(to_new_char=True, tg_id=self.tg_id))
         self.builder.button(text='🏠 Меню', callback_data=MenuCall(where='menu', tg_id=self.tg_id))
-        self.builder.button(text='📖 Вики', web_app=WebAppInfo(url=wiki))
+        self.builder.button(text='📖 Вики', url=wiki)
         return self.builder.adjust(1).as_markup()
         
     def help(self):
         self.builder.button(text='📰 Актуальные новости по боту', url='https://t.me/oldneal')
-        self.builder.button(text='📖 Вики', web_app=WebAppInfo(url=wiki))
+        self.builder.button(text='📖 Вики', url=wiki)
         return self.builder.adjust(1).as_markup()

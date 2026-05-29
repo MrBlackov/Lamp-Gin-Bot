@@ -21,7 +21,7 @@ class BotError(Exception):
     
     @property
     def to_msg(self):
-        return self.msg + f' [{self.code}]'
+        return self.msg
     
     @property
     def name(self):

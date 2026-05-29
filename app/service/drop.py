@@ -8,6 +8,7 @@ from app.service.base import BaseService
 from app.exeption import error_faq, BotError
 from app.interlayer.drop import DropLayer
 from app.aio.cls.fsm.utils import DropFSM
+import traceback
 
 class DropService(BaseService):
     def __init__(self, tg_id, state = None, message = None, **kwargs):
@@ -35,19 +36,23 @@ class DropService(BaseService):
         while True:
             sleep_time = 20
             try:
+                chats = await self.layer.get_chats()
+                chat_ids = {chat.id:chat for chat in chats}
                 now = self.datetime.datetime.now()
                 drops = await self.layer.get_drops(time=now, operator='<=', is_open=False)
                 if len(drops) > 0:
-                    await self.texts_boardcast([(drop.chat.tg_id, '⏰ В чате появился новый дроп!', DropIKB(0).open(drop.id), drop.chat.setting.main_topic_id) for drop in drops])
+                    await self.texts_boardcast([(drop.chat.tg_id, '⏰ В чате появился новый дроп!', DropIKB(0).open(drop.id), chat_ids.get(drop.chat_id).setting.main_topic_id) for drop in drops])
                     await self.layer.drops_to_open([d.id for d in drops])
                 no_open_drops = await self.layer.get_drops(time=now, operator='>')
-                print(f'📦 DropRunner send drop: {len(drops)}')
-                chats = await self.layer.get_chats()
                 chat_tasks = [self.create_drop(chat.tg_id) for chat in chats if chat.setting.receive_drops and chat.id not in [d.chat_id for d in no_open_drops]]
                 new_drops = await self.asyncio.gather(*chat_tasks) if len(chat_tasks) > 0 else []
                 print(f'📦 DropRunner create drop: {len(new_drops)}')
             except Exception as e:
                 print('📦 DropRunner: ', e)
+                tb = traceback.extract_tb(e.__traceback__)
+                for frame in tb:
+                    print(f"📦 DropRunner, Файл: {frame.filename}, строка: {frame.lineno}, функция: {frame.name}")
+                    print(f"📦 DropRunner, Код: {frame.line}")
                 return True
             finally:
                 await self.asyncio.sleep(sleep_time)

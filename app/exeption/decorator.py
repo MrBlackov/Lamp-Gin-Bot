@@ -7,7 +7,8 @@ from app.aio.inline_buttons.faq import FaqIKB
 from app.aio.msg.utils import TextHTML
 from app.aio.cls.callback.base import BaseCall, MenuCall
 import random
-from aiogram.exceptions import TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
+import traceback
 
 def exept(func):
     @wraps(func)
@@ -24,15 +25,21 @@ def exept(func):
             log.warning(f'AioPartPath: {bote}')
             markup = FaqIKB(message.from_user.id).to_error_faq(bote.code) if len(bote.faq) > 0 else None
             await message.answer((TextHTML(bote.to_msg).escape())[:4000], reply_markup=markup)
-        except TelegramBadRequest as e:
-            log.error(f'AioPartPath: {e}')
+        except (TelegramBadRequest, TelegramForbiddenError) as e:
+            log.warning(f'AioPartPath: {e}')
         except Exception as e:
+            tb = traceback.extract_tb(e.__traceback__)
+            for frame in tb:
+                print(f"AioPartPath, Файл: {frame.filename}, строка: {frame.lineno}, функция: {frame.name}")
+                print(f"AioPartPath, Код: {frame.line}\n")
             str_e = str(e)
             log.error(f'AioPartPath: {e}')
             if message.from_user.id == owner:
-                await message.answer(f'⚠️ Непредвиденная ошибка: {(TextHTML(str_e).escape())[:4000]} (500.0)')
+                await message.answer(f'⚠️ Непредвиденная ошибка: {(TextHTML(str_e).escape())[:4000]}')
+                await message.answer(f'⚠️ Непредвиденная ошибка, Файл: {frame.filename}, строка: {frame.lineno}, функция: {frame.name}')
+                await message.answer(f'⚠️ Непредвиденная ошибка, Код: {frame.line}')
             else:
-                await message.answer(f'⚠️ Непредвиденная ошибка (500.0)')
+                await message.answer(f'⚠️ Непредвиденная ошибка')
             raise e
         finally:
             await dowload.delete()
@@ -57,8 +64,8 @@ def call_exept(check_is_user: bool = True, tips: list[str] | None = None, rarity
                 log.warning(f'AioPartPath: {bote}')
                 show_alert=True
                 answer_text = (TextHTML(bote.to_msg).escape())[:4000]
-            except TelegramBadRequest as e:
-                log.error(f'AioPartPath: {e}')
+            except (TelegramBadRequest, TelegramForbiddenError) as e:
+                log.warning(f'AioPartPath: {e}')
             except Exception as e:
                 str_e = str(e)
                 log.error(f'AioPartPath: {e}')

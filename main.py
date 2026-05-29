@@ -10,7 +10,7 @@ from app.interlayer.action import ActionLayer
 from app.service.drop import DropService
 
 async def loggers():
-    return asyncio.create_task(tg_log()) 
+    return await tg_log()
 
 async def run_scheduler():
     return await MessageUtils().run_deleter_job()
@@ -37,7 +37,7 @@ async def main():
         return True
 
 if __name__ == "__main__": 
-    asyncio.run(main(), debug=True)
+    asyncio.run(main())
     
 
 

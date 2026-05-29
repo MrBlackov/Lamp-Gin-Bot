@@ -9,7 +9,7 @@ class UserChars(BaseServiceValidate):
     main_id: int | None = None
     no_chars: bool = False
     max_chars: int
-    use_bonus: bool = False
+    use_bonus: bool | None = False
 
     @property
     def no_die_chars(self):
