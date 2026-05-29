@@ -45,8 +45,10 @@ class DropService(BaseService):
                     await self.layer.drops_to_open([d.id for d in drops])
                 no_open_drops = await self.layer.get_drops(time=now, operator='>')
                 chat_tasks = [self.create_drop(chat.tg_id) for chat in chats if chat.setting.receive_drops and chat.id not in [d.chat_id for d in no_open_drops]]
-                new_drops = await self.asyncio.gather(*chat_tasks) if len(chat_tasks) > 0 else []
-                print(f'📦 DropRunner create drop: {len(new_drops)}')
+                new_drops = await self.asyncio.gather(*chat_tasks, return_exceptions=True) if len(chat_tasks) > 0 else []
+                while None in new_drops:
+                   new_drops.remove(None)
+                print(f'📦 DropRunner create: {len(new_drops)}, to open: {len(new_drops)}')
             except Exception as e:
                 print('📦 DropRunner: ', e)
                 tb = traceback.extract_tb(e.__traceback__)

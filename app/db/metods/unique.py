@@ -201,7 +201,7 @@ async def get_item_sketch_for_action_tag(
                              action_tag: str,                      
                             ):
         try:
-            query = select(ItemSketchDB).where(or_(ItemSketchDB.action.op('@>')([action_tag])))
+            query = select(ItemSketchDB).filter_by(is_hide=False).where(ItemSketchDB.action.op('@>')([action_tag]))
             result = await session.execute(query)
             log.trace(query)
             record = result.scalars().all()

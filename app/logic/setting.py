@@ -7,10 +7,12 @@ class SettingLogic:
     setting_self = SettingSelf
     
     async def check_setting(self, type: str, user: UserDB, char: CharacterDB) -> list[SettingValueBase]:
-        if user.setting == None:
-            user.setting = (await add_db_obj(data=[UserSettingDB(user_id=user.id)]))[0]
-        if char.setting == None:
-            char.setting = (await add_db_obj(data=[CharSettingDB(char_id=char.id, user_setting_id=user.setting.id)]))[0]
+        if user:
+            if user.setting == None:
+                user.setting = (await add_db_obj(data=[UserSettingDB(user_id=user.id)]))[0]
+        if char:
+            if char.setting == None:
+                char.setting = (await add_db_obj(data=[CharSettingDB(char_id=char.id, user_setting_id=user.setting.id)]))[0]
 
     async def redact_setting(self, tag: str, type: str, user: UserDB, char: CharacterDB) -> list[SettingValueBase]:
         match type:

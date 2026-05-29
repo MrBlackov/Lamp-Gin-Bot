@@ -41,7 +41,8 @@ class NewCharLogic:
                                  amount_life=sketch.age + 50)])
         inventory = await add_db_obj(data=[InventoryDB(exist_id=exist[0].id)])
         atp = await add_db_obj(data=[AttributePointDB(exist_id=exist[0].id)])
-        await add_db_obj(data=[ItemDB(sketch_id=lbs.id, inventory_id=inventory[0].id, quantity = sketch.coins)]) if sketch.coins > 0 else None
+        if lbs:
+           await add_db_obj(data=[ItemDB(sketch_id=lbs.id, inventory_id=inventory[0].id, quantity = sketch.coins)]) if sketch.coins > 0 else None
         skills = sketch.skills
         all_base_skills = await get_base_skills()
         new_skills = {s.tag:SkillDB(level=s.default_level, coins=s.default_coins, sketch=s, sketch_tag=s.tag, sketch_id=s.id, attribute_point_id=atp[0].id) for s in all_base_skills}

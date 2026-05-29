@@ -56,6 +56,8 @@ class DropLogic:
         chat = await self.check_drop(chat_tg_id)
         drops = await get_drops_for_chat_id(chat_id=chat.id)
         items = self.generate_drop_items(items=await self.get_drop_item(), coins=coins)
+        if len(items) < 1:
+            return None
         open_time = random_today_time() if is_random else datetime.now()
         while datetime.now() > open_time:
             open_time = random_today_time()
@@ -75,7 +77,7 @@ class DropLogic:
                 prices[item.id] = drop.price
                 for _ in range(int(drop.rarity*drop_lenght)):
                     all_items.append(ItemDB(sketch=item, sketch_id=item.id, quantity=drop.min_quantity))
-        while coins > 0:
+        while coins > 0 and len(all_items) > 0:
             item = random.choice(all_items)
             coins -= item.quantity*prices.get(item.sketch_id)
             drops.append(item)

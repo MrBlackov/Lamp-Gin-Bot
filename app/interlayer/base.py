@@ -7,6 +7,7 @@ from app.enum_type.tags import ActionTags, SkillTags
 from app.service.utils import to_msg
 from app.logic.actions import RecoveryAction, ActionSelf
 from app.logic.settings import SettingSelf
+from app.exeption.char import NoHaveMainChar
 
 class BaseLayer:
     def __init__(self, tg_id: int):
@@ -18,6 +19,8 @@ class BaseLayer:
         self.user = await self.get_user_full_info(user_id)
         if and_char:
             self.char_id = await get_main_char_for_user_id(self.user.id, **kwargs)
+            if self.char_id == None:
+                raise NoHaveMainChar('This user dont have main char')
             self.char = await self.get_char_full_info(self.char_id, **kwargs)
         return self
     
