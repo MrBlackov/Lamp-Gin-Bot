@@ -1,5 +1,5 @@
 from app.logic.actions.base import (ActionTags, 
-                                    ActionStateDB, 
+                                    ItemDB, 
                                     CharacterDB, 
                                     delete_action_state, 
                                     get_action_state_for_tag,
@@ -9,6 +9,7 @@ from app.logic.actions.base import (ActionTags,
                                     SettingSelf,
                                     UserDB)
 from app.logic.settings import allowed_sender_item
+from app.exeption.char import InventaryIsEmpty
 
 class ThrowAction(ActionBase):
     tag = ActionTags.throw
@@ -29,17 +30,19 @@ class ThrowAction(ActionBase):
         self.purpose_user: UserDB = kwargs.pop('purpose_user') if kwargs.get('purpose_user') else None
 
     async def to_action(self):
-        if self.item_id == None:
+        if len(self.char.exist.inventory.items) == 0:
+            raise InventaryIsEmpty(f'This user dont have items')
+        if self.item_id == None and len(self.char.exist.inventory.items) > 0:
             self.result = 'item_throw'
             self.msg = '❔ Какой предмет хотите кинуть?'
             return self
         if self.purpose_char_id == None:
             self.result = 'char_throw'
             self.msg = '❔ Кому хотите кинуть?'
-            self.chars = await self.get_chars(True)
+            self.chars = [c for c in await self.get_chars(True) if c.id != self.char.id]
             return self
         item = self.char.exist.inventory.item_ids.get(self.item_id)
-        if item == None:
+        if item == None and len(self.char.exist.inventory.items) > 0:
             self.msg = '❌ Этого предмета у вас нету. Какой предмет хотите кинуть?'
             self.result = 'item_throw'
             return self
@@ -51,7 +54,7 @@ class ThrowAction(ActionBase):
             return self   
         if parametr.value == parametr.redact_values[0] or parametr.value == parametr.redact_values[1] and self.char.user_id in self.purpose_user.friend_ids:
             await self.logic.item.action_for_items([item], self.char, action='-', quantity=self.quantity, is_pick_up=True)  
-            await self.logic.item.action_for_items([item], self.purpose_char, action='+', quantity=self.quantity, is_pick_up=True)
+            await self.give_item(ItemDB(inventory_id=self.purpose_char.exist.inventory.id, sketch_id=item.sketch.id, quantity=self.quantity))
             self.msg = f'🥏 Вы бросили персонажу {self.purpose_char.exist.full_name} {item.to_text(self.quantity)}, и он словил'
             self.purpose_msg = f'🥏 Вы словили {item.to_text(self.quantity)}. Посмотреть - /inventory'
             self.result = 'to_throw'

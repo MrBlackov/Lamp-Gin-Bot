@@ -19,8 +19,6 @@ class BaseLayer:
         self.user = await self.get_user_full_info(user_id)
         if and_char:
             self.char_id = await get_main_char_for_user_id(self.user.id, **kwargs)
-            if self.char_id == None:
-                raise NoHaveMainChar('This user dont have main char')
             self.char = await self.get_char_full_info(self.char_id, **kwargs)
         return self
     

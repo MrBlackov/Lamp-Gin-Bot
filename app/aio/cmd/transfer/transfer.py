@@ -62,7 +62,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: InfoTransferS
     msg, markup = await TransferService(callback.from_user.id, state, callback.message).info.to_search(callback_data.search_type, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@transfer_router.message(InfoTransferState.search)
+@transfer_router.message(InfoTransferState.search, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

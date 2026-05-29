@@ -47,7 +47,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: SocialActionC
     msg, markup = await SocialService(callback.from_user.id, state, callback.message).to_send_request(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@social_router.message(SocialState.friend_data, F.text.not_contains('/'))
+@social_router.message(SocialState.friend_data, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

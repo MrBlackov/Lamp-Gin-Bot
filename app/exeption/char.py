@@ -29,6 +29,10 @@ class NoHaveMainChar(CharError):
     code = '503.1'  
     faq = 'Чтобы выбрать используйте команду /mychars и выберите из списка нужного персонажа'  
 
+class InventaryIsEmpty(CharError):
+    msg = '❌ Ваш инвентарь пуст, вам нечего бросить'
+    code = '402.7'
+
 class InventaryOverFlowing(CharError):
     msg = '❌ Инвентарь будет переполнен, предмет невозможно получить'
     code = '402.7'

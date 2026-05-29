@@ -12,7 +12,7 @@ from app.interlayer.base import BaseLayer
 class TransferLayer(BaseLayer):
     def __init__(self, tg_id: int):
         self.tg_id = tg_id
-        self.char = CharLogic(tg_id)
+        self.char_logic = CharLogic(tg_id)
         self.item = ItemsLogic()
         self.item_sketch = ItemSketchsLogic()
         self.transfer = TransferLogic()
@@ -20,7 +20,7 @@ class TransferLayer(BaseLayer):
     async def locator(self):
         await self.get_char_info()
         await self.checking_freedom()
-        chars = await self.char.get_all_chars()
+        chars = await self.char_logic.get_all_chars()
         if self.char == None:
             raise NoHaveMainChar(f'This user(tg_id:{self.tg_id}) hanst main char')
         return [char for char in chars if char.id != self.char_id]

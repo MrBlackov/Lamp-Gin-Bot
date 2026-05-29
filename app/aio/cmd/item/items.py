@@ -66,7 +66,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: ListItemSketc
     msg, markup = await ItemService(callback.from_user.id, state, callback.message).list.to_search(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@item_router.message(ListItemSketchsState.name, F.text.not_contains('/'))
+@item_router.message(ListItemSketchsState.name, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

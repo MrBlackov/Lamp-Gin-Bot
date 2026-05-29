@@ -99,7 +99,7 @@ class InfoCharacterLayer(BaseLayer):
         chars = await self.logic.get_chars(self.user.id, False)
         if result:
             if result.status != ChatMemberStatus.LEFT and result.status != ChatMemberStatus.KICKED:
-                use_channel_bonus = True if len(chars) > 1 else False
+                use_channel_bonus = True if chars and len(chars) > 1 else False
         return await update_donat_for_id(self.user.donates.id, {'use_channel_bonus':use_channel_bonus, 'char_quantity':(len(chars) if chars else 0)})
         
     async def get_chars(self, is_die: bool | None = None) -> UserChars:

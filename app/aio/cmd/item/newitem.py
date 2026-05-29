@@ -40,7 +40,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
     await callback.message.edit_text(msg, reply_markup=markup)
     await state.update_data(msg=callback.message)
 
-@new_item_router.message(NewItemState.to_name, F.text.not_contains('/'))
+@new_item_router.message(NewItemState.to_name, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -51,19 +51,23 @@ async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     await fsm.update_data(msg=msg2)
     await msg0.delete()
 
-@new_item_router.message(NewItemState.to_emodzi, F.text.not_contains('/'))
+@new_item_router.message(NewItemState.to_emodzi, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
     fsm = ItemFSM(state, 'new')
     msg0 = await fsm.get_value('msg')
-    msg, markup = await ItemService(message.from_user.id, state, message).add.to_tag(message.text, message)
+    if message.sticker:
+        emodzi = message.sticker.emoji
+    else:
+        emodzi = message.text
+    msg, markup = await ItemService(message.from_user.id, state, message).add.to_tag(emodzi, message)
     msg2 = await message.answer(msg, reply_markup=markup)
     await fsm.update_data(msg=msg2)
     await msg0.delete()
 
 
-@new_item_router.message(NewItemState.to_tag, F.text.not_contains('/'))
+@new_item_router.message(NewItemState.to_tag, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -104,7 +108,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
     msg, markup = await ItemService(callback.from_user.id, state, callback.message).add.to_redact(callback_data.redact_key, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@new_item_router.message(NewItemState.to_redact, F.text.not_contains('/'))
+@new_item_router.message(NewItemState.to_redact, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -155,7 +159,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: NewItemACtion
     msg, markup = await ItemService(callback.from_user.id, state, callback.message).add.to_add_action_tag(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@new_item_router.message(NewItemState.add_action, F.text.not_contains('/'))
+@new_item_router.message(NewItemState.add_action, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

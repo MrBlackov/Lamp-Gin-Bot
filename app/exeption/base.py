@@ -32,7 +32,7 @@ class PermissionError(BotError):
     code = '405.1'
 
 class ALienCallbackError(BotError):
-    msg = '❌ Это не ваши кнокпа    '
+    msg = '❌ Это не ваша кнокпа'
     code = '405.1'
 
 def msg_error(bot_error: BotError | list[BotError]) -> str | list[str]:

@@ -64,7 +64,7 @@ class DropLogic:
         drop = DropDB(open=open_time + timedelta(days=len(drops)), chat_id=chat.id, _items=[f'{item.sketch_id}:{item.quantity}' for item in items])
         return await add_db_obj(data=[drop], logger=False)
 
-    def generate_drop_items(self, items: list[ItemSketchDB], coins: int, drop_lenght: int = 1000) -> list[ItemDB]:
+    def generate_drop_items(self, items: list[ItemSketchDB], coins: int, drop_lenght: int = 10000) -> list[ItemDB]:
         all_items: list[ItemDB] = []
         drops: list[ItemDB] = []
         prices = {}

@@ -96,6 +96,8 @@ class NewCharacterService(BaseService):
     async def to_page_skills(self, page: int):
         coins = await self.state.get_value('coins')
         pages = await self.state.get_value('skills_pages')
+        if pages == None:
+            return '💡 Вы добавии все существующие навыки', self.IKB.back('skills')
         return f'💡 Навыки доступные для приобретения [{coins} 💮] {f'[{page + 1}/{len(pages)}стр]' if len(pages) > 1 else ''}', self.IKB.skills(pages[page], page, len(pages), 'skills')
     
     async def to_rename(self, name_type: str | None = None):

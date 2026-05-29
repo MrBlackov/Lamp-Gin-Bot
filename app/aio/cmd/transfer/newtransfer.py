@@ -75,7 +75,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferB
     msg, markup = await TransferService(callback.from_user.id, state, callback.message).new.to_page_char(page)
     await callback.message.edit_text(msg, reply_markup=markup)
 
-@new_transfer_router.message(ItemTransferState.search_char, F.text.not_contains('/'))
+@new_transfer_router.message(ItemTransferState.search_char, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -136,7 +136,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: ItemTransferI
     msg, markup = await TransferService(callback.from_user.id, state, callback.message).new.to_item_info(callback_data.item_id, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)
         
-@new_transfer_router.message(ItemTransferState.item_quantity, F.text.not_contains('/'))
+@new_transfer_router.message(ItemTransferState.item_quantity, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

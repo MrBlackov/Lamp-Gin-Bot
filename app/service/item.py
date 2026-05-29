@@ -278,6 +278,8 @@ class ChangeItemService(ItemBaseService):
         return '✒️ Отправьте новое значение', self.IKB.back(back_where)
 
     async def change_data(self, new_data: str, msg):
+        if self.message.sticker:
+            new_data = self.message.sticker.emoji
         what_change = await self.state.get_value('what_change')
         sketch_id = await self.state.get_value('sketch_id')
         new_data = await self.layer.change_data_valid(what_change, new_data, self.tg_id in self.admins)

@@ -64,7 +64,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: ChangeItemSke
     msg, markup = await ItemService(callback.from_user.id, state, callback.message).change.to_add_action_tag(callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)  
 
-@change_item_router.message(ChangeItemSketchState.add_action, F.text.not_contains('/'))
+@change_item_router.message(ChangeItemSketchState.add_action, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -120,7 +120,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: ChangeItemSke
     msg, markup = await ItemService(callback.from_user.id, state, callback.message).change.to_change_data(callback_data.what, callback.message)
     await callback.message.edit_text(msg, reply_markup=markup)    
 
-@change_item_router.message(ChangeItemSketchState.new_data, F.text.not_contains('/'))
+@change_item_router.message(ChangeItemSketchState.new_data, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):
@@ -169,7 +169,7 @@ async def callback_handler(callback: CallbackQuery, callback_data: ChangetemSket
     msg, markup = await ItemService(callback.from_user.id, state, callback.message).change.to_action_inventory(callback.message, callback_data.item_id, callback_data.action)
     await callback.message.edit_text(msg, reply_markup=markup) 
 
-@change_item_router.message(ChangeItemSketchState.action_data, F.text.not_contains('/'))
+@change_item_router.message(ChangeItemSketchState.action_data, F.content_type == 'text', F.text.not_contains('/'))
 @log.decor(arg=True)
 @exept
 async def cmd_handler(message: Message, state: FSMContext, **kwargs):

@@ -14,6 +14,8 @@ class SKillIKB(BotIKB):
 
     def skills(self, skills: list[SkillDB], page: int, max_page: int, where: str | None = None):
         for skill in skills:
+            if skill.sketch.is_hide:
+                continue
             self.builder.button(**skill.button_text, callback_data=SkillCall(skill_id=skill.id, tg_id=self.tg_id))
         self.builder.adjust(1)
         pages = []

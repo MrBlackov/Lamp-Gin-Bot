@@ -149,9 +149,9 @@ class ItemsLogic:
                 raise InventaryOverFlowing(f'This char({char.id}) inventary is full')
         return True
       
-    def check_have_item(self, char: CharacterDB, item_id :int, quantity: int):
+    def check_have_item(self, char: CharacterDB, item_id: int, quantity: int):
         item = char.exist.inventory.item_ids.get(item_id)
-        if item.quantity < quantity:
+        if item == None or item.quantity < quantity:
             raise InventaryNoHaveError(f'This char(id={char.id}) not have quantity by item')
         return True
 
